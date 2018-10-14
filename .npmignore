@@ -1,0 +1,18 @@
+# ======================================================
+#	TYPESCRIPT
+# ======================================================
+.git/
+.github/
+.vscode/
+
+node_modules/
+build/
+src/
+test/
+
+*.log
+*.*ignore
+*.js.map
+
+tsconfig.json
+package-lock.json

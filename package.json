@@ -1,0 +1,45 @@
+{
+  "name": "tgrid",
+  "description": "Grid Computing Framework for TypeScript",
+  "author": {
+    "name": "Jeongho Nam",
+    "email": "samchon@samchon.org",
+    "url": "http://samchon.org"
+  },
+  "version": "0.0.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "node build/clean",
+    "test": "node lib/test/main"
+  },
+  "dependencies": {
+    "@types/websocket": "0.0.40",
+    "tstl": "^2.0.7",
+    "websocket": "^1.0.28",
+    "websocket-polyfill": "0.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^10.11.7",
+    "@types/sharedworker": "0.0.28"
+  },
+  "homepage": "https://github.com/samchon/tgrid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samchon/tgrid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/samchon/tgrid/issues"
+  },
+  "licenses": [
+    {
+      "type": "BSD 3-Clause",
+      "url": "https://opensource.org/licenses/BSD-3-Clause"
+    }
+  ],
+  "keywords": [
+    "grid",
+    "computing"
+  ]
+}

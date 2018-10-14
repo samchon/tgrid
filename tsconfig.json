@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "outDir": ".",
+        
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "downlevelIteration": true,
+        
+        "lib": [
+            "dom",
+            "es2015"
+        ]
+    },
+    "exclude": ["**/*.d.ts"],
+    "include": [
+        "node_modules",
+        "src"
+    ]
+}
