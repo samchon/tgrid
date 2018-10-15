@@ -1,15 +1,29 @@
-# TGrid
+# **T**ypeScript **Grid** Computing Framework
 [![Build Status](https://travis-ci.org/samchon/tgrid.svg?branch=master)](https://travis-ci.org/samchon/tgrid)
 [![npm version](https://badge.fury.io/js/tgrid.svg)](https://www.npmjs.com/package/tgrid)
 [![Downloads](https://img.shields.io/npm/dm/tgrid.svg)](https://www.npmjs.com/package/tgrid)
-[![Chat on Gitter](https://badges.gitter.im/samchon/grid.svg)](https://gitter.im/samchon/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Chat on Gitter](https://badges.gitter.im/samchon/tgrid.svg)](https://gitter.im/samchon/tgrid?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-## TypeScript Grid Computing Framework
-**TGrid** is a tiny framework for Grid Computing in TypeScript. 
+**TGrid** is a tiny framework for *Grid Computing in TypeScript*. 
 
-Following the paradigm of **TGrid**, you can compose a real-time network communication system very easily. Consider that systems are correspondent with objects. Only need for you is to calling functions in the objects with special symbol `async` & `await`.
+Following paradigm of the **TGrid**, you can compose real-time network communication systems very easily. Consider that system nodes are correspondent with objects. All you have to do is just calling functions in those objects with special symbol `await`.
 
-### `example/server.ts`
+I repeat, whether how network systems are enormouse and feature are complicated, *they're just objects*. Just call functions, with the keyword `await`. It sound difficult, then look at the below [Usage - Example Code](#usage---example-code), then you may understand.
+
+
+
+
+## Installation
+### NPM Module
+Installing **TGrid** in *NodeJS* is very easy. Just install with the `npm` command.
+
+```bash
+# Install TGrid from the NPM module.
+npm install --save tgrid
+```
+
+### Usage - Example Code
+#### `example/vector/server.ts`
 ```typescript
 import { WebServer } from "tgrid/protocol/web";
 
@@ -25,10 +39,10 @@ function main(): void
 main();
 ```
 
-### `example/client.ts`
+#### `example/vector/client.ts`
 ```typescript
-import { Vector } from "tstl/container";
 import { WebConnector } from "tgrid/protocol/web";
+import { Vector } from "tstl/container";
 
 async function main(): Promise<void>
 {
@@ -36,23 +50,24 @@ async function main(): Promise<void>
     await connector.connect("ws://127.0.0.1:10101");
 
     let v = connector.getDriver<Vector<number>>();
-    for (let i: number = 0; i < 10; ++i)
+    for (let i: number = 0; i < 5; ++i)
         await v.push_back(i);
 
+    console.log("size:", await v.size());
     for (let i: number = 0; i < await v.size(); ++i)
-        console.log(await v.at(i));
+        console.log("  element:", await v.at(i));
 }
 main();
 ```
 
-
-
-
-## Features
-### Base
-### Exception
-### Protocol
-### Template
+> ```bash
+> size: 5
+>   element: 0
+>   element: 1
+>   element: 2
+>   element: 3
+>   element: 4
+> ```
 
 
 
