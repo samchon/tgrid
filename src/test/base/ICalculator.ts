@@ -23,13 +23,15 @@ export namespace ICalculator
 
 	async function validate(driver: ICalculator, validator: Calculator): Promise<void>
 	{
+		if (driver === <any>validator)
+			throw new std.InvalidArgument("Mistaken arguments.");
+
 		// SPECIFY METHODS
 		let method: string = METHODS[std.randint(0, METHODS.length - 1)];
 		let x: number = std.randint(1, 10);
 		let y: number = std.randint(1, 10);
 		
 		// CALL FUNCTION & GET ANSWER
-		driver; validator;
 		let ret = await eval(`driver.${method}`)(x, y);
 		let answer = eval(`validator.${method}`)(x, y);
 
@@ -46,6 +48,7 @@ export namespace ICalculator
 		}
 		catch (exp) 
 		{
+			console.log("Exception", exp);
 			return exp.message; 
 		}
 		return null;

@@ -8,7 +8,7 @@
 
 Following paradigm of the **TGrid**, you can compose real-time network communication systems very easily. Consider that system nodes are correspondent with objects. All you have to do is just calling functions in those objects with special symbol `await`.
 
-I repeat, whether how network systems are enormouse and feature are complicated, *they're just objects*. Just call functions, with the keyword `await`. It sound difficult, then look at the below [Usage - Example Code](#usage---example-code), then you may understand.
+I repeat, whether how network systems are enormous and feature are complicated, *they're just objects*. Just call functions, with the keyword `await`. It sound difficult, then look at the below [Usage - Example Code](#usage---example-code), then you may understand. If you want to know more, [Guide Documents](https://github.com/samchon/tgrid/wiki) are prepared for you.
 
 
 
@@ -25,6 +25,7 @@ npm install --save tgrid
 ### Usage - Example Code
 #### `example/vector/server.ts`
 ```typescript
+import { Vector } from "tstl/container";
 import { WebServer } from "tgrid/protocol/web";
 
 function main(): void
@@ -41,8 +42,8 @@ main();
 
 #### `example/vector/client.ts`
 ```typescript
-import { WebConnector } from "tgrid/protocol/web";
 import { Vector } from "tstl/container";
+import { WebConnector } from "tgrid/protocol/web";
 
 async function main(): Promise<void>
 {

@@ -50,7 +50,6 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 		{
 			get: (target: Promisify<Controller>, name: string) =>
 			{
-				target;
 				return this._Proxy_func(name);
 			}
 		});
@@ -68,7 +67,6 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 		{
 			get: (target: any, newName: string) =>
 			{
-				target;
 				return this._Proxy_func(`${name}.${newName}`);
 			}
 		});
@@ -177,6 +175,17 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 	 */
 	private _Send_return(uid: number, flag: boolean, val: any): void
 	{
+		// SPECIAL LOGIC FOR ERROR -> FOR CLEAR JSON ENCODING
+		if (flag === false && val instanceof Error)
+		{
+			let obj = JSON.parse(JSON.stringify(val));
+			obj.name = val.name;
+			obj.message = val.message;
+
+			val = obj;
+		}
+
+		// RETURNS
 		let ret: IReturn = {uid: uid, success: flag, value: val};
 		this.sendData(ret);
 	}
