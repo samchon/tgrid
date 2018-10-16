@@ -13,10 +13,10 @@ export async function test_web(): Promise<void>
 	// SERVER
 	//----
 	let server: WebServer = new WebServer();
-	server.open(PORT, acceptor =>
+	server.open(PORT, async acceptor =>
 	{
-		acceptor.accept(); // ALLOW CONNECTION
-		acceptor.listen(/calculator/.test(acceptor.getPath())
+		await acceptor.accept(); // ALLOW CONNECTION
+		await acceptor.listen(/calculator/.test(acceptor.getPath())
 			? new Calculator()
 			: new std.Vector<number>()); // SET LISTENER
 	});
@@ -37,9 +37,9 @@ export async function test_web(): Promise<void>
 		else
 			await IVector.main(<IVector>driver);
 
-		connector.close();
+		await connector.close();
 	}
 
 	// CLOSE SERVER TOO
-	server.close();
+	await server.close();
 }

@@ -3,7 +3,6 @@ import "websocket-polyfill";
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { Invoke } from "../../base/Invoke";
 
-
 export class WebConnector<Listener extends object = {}>
 	extends CommunicatorBase<Listener>
 {
@@ -11,6 +10,11 @@ export class WebConnector<Listener extends object = {}>
 	 * @hidden
 	 */
 	private socket_: WebSocket;
+
+	/**
+	 * @hidden
+	 */
+	private closer_: ()=>void;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -20,29 +24,45 @@ export class WebConnector<Listener extends object = {}>
 		super(listener);
 	}
 	
-	/* ----------------------------------------------------------------
-		SOCKET
-	---------------------------------------------------------------- */
 	public connect(url: string, protocols?: string | string[]): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
+			// CONSTRUCT SOCKET
 			this.socket_ = new WebSocket(url, protocols);
-			this.socket_.onopen = <any>resolve;
 			this.socket_.onerror = reject;
-			this.socket_.onclose = this.destroy.bind(this);
+			this.socket_.onclose = this._Handle_close.bind(this);
 
-			this.socket_.onmessage = msg =>
+			this.socket_.onopen = () =>
 			{
-				this.replyData(JSON.parse(msg.data));
+				// RE-DEFINE HANDLERS
+				this.socket_.onerror = this._Handle_error.bind(this);
+				this.socket_.onmessage = msg =>
+				{
+					this.replyData(JSON.parse(msg.data));
+				};
+
+				// RETURNS
+				resolve();
 			};
 		});
 	}
 
-	public close(code?: number, reason?: string): void
+	public close(code?: number, reason?: string): Promise<void>
 	{
-		this.socket_.close(code, reason);
+		return new Promise(resolve =>
+		{
+			this.closer_ = resolve;
+			this.socket_.close(code, reason);
+		});
 	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	public handleClose: (code: number, reason: string) => void;
+
+	public handleError: (error: Error) => void;
 
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
@@ -50,5 +70,32 @@ export class WebConnector<Listener extends object = {}>
 	public sendData(invoke: Invoke): void
 	{
 		this.socket_.send(JSON.stringify(invoke));
+	}
+
+	/**
+	 * @hidden
+	 */
+	private _Handle_error(error: Error): void
+	{
+		if (this.handleError)
+			this.handleError(error);
+	}
+
+	/**
+	 * @hidden
+	 */
+	private _Handle_close(event: CloseEvent): void
+	{
+		// DESTRUCT UNRETURNED FUNCTIONS
+		this.destructor().then(() =>
+		{
+			// CLOSD BY SERVER ?
+			if (this.closer_)
+				this.closer_();
+			
+			// CUSTOM CLOSE HANDLER
+			if (this.handleClose)
+				this.handleClose(event.code, event.reason);
+		});
 	}
 }

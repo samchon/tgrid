@@ -18,6 +18,11 @@ export class Communicator<Listener extends object = {}>
 		this.sender_ = sender;
 	}
 
+	public destory(): Promise<void>
+	{
+		return this.destructor();
+	}
+
 	public sendData(invoke: Invoke): void
 	{
 		this.sender_(invoke);

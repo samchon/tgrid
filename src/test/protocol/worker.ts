@@ -4,8 +4,10 @@ import { WorkerConnector } from "../../protocol/worker/WorkerConnector";
 export async function test_process(): Promise<void>
 {
 	let connector: WorkerConnector = new WorkerConnector();
-	connector.connect(__dirname + "/instances/process-server");
+	await connector.connect(__dirname + "/instances/process-server");
+
+	console.log("Connected to Worker Server.");
 
 	await ICalculator.main(connector.getDriver<ICalculator>());
-	connector.close();
+	await connector.close();
 }

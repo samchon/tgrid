@@ -48,7 +48,6 @@ export namespace ICalculator
 		}
 		catch (exp) 
 		{
-			console.log("Exception", exp);
 			return exp.message; 
 		}
 		return null;

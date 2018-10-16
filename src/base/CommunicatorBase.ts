@@ -31,7 +31,7 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 		this.promises_ = new HashMap();
 	}
 
-	public async destroy(): Promise<void>
+	protected async destructor(): Promise<void>
 	{
 		for (let entry of this.promises_)
 		{
