@@ -31,10 +31,10 @@ import { WebServer } from "tgrid/protocol/web";
 function main(): void
 {
     let server = new WebServer();
-    server.open(10101, acceptor =>
+    server.open(10101, async acceptor =>
     {
-        acceptor.accept();
-        acceptor.listen(new Vector<number>());
+        await acceptor.accept();
+        await acceptor.listen(new Vector<number>());
     });
 }
 main();
