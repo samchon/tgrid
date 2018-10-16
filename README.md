@@ -57,6 +57,8 @@ async function main(): Promise<void>
     console.log("size:", await v.size());
     for (let i: number = 0; i < await v.size(); ++i)
         console.log("  element:", await v.at(i));
+
+    await connector.close();
 }
 main();
 ```

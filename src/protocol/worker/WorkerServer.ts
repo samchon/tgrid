@@ -29,7 +29,9 @@ export class WorkerServer<Listener extends object = {}>
 	public async close(): Promise<void>
 	{
 		await this.destructor();
-		this.close();
+		g.postMessage("CLOSE");
+
+		close();
 	}
 
 	/* ----------------------------------------------------------------
@@ -48,7 +50,9 @@ export class WorkerServer<Listener extends object = {}>
 		if (evt.data === "READY")
 			g.postMessage("READY");
 		else if (evt.data === "CLOSE")
+		{
 			this.close();
+		}
 		else
 			this.replyData(JSON.parse(evt.data));
 	}

@@ -91,8 +91,11 @@ export class WorkerConnector<Listener extends object = {}>
 			this.connector_();
 		else if (evt.data === "CLOSE")
 		{
-			this.closer_();
-			this.worker_.terminate();
+			this.destructor().then(() =>
+			{
+				this.worker_.terminate();
+				this.closer_();
+			});
 		}
 		else
 			this.replyData(JSON.parse(evt.data));
