@@ -1,7 +1,17 @@
-import "websocket-polyfill";
-
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { Invoke } from "../../base/Invoke";
+
+import { is_node } from "tstl/utility/node";
+
+//----
+// POLYFILL
+//----
+/**
+ * @hidden
+ */
+var g: IFeature = is_node()
+	? require("./internal/WebSocket")
+	: <any>window;
 
 export class WebConnector<Listener extends object = {}>
 	extends CommunicatorBase<Listener>
@@ -29,7 +39,7 @@ export class WebConnector<Listener extends object = {}>
 		return new Promise((resolve, reject) =>
 		{
 			// CONSTRUCT SOCKET
-			this.socket_ = new WebSocket(url, protocols);
+			this.socket_ = new g.WebSocket(url, protocols);
 			this.socket_.onerror = reject;
 			this.socket_.onclose = this._Handle_close.bind(this);
 
@@ -98,4 +108,12 @@ export class WebConnector<Listener extends object = {}>
 				this.handleClose(event.code, event.reason);
 		});
 	}
+}
+
+/**
+ * @hidden
+ */
+interface IFeature
+{
+	WebSocket: new(url: string, protocols?: string | string[]) => WebSocket;
 }

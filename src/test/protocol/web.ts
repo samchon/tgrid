@@ -13,7 +13,7 @@ export async function test_web(): Promise<void>
 	// SERVER
 	//----
 	let server: WebServer = new WebServer();
-	server.open(PORT, async acceptor =>
+	await server.open(PORT, async acceptor =>
 	{
 		await acceptor.accept(); // ALLOW CONNECTION
 		await acceptor.listen(/calculator/.test(acceptor.getPath())

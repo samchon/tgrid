@@ -13,7 +13,7 @@ export namespace ICalculator
 		let validator: Calculator = new Calculator();
 
 		// CALL FUNCTIONS IN SERVER FROM CLIENT
-		for (let i: number = 0; i < 5; ++i)
+		for (let i: number = 0; i < 100; ++i)
 			validate(driver, validator);
 
 		// EXCEPTION THROWN BY THE SERVER
@@ -28,13 +28,13 @@ export namespace ICalculator
 
 		// SPECIFY METHODS
 		let method: string = METHODS[std.randint(0, METHODS.length - 1)];
-		let x: number = std.randint(1, 10);
-		let y: number = std.randint(1, 10);
-		
-		// CALL FUNCTION & GET ANSWER
-		let ret = await eval(`driver.${method}`)(x, y);
-		let answer = eval(`validator.${method}`)(x, y);
+		let x: number = std.randint(2, 10);
+		let y: number = std.randint(2, 10);
 
+		// CALL FUNCTION & GET ANSWER
+		let ret: number = await eval(`driver.${method}`)(x, y);
+		let answer: number = eval(`validator.${method}(x, y)`);
+		
 		// VALIDATE
 		if (ret !== answer)
 			throw new std.DomainError("Error on function calling.");
@@ -44,7 +44,7 @@ export namespace ICalculator
 	{
 		try 
 		{ 
-			await driver.normal.divides(2, 0); 
+			await driver.divides(2, 0); 
 		}
 		catch (exp) 
 		{
@@ -54,8 +54,9 @@ export namespace ICalculator
 	}
 
 	const METHODS: string[] = [
-		"normal.plus", "normal.minus", "normal.multiplies", "normal.divides",
-		"scientific.pow", "scientific.sqrt"
+		/*"plus", "minus", "multiplies", "divides",
+		"scientific.pow", "scientific.log", "scientific.sqrt",
+		"statistics.mean", */"statistics.stdev"
 	];
 }
 

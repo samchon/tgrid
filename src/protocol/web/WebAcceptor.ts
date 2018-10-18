@@ -1,16 +1,10 @@
 import * as ws from "websocket";
 
-import { WebServer } from "./WebServer";
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { Invoke } from "../../base/Invoke";
 
 export class WebAcceptor extends CommunicatorBase
 {
-	/**
-	 * @hidden
-	 */
-	private server_: WebServer;
-
 	/**
 	 * @hidden
 	 */
@@ -29,14 +23,21 @@ export class WebAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
-	public constructor(server: WebServer, request: ws.request)
+	private constructor(request: ws.request)
 	{
 		super();
-
-		this.server_ = server;
+		
 		this.request_ = request;
 	}
 
+	public static _Create(request: any): WebAcceptor
+	{
+		return new WebAcceptor(request);
+	}
+
+	/* ----------------------------------------------------------------
+		HANDSHAKES
+	---------------------------------------------------------------- */
 	public accept(
 			protocol?: string, 
 			allowOrigin?: string, 
@@ -51,6 +52,7 @@ export class WebAcceptor extends CommunicatorBase
 				this.connection_ = connection;
 				this.connection_.on("error", this._Handle_error.bind(this));
 				this.connection_.on("close", this._Handle_close.bind(this));
+				this.connection_.on("message", this._Handle_message.bind(this));
 
 				resolve();
 			});
@@ -68,7 +70,6 @@ export class WebAcceptor extends CommunicatorBase
 		(listener: Listener): Promise<void>
 	{
 		this.listener_ = listener;
-		this.connection_.on("message", this._Handle_message.bind(this));
 	}
 	
 	public close(): Promise<void>
@@ -83,11 +84,6 @@ export class WebAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
-	public getServer(): WebServer
-	{
-		return this.server_;
-	}
-
 	public getPath(): string
 	{
 		return this.request_.resource;
