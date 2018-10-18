@@ -10,7 +10,7 @@ import { is_node } from "tstl/utility/node";
  * @hidden
  */
 var g: IFeature = is_node()
-	? require("./internal/WebSocket")
+	? require("./internal/websocket-polyfill")
 	: <any>window;
 
 export class WebConnector<Listener extends object = {}>
