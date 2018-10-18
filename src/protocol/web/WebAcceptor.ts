@@ -41,7 +41,7 @@ export class WebAcceptor extends CommunicatorBase
 	public accept(
 			protocol?: string, 
 			allowOrigin?: string, 
-			cookies?: ws.ICookie[]
+			cookies?: ICookie[]
 		): Promise<boolean>
 	{
 		return new Promise((resolve, reject) =>
@@ -135,4 +135,16 @@ export class WebAcceptor extends CommunicatorBase
 				this.handleClose(code, reason);
 		});
 	}
+}
+
+export interface ICookie 
+{
+    name: string;
+    value: string;
+    path?: string;
+    domain?: string;
+    expires?: Date;
+    maxage?: number;
+    secure?: boolean;
+    httponly?: boolean;
 }
