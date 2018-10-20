@@ -36,6 +36,18 @@ export class WebAcceptor extends CommunicatorBase
 		this.request_ = request;
 	}
 
+	public close(): Promise<void>
+	{
+		return new Promise((resolve) =>
+		{
+			this.closer_ = resolve;
+			this.connection_.close();
+		});
+	}
+
+	/**
+	 * @hidden
+	 */
 	public static _Create(request: any): WebAcceptor
 	{
 		return new WebAcceptor(request);
@@ -58,6 +70,7 @@ export class WebAcceptor extends CommunicatorBase
 				this.connection_ = connection;
 				this.connection_.on("error", this._Handle_error.bind(this));
 				this.connection_.on("close", this._Handle_close.bind(this));
+				this.connection_.on("message", this._Handle_message.bind(this));
 
 				resolve();
 			});
@@ -86,17 +99,7 @@ export class WebAcceptor extends CommunicatorBase
 			return;
 		
 		this.listening_ = true;
-		this.connection_.on("message", this._Handle_message.bind(this));
 		this.connection_.sendUTF("LISTENING");
-	}
-	
-	public close(): Promise<void>
-	{
-		return new Promise((resolve) =>
-		{
-			this.closer_ = resolve;
-			this.connection_.close();
-		});
 	}
 
 	/* ----------------------------------------------------------------

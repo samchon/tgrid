@@ -27,14 +27,16 @@ export class WorkerServer<Listener extends object = {}>
 		super(listener);
 
 		this.ready_ = false;
-		g.onmessage = this._Reply_data.bind(this);
+		g.onmessage = this._Handle_message.bind(this);
 	}
 
 	public async close(): Promise<void>
 	{
+		// DESTRUCT & INFORM TO CLIENT
 		await this.destructor();
 		g.postMessage("CLOSE");
 
+		// DO CLOSE
 		close();
 	}
 
@@ -56,7 +58,7 @@ export class WorkerServer<Listener extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Reply_data(evt: MessageEvent): void
+	private _Handle_message(evt: MessageEvent): void
 	{
 		if (evt.data === "READY")
 		{

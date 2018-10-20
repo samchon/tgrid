@@ -25,6 +25,11 @@ export class WorkerConnector<Listener extends object = {}>
 	/**
 	 * @hidden
 	 */
+	private state_: WorkerConnector.State;
+
+	/**
+	 * @hidden
+	 */
 	private connector_: ()=>void;
 
 	/**
@@ -32,21 +37,18 @@ export class WorkerConnector<Listener extends object = {}>
 	 */
 	private closer_: ()=>void;
 
-	/**
-	 * @hidden
-	 */
-	private state_: WorkerConnector.State;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
 	public constructor(listener?: Listener)
 	{
 		super(listener);
+
+		this.worker_ = null;
 		this.state_ = WorkerConnector.State.NONE;
 	}
 
-	public connect(jsFile: string, waitFor: number = null): Promise<void>
+	public connect(jsFile: string): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -57,7 +59,7 @@ export class WorkerConnector<Listener extends object = {}>
 
 				// DO CONNECT
 				this.worker_ = new g.Worker(jsFile);
-				this.worker_.onmessage = this._Reply_data.bind(this);
+				this.worker_.onmessage = this._Handle_message.bind(this);
 
 				// GO RETURN
 				this.connector_ = resolve;
@@ -67,24 +69,20 @@ export class WorkerConnector<Listener extends object = {}>
 			{
 				this.state_ = WorkerConnector.State.NONE;
 				reject(exp);
-
-				return;
 			}
-
-			if (waitFor !== null)
-				setTimeout(() =>
-				{
-					this.state_ = WorkerConnector.State.NONE;
-					reject();
-				}, waitFor);
 		});
 	}
 
 	public close(): Promise<void>
 	{
+		// 1. REQUEST CLOSE TO SERVER
+		// 2. DO CLOSE IN SERVER
+		// 3. RESOLVE
 		return new Promise(resolve =>
 		{
 			this.closer_ = resolve;
+			this.state_ = WorkerConnector.State.CLOSING;
+
 			this.worker_.postMessage("CLOSE");
 		});
 	}
@@ -115,7 +113,7 @@ export class WorkerConnector<Listener extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Reply_data(evt: MessageEvent): void
+	private _Handle_message(evt: MessageEvent): void
 	{
 		if (evt.data === "READY")
 		{
@@ -127,7 +125,6 @@ export class WorkerConnector<Listener extends object = {}>
 			this.state_ = WorkerConnector.State.CLOSED;
 			this.destructor().then(() =>
 			{
-				this.worker_.terminate();
 				this.closer_();
 			});
 		}
@@ -143,6 +140,7 @@ export namespace WorkerConnector
 		NONE,
 		CONNECTING,
 		OPEN,
+		CLOSING,
 		CLOSED
 	}
 }

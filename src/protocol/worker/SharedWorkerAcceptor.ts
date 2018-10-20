@@ -8,6 +8,11 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	 */
 	private port_: MessagePort;
 
+	/**
+	 * @hidden
+	 */
+	private listening_: boolean;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -17,18 +22,38 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_ = port;
 	}
 
-	public close(): void
+	public async close(): Promise<void>
 	{
-		return this.port_.close();
+		// DESTRUCT & INFORM TO CLIENT
+		await this.destructor();
+		this.port_.postMessage("CLOSE");
+
+		// DO CLOSE
+		this.port_.close();
 	}
 
-	public listen<Listener extends object>
-		(listener: Listener): void
+	/* ----------------------------------------------------------------
+		HANDSHAKES
+	---------------------------------------------------------------- */
+	public async accept(): Promise<void>
 	{
-		this.listener_ = listener;
-		
 		this.port_.onmessage = this._Handle_message.bind(this);
 		this.port_.start();
+
+		this.port_.postMessage("ACCEPT");
+	}
+
+	public async listen<Listener extends object>
+		(listener: Listener): Promise<void>
+	{
+		// ASSIGN LISTENER
+		this.listener_ = listener;
+		if (this.listening_ === true)
+			return;
+		
+		// INFORM READY TO CLIENT
+		this.listening_ = true;
+		this.port_.postMessage("LISTENING");
 	}
 
 	/* ----------------------------------------------------------------
@@ -52,6 +77,9 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	 */
 	private _Handle_message(evt: MessageEvent): void
 	{
-		this.replyData(JSON.parse(evt.data));
+		if (evt.data === "CLOSE")
+			this.close();
+		else
+			this.replyData(JSON.parse(evt.data));
 	}
 }

@@ -53,8 +53,6 @@ export class WebConnector<Listener extends object = {}>
 		this.socket_ = null;
 		this.cv_ = new ConditionVariable();
 		this.server_is_listening_ = false;
-
-		this.closer_ = null;
 	}
 	
 	/**
@@ -197,15 +195,15 @@ export class WebConnector<Listener extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_message(message: MessageEvent): void
+	private _Handle_message(evt: MessageEvent): void
 	{
-		if (message.data === "LISTENING")
+		if (evt.data === "LISTENING")
 		{
 			this.server_is_listening_ = true;
 			this.cv_.notify_all();
 		}
 		else
-			this.replyData(JSON.parse(message.data));
+			this.replyData(JSON.parse(evt.data));
 	}
 
 	/**
