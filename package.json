@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.0.9",
+  "version": "0.0.10",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -26,19 +26,18 @@
   "homepage": "https://github.com/samchon/tgrid#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samchon/tgrid.git"
+    "url": "https://github.com/samchon/tgrid.git"
   },
   "bugs": {
     "url": "https://github.com/samchon/tgrid/issues"
   },
-  "licenses": [
-    {
-      "type": "BSD 3-Clause",
-      "url": "https://opensource.org/licenses/BSD-3-Clause"
-    }
-  ],
+  "license": "BSD-3-Clause",
   "keywords": [
-    "grid",
-    "computing"
+    "TGrid",
+    "typescript grid computing",
+    "RFC",
+    "ROC",
+    "remote function call",
+    "remote object call"
   ]
 }

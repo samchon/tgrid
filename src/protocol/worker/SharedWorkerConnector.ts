@@ -4,14 +4,20 @@ import { Invoke } from "../../base/Invoke";
 export class SharedWorkerConnector<Listener extends Object = {}>
 	extends CommunicatorBase<Listener>
 {
+	/**
+	 * @hidden
+	 */
 	private port_: MessagePort;
 
+	/* ----------------------------------------------------------------
+		CONSTRUCTOR
+	---------------------------------------------------------------- */
 	public constructor(listener: Listener = null)
 	{
 		super(listener);
 	}
 
-	public connect(jsFile: string, name?: string): void
+	public async connect(jsFile: string, name?: string): Promise<void>
 	{
 		let worker = new SharedWorker(jsFile, name);
 		
@@ -23,13 +29,21 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 		this.port_.start();
 	}
 
-	public close(): void
+	public async close(): Promise<void>
 	{
 		this.port_.close();
 	}
 
+	/* ----------------------------------------------------------------
+		COMMUNICATOR
+	---------------------------------------------------------------- */
 	public sendData(invoke: Invoke): void
 	{
 		this.port_.postMessage(JSON.stringify(invoke));
+	}
+
+	protected _Is_ready(): Error
+	{
+		return null;
 	}
 }

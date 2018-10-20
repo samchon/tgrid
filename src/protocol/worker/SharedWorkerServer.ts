@@ -2,7 +2,7 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 export class SharedWorkerServer
 {
-	public open(callback: (acceptor: SharedWorkerAcceptor) => void): void
+	public async open(callback: (acceptor: SharedWorkerAcceptor) => void): Promise<void>
 	{
 		addEventListener("open", (evt: OpenEvent) =>
 		{
@@ -13,7 +13,7 @@ export class SharedWorkerServer
 		});
 	}
 
-	public close(): void
+	public async close(): Promise<void>
 	{
 		close();
 	}

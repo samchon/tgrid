@@ -29,6 +29,7 @@ export async function test_web(): Promise<void>
 		// DO CONNECT
 		let connector: WebConnector = new WebConnector();
 		await connector.connect(`ws://127.0.0.1:${PORT}/${path}`);
+		await connector.wait();
 
 		// SET DRIVER AND TEST BY CALCULATOR PROCESS
 		let driver: ICalculator | IVector = connector.getDriver();

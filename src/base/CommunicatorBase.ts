@@ -25,12 +25,20 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
+	/**
+	 * Default Constructor.
+	 * 
+	 * @param listener A controller provided for the remote system.
+	 */
 	public constructor(listener: Listener = null)
 	{
 		this.listener_ = listener;
 		this.promises_ = new HashMap();
 	}
 
+	/**
+	 * @hidden
+	 */
 	protected async destructor(): Promise<void>
 	{
 		for (let entry of this.promises_)
@@ -44,11 +52,11 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		DRIVER
 	---------------------------------------------------------------- */
-	public getDriver<Controller extends object>(): Promisify<Controller>
+	public getDriver<Driver extends object>(): Promisify<Driver>
 	{
-		return new Proxy<Promisify<Controller>>({} as Promisify<Controller>,
+		return new Proxy<Promisify<Driver>>({} as Promisify<Driver>,
 		{
-			get: (target: Promisify<Controller>, name: string) =>
+			get: (target: Promisify<Driver>, name: string) =>
 			{
 				return this._Proxy_func(name);
 			}
@@ -79,6 +87,14 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 	{
 		return new Promise((resolve, reject) =>
 		{
+			// READY TO SEND ?
+			let error: Error = this._Is_ready();
+			if (error)
+			{
+				reject(error);
+				return;
+			}
+
 			// CONSTRUCT INVOKE MESSAGE
 			let invoke: IFunction =
 			{
@@ -92,6 +108,11 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 			this.sendData(invoke);
 		});
 	}
+
+	/**
+	 * @hidden
+	 */
+	protected abstract _Is_ready(): Error;
 
 	/* ----------------------------------------------------------------
 		COMMUNICATORS

@@ -2,6 +2,7 @@ import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { Invoke } from "../../base/Invoke";
+import { LogicError, RuntimeError } from "tstl/exception";
 
 export class WebAcceptor extends CommunicatorBase
 {
@@ -19,6 +20,11 @@ export class WebAcceptor extends CommunicatorBase
 	 * @hidden
 	 */
 	private closer_: ()=>void;
+
+	/**
+	 * @hidden
+	 */
+	private listening_: boolean;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
@@ -41,7 +47,7 @@ export class WebAcceptor extends CommunicatorBase
 	public accept(
 			protocol?: string, 
 			allowOrigin?: string, 
-			cookies?: ICookie[]
+			cookies?: WebAcceptor.ICookie[]
 		): Promise<boolean>
 	{
 		return new Promise((resolve, reject) =>
@@ -52,7 +58,6 @@ export class WebAcceptor extends CommunicatorBase
 				this.connection_ = connection;
 				this.connection_.on("error", this._Handle_error.bind(this));
 				this.connection_.on("close", this._Handle_close.bind(this));
-				this.connection_.on("message", this._Handle_message.bind(this));
 
 				resolve();
 			});
@@ -66,10 +71,23 @@ export class WebAcceptor extends CommunicatorBase
 		});
 	}
 
+	/**
+	 * Start listening.
+	 * 
+	 * Start listening data from the remote client. 
+	 * 
+	 * @param listener A controller provided for the remote client.
+	 */
 	public async listen<Listener extends object = {}>
 		(listener: Listener): Promise<void>
 	{
 		this.listener_ = listener;
+		if (this.listening_ === true)
+			return;
+		
+		this.listening_ = true;
+		this.connection_.on("message", this._Handle_message.bind(this));
+		this.connection_.sendUTF("LISTENING");
 	}
 	
 	public close(): Promise<void>
@@ -98,6 +116,19 @@ export class WebAcceptor extends CommunicatorBase
 	public sendData(invoke: Invoke): void
 	{
 		this.connection_.sendUTF(JSON.stringify(invoke));
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected _Is_ready(): Error
+	{
+		if (!this.connection_)
+			return new LogicError("Not accepted.");
+		else if (!this.connection_.connected)
+			return new RuntimeError("Disconnected.");
+		else
+			return null;
 	}
 
 	/**
@@ -137,14 +168,17 @@ export class WebAcceptor extends CommunicatorBase
 	}
 }
 
-export interface ICookie 
+export namespace WebAcceptor
 {
-    name: string;
-    value: string;
-    path?: string;
-    domain?: string;
-    expires?: Date;
-    maxage?: number;
-    secure?: boolean;
-    httponly?: boolean;
+	export interface ICookie 
+	{
+		name: string;
+		value: string;
+		path?: string;
+		domain?: string;
+		expires?: Date;
+		maxage?: number;
+		secure?: boolean;
+		httponly?: boolean;
+	}
 }

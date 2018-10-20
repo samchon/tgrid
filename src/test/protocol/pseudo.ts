@@ -13,8 +13,8 @@ export async function test_pseudo(): Promise<void>
 	let client: Communicator;
 	
 	// CONSTRUCT SYSTEMS
-	server = new Communicator(invoke => client.replyData(invoke), new Calculator());
-	client = new Communicator(invoke => server.replyData(invoke));
+	server = new Communicator(invoke => client.replyData(invoke), ()=>null, new Calculator());
+	client = new Communicator(invoke => server.replyData(invoke), ()=>null);
 
 	//----
 	// INTERACTS

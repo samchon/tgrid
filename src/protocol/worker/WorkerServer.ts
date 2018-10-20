@@ -2,6 +2,7 @@ import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { Invoke } from "../../base/Invoke";
 
 import { is_node } from "tstl/utility/node";
+import { DomainError } from "tstl/exception";
 
 //----
 // CAPSULIZATION
@@ -16,6 +17,8 @@ var g: IFeature = is_node()
 export class WorkerServer<Listener extends object = {}> 
 	extends CommunicatorBase<Listener>
 {
+	private ready_: boolean;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -23,6 +26,7 @@ export class WorkerServer<Listener extends object = {}>
 	{
 		super(listener);
 
+		this.ready_ = false;
 		g.onmessage = this._Reply_data.bind(this);
 	}
 
@@ -42,13 +46,23 @@ export class WorkerServer<Listener extends object = {}>
 		g.postMessage(JSON.stringify(invoke));
 	}
 
+	protected _Is_ready(): Error
+	{
+		return this.ready_
+			? null
+			: new DomainError("Not ready yet.");
+	}
+
 	/**
 	 * @hidden
 	 */
 	private _Reply_data(evt: MessageEvent): void
 	{
 		if (evt.data === "READY")
+		{
 			g.postMessage("READY");
+			this.ready_ = true;
+		}
 		else if (evt.data === "CLOSE")
 		{
 			this.close();
