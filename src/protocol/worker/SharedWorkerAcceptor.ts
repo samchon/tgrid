@@ -9,6 +9,11 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	private port_: MessagePort;
 
 	/**
+	 * @hidden 
+	 */
+	private eraser_: ()=>void;
+
+	/**
 	 * @hidden
 	 */
 	private listening_: boolean;
@@ -16,10 +21,15 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
-	public constructor(port: MessagePort)
+	/**
+	 * @hidden
+	 */
+	private constructor(port: MessagePort, eraser: ()=>void)
 	{
 		super();
+
 		this.port_ = port;
+		this.eraser_ = eraser;
 	}
 
 	public async close(): Promise<void>
@@ -29,6 +39,7 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_.postMessage("CLOSE");
 
 		// DO CLOSE
+		this.eraser_();
 		this.port_.close();
 	}
 
@@ -41,6 +52,14 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_.start();
 
 		this.port_.postMessage("ACCEPT");
+	}
+
+	public async deny(): Promise<void>
+	{
+		this.port_.postMessage("DENY");
+
+		this.eraser_();
+		this.port_.close();
 	}
 
 	public async listen<Listener extends object>

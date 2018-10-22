@@ -82,18 +82,17 @@ export class WebConnector<Listener extends object = {}>
 
 			// OPEN A SOCKET
 			this.socket_ = new g.WebSocket(url, protocols);
-			this.socket_.onerror = reject;
-			this.socket_.onclose = this._Handle_close.bind(this);
-
 			this.socket_.onopen = () =>
 			{
 				// RE-DEFINE HANDLERS
 				this.socket_.onerror = this._Handle_error.bind(this);
 				this.socket_.onmessage = this._Handle_message.bind(this);
-
+				
 				// RETURNS
 				resolve();
 			};
+			this.socket_.onclose = this._Handle_close.bind(this);
+			this.socket_.onerror = reject;
 		});
 	}
 
@@ -121,6 +120,21 @@ export class WebConnector<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
+	public get url(): string
+	{
+		return this.socket_.url;
+	}
+
+	public get protocol(): string
+	{
+		return this.socket_.protocol;
+	}
+
+	public get extensions(): string
+	{
+		return this.socket_.extensions;
+	}
+	
 	public get state(): WebConnector.State
 	{
 		if (!this.socket_)
@@ -174,6 +188,9 @@ export class WebConnector<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		this.socket_.send(JSON.stringify(invoke));

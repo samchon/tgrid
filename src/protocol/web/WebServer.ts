@@ -24,7 +24,21 @@ export class WebServer
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
+	/**
+	 * Default Constructor for the `ws` server..
+	 * 
+	 * Create an websocket server (`ws://`).
+	 */
 	public constructor();
+
+	/**
+	 * Initializer Constructor for the `wss` server.
+	 * 
+	 * Create a secured websocket server (`wss://`).
+	 * 
+	 * @param key Key string.
+	 * @param cert Certification string.
+	 */
 	public constructor(key: string, cert: string);
 
 	public constructor(key: string = null, cert: string = null)
@@ -49,7 +63,7 @@ export class WebServer
 				this.socket_ = new ws.server({ httpServer: this.server_ });
 				this.socket_.on("request", request =>
 				{
-					let acceptor: WebAcceptor = WebAcceptor._Create(request);
+					let acceptor: WebAcceptor = new AcceptorFactory(request);
 					cb(acceptor);
 				});
 			}
@@ -106,3 +120,8 @@ export namespace WebServer
 		CLOSED = 3
 	}
 }
+
+const AcceptorFactory:
+{
+	new(request: ws.request): WebAcceptor;
+} = <any>WebAcceptor;

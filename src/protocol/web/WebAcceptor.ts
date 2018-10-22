@@ -29,6 +29,9 @@ export class WebAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
+	/**
+	 * @hidden
+	 */
 	private constructor(request: ws.request)
 	{
 		super();
@@ -43,14 +46,6 @@ export class WebAcceptor extends CommunicatorBase
 			this.closer_ = resolve;
 			this.connection_.close();
 		});
-	}
-
-	/**
-	 * @hidden
-	 */
-	public static _Create(request: any): WebAcceptor
-	{
-		return new WebAcceptor(request);
 	}
 
 	/* ----------------------------------------------------------------
@@ -105,9 +100,22 @@ export class WebAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
-	public getPath(): string
+	public get path(): string
 	{
 		return this.request_.resource;
+	}
+
+	public get protocol(): string
+	{
+		return this.connection_.protocol;
+	}
+
+	public get extensions(): string
+	{
+		return this.connection_
+			.extensions
+			.map(elem => elem.name)
+			.toString();
 	}
 
 	public handleClose: (code: number, reason: string)=>void;
@@ -116,6 +124,9 @@ export class WebAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		this.connection_.sendUTF(JSON.stringify(invoke));

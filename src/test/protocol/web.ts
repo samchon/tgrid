@@ -16,7 +16,7 @@ export async function test_web(): Promise<void>
 	await server.open(PORT, async acceptor =>
 	{
 		await acceptor.accept(); // ALLOW CONNECTION
-		await acceptor.listen(/calculator/.test(acceptor.getPath())
+		await acceptor.listen(/calculator/.test(acceptor.path)
 			? new Calculator()
 			: new std.Vector<number>()); // SET LISTENER
 	});
