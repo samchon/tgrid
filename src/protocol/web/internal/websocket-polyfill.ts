@@ -171,6 +171,9 @@ export class WebSocket
 	}
 }
 
+/**
+ * @hidden
+ */
 export namespace WebSocket
 {
 	export const CONNECTING = 0;
@@ -178,4 +181,8 @@ export namespace WebSocket
 	export const CLOSING = 2;
 	export const CLOSED = 3;
 }
+
+/**
+ * @hidden
+ */
 type Listener<K extends keyof WebSocketEventMap> = (event: WebSocketEventMap[K]) => void;

@@ -55,7 +55,7 @@ export class WorkerConnector<Listener extends object = {}>
 		this.state_ = WorkerConnector.State.NONE;
 	}
 
-	public compile(content: string): Promise<void>
+	public async compile(content: string): Promise<void>
 	{
 		return this.connect(Compiler.compile(content));
 	}
@@ -168,6 +168,9 @@ interface IWorker
 	};
 }
 
+/**
+ * @hidden
+ */
 interface CompilerScope
 {
 	compile(content: string): string;

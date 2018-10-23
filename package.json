@@ -10,8 +10,9 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "tsc && npm run test",
+    "compile": "tsc",
     "clean": "node build/clean",
+    "build": "tsc && npm run test",
     "test": "node test/main"
   },
   "dependencies": {

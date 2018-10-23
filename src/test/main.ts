@@ -17,8 +17,10 @@ async function iterate(path: string): Promise<void>
 		}
 		else if (file.substr(-3) !== ".js" || current_path === PATH + "/main.js")
 			continue;
+		else if (current_path.indexOf("instances") !== -1)
+			continue;
 
-		let external: any = await import(current_path.substr(0, current_path.length - 3));
+		let external: any = await import(current_path);
 		for (let key in external)
 			if (key.substr(0, 5) === "test_")
 			{

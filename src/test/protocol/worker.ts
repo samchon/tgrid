@@ -1,11 +1,29 @@
-import { ICalculator } from "../base/ICalculator";
 import { WorkerConnector } from "../../protocol/worker/WorkerConnector";
+import { ICalculator } from "../base/ICalculator";
 
-export async function test_process(): Promise<void>
+export function test_worker_connect(): Promise<void>
 {
-	let connector: WorkerConnector = new WorkerConnector();
-	await connector.connect(__dirname + "/instances/process-server");
-
-	await ICalculator.main(connector.getDriver<ICalculator>());
-	await connector.close();
+	return _Test_worker(worker =>
+	{
+		return worker.connect(PATH + ".js");
+	});
 }
+
+// export function test_worker_compile(): Promise<void>
+// {
+// 	return _Test_worker(worker =>
+// 	{
+// 		return worker.compile(fs.readFileSync(PATH + ".bundle.js", "utf8"));
+// 	});
+// }
+
+async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>): Promise<void>
+{
+	let worker = new WorkerConnector();
+	await connect(worker);
+
+	await ICalculator.main(worker.getDriver<ICalculator>())
+	await worker.close();
+}
+
+const PATH = __dirname + "/instances/worker-server";

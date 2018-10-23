@@ -39,7 +39,14 @@ export class SharedWorkerServer
 	}
 }
 
+/**
+ * @hidden
+ */
 type OpenEvent = Event & {ports: MessagePort[]};
+
+/**
+ * @hidden
+ */
 const AcceptorFactory:
 {
 	new(port: MessagePort, eraser: ()=>void): SharedWorkerAcceptor;

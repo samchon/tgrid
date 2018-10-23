@@ -4,6 +4,7 @@
 .git/
 .github/
 .vscode/
+.cache/
 
 node_modules/
 build/

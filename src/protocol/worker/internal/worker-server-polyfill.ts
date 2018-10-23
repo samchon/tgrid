@@ -1,3 +1,6 @@
+/**
+ * @hidden
+ */
 class WorkerServerPolyfill
 {
 	public static postMessage(message: any): void
