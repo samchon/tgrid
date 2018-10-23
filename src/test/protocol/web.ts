@@ -44,3 +44,29 @@ export async function test_web(): Promise<void>
 	// CLOSE SERVER TOO
 	await server.close();
 }
+
+export async function test_web_deny(): Promise<void>
+{
+	let server = new WebServer();
+	await server.open(PORT, async acceptor =>
+	{
+		await acceptor.deny(404, "Unable to find the matched record.");
+		await acceptor.close();
+	});
+
+	let connector = new WebConnector();
+	let error: Error = null;
+
+	try
+	{
+		await connector.connect(`ws://127.0.0.1:${PORT}`);
+	}
+	catch (exp)
+	{
+		error = exp;
+	}
+	await server.close();
+
+	if (!error)
+		throw new Error("Catching deny has failed.");
+}

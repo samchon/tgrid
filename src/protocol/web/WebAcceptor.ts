@@ -44,7 +44,8 @@ export class WebAcceptor extends CommunicatorBase
 		return new Promise((resolve) =>
 		{
 			this.closer_ = resolve;
-			this.connection_.close();
+			if (this.connection_)
+				this.connection_.close();
 		});
 	}
 
@@ -55,9 +56,9 @@ export class WebAcceptor extends CommunicatorBase
 			protocol?: string, 
 			allowOrigin?: string, 
 			cookies?: WebAcceptor.ICookie[]
-		): Promise<boolean>
+		): Promise<void>
 	{
-		return new Promise((resolve, reject) =>
+		return new Promise(resolve =>
 		{
 			// PREPARE EVENT LISTENERS
 			this.request_.on("requestAccepted", connection =>
@@ -69,13 +70,18 @@ export class WebAcceptor extends CommunicatorBase
 
 				resolve();
 			});
-			this.request_.on("requestRejected", (error?: Error) =>
-			{
-				reject(error);
-			});
 
 			// DO ACCEPT
 			this.request_.accept(protocol, allowOrigin, cookies);
+		});
+	}
+
+	public deny(status: number, reason: string): Promise<void>
+	{
+		return new Promise(resolve =>
+		{
+			this.request_.on("requestRejected", resolve);
+			this.request_.reject(status, reason);
 		});
 	}
 

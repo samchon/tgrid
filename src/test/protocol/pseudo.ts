@@ -23,5 +23,5 @@ export async function test_pseudo(): Promise<void>
 	let driver: ICalculator = client.getDriver<ICalculator>();
 
 	// DO TEST
-	ICalculator.main(driver);
+	await ICalculator.main(driver);
 }

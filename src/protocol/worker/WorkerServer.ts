@@ -17,6 +17,9 @@ var g: IFeature = is_node()
 export class WorkerServer<Listener extends object = {}> 
 	extends CommunicatorBase<Listener>
 {
+	/**
+	 * @hidden
+	 */
 	private ready_: boolean;
 
 	/* ----------------------------------------------------------------
@@ -37,17 +40,23 @@ export class WorkerServer<Listener extends object = {}>
 		g.postMessage("CLOSE");
 
 		// DO CLOSE
-		close();
+		g.close();
 	}
 
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		g.postMessage(JSON.stringify(invoke));
 	}
 
+	/**
+	 * @hidden
+	 */
 	protected _Is_ready(): Error
 	{
 		return this.ready_

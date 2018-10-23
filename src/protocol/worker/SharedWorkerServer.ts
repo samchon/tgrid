@@ -1,7 +1,5 @@
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
-
 import { HashSet } from "tstl/container";
-import { DomainError } from "tstl/exception";
 
 export class SharedWorkerServer
 {
@@ -11,21 +9,13 @@ export class SharedWorkerServer
 	private acceptors_: HashSet<SharedWorkerAcceptor>;
 
 	/**
-	 * @hidden
+	 * Initializer Constructor.
+	 * 
+	 * @param cb Callback function called whenever client connects.
 	 */
-	private opened_: boolean;
-
-	public constructor()
+	public constructor(cb: (acceptor: SharedWorkerAcceptor) => void)
 	{
 		this.acceptors_ = new HashSet();
-		this.opened_ = false;
-	}
-
-	public async open(callback: (acceptor: SharedWorkerAcceptor) => void): Promise<void>
-	{
-		if (this.opened_ === true)
-			throw new DomainError("Already opened.");
-
 		addEventListener("open", (evt: OpenEvent) =>
 		{
 			let port: MessagePort = evt.ports[evt.ports.length - 1];
@@ -35,11 +25,13 @@ export class SharedWorkerServer
 			});
 			
 			this.acceptors_.insert(acceptor);
-			callback(acceptor);
+			cb(acceptor);
 		});
-		this.opened_ = true;
 	}
 
+	/**
+	 * Close server.
+	 */
 	public async close(): Promise<void>
 	{
 		for (let acceptor of this.acceptors_)

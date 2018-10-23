@@ -4,6 +4,7 @@ import { Invoke } from "../../base/Invoke";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
+import { compile } from "./internal/node-compiler";
 
 export class SharedWorkerConnector<Listener extends Object = {}>
 	extends CommunicatorBase<Listener>
@@ -53,30 +54,12 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 		this.server_is_listening_ = false;
 	}
 
-	public close(): Promise<void>
+	public compile(content: string): Promise<void>
 	{
-		// 1. REQUEST CLOSE TO SERVER
-		// 2. DO CLOSE IN SERVER
-		// 3. RESOLVE
-		return new Promise((resolve, reject) =>
-		{
-			this.closer_ = resolve;
-			this.port_.postMessage("CLOSE");
-		});
+		return this.connect(compile(content));
 	}
 
-	/* ----------------------------------------------------------------
-		STATE
-	---------------------------------------------------------------- */
-	public get state(): SharedWorkerConnector.State
-	{
-		return this.state_;
-	}
-
-	/* ----------------------------------------------------------------
-		HANDSHAKES
-	---------------------------------------------------------------- */
-	public connect(jsFile: string, name?: string): Promise<void>
+	public connect(jsFile: string): Promise<void>
 	{
 		return new Promise((resolve, reject) => 
 		{
@@ -86,7 +69,7 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 				this.state_ = SharedWorkerConnector.State.CONNECTING;
 
 				// DO CONNECT
-				let worker = new SharedWorker(jsFile, name);
+				let worker = new SharedWorker(jsFile);
 
 				this.port_ = worker.port;
 				this.port_.onmessage = this._Handle_message.bind(this);
@@ -101,6 +84,26 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 				reject(exp);
 			}
 		});
+	}
+
+	public close(): Promise<void>
+	{
+		// 1. REQUEST CLOSE TO SERVER
+		// 2. DO CLOSE IN SERVER
+		// 3. RESOLVE
+		return new Promise((resolve, reject) =>
+		{
+			this.closer_ = resolve;
+			this.port_.postMessage("CLOSE");
+		});
+	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	public get state(): SharedWorkerConnector.State
+	{
+		return this.state_;
 	}
 
 	public wait(): Promise<void>;

@@ -10,9 +10,16 @@ import { is_node } from "tstl/utility/node";
 /**
  * @hidden
  */
-var g: IWorker = is_node()
+const g: IWorker = is_node()
 	? require("./internal/worker-connector-polyfill")
 	: <any>window;
+
+/**
+ * @hidden
+ */
+const Compiler: CompilerScope = is_node()
+	? require("./internal/node-compiler")
+	: require("./internal/web-compiler");
 
 export class WorkerConnector<Listener extends object = {}>
 	extends CommunicatorBase<Listener>
@@ -40,12 +47,17 @@ export class WorkerConnector<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
-	public constructor(listener?: Listener)
+	public constructor(listener: Listener = null)
 	{
 		super(listener);
 
 		this.worker_ = null;
 		this.state_ = WorkerConnector.State.NONE;
+	}
+
+	public compile(content: string): Promise<void>
+	{
+		return this.connect(Compiler.compile(content));
 	}
 
 	public connect(jsFile: string): Promise<void>
@@ -113,7 +125,7 @@ export class WorkerConnector<Listener extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_message(evt: MessageEvent): void
+	protected _Handle_message(evt: MessageEvent): void
 	{
 		if (evt.data === "READY")
 		{
@@ -154,4 +166,9 @@ interface IWorker
 	{
 		new(jsFile: string): Worker;
 	};
+}
+
+interface CompilerScope
+{
+	compile(content: string): string;
 }

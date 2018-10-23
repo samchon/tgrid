@@ -92,7 +92,10 @@ export class WebConnector<Listener extends object = {}>
 				resolve();
 			};
 			this.socket_.onclose = this._Handle_close.bind(this);
-			this.socket_.onerror = reject;
+			this.socket_.onerror = (evt: ErrorEvent) =>
+			{
+				reject(evt.error);
+			};
 		});
 	}
 
@@ -226,10 +229,10 @@ export class WebConnector<Listener extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_error(error: Error): void
+	private _Handle_error(evt: ErrorEvent): void
 	{
 		if (this.handleError)
-			this.handleError(error);
+			this.handleError(evt.error);
 	}
 
 	/**

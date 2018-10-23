@@ -14,7 +14,7 @@ export class WebServer
 	/**
 	 * @hidden
 	 */
-	private socket_: ws.server;
+	private protocol_: ws.server;
 
 	/**
 	 * @hidden
@@ -49,19 +49,25 @@ export class WebServer
 			: https.createServer({ key: key, cert: cert });
 
 		// SOCKET AND STATUS ARE YET
-		this.socket_ = null;
+		this.protocol_ = null;
 		this.state_ = WebServer.State.NONE;
 	}
 
+	/**
+	 * Open server.
+	 * 
+	 * @param port Port number to listen.
+	 * @param cb Callback function called whenever client connects.
+	 */
 	public open(port: number, cb: (acceptor: WebAcceptor) => void | Promise<void>): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
 			// PROTOCOL - ADAPTOR & ACCEPTOR
-			if (this.socket_ === null)
+			if (this.protocol_ === null)
 			{
-				this.socket_ = new ws.server({ httpServer: this.server_ });
-				this.socket_.on("request", request =>
+				this.protocol_ = new ws.server({ httpServer: this.server_ });
+				this.protocol_.on("request", request =>
 				{
 					let acceptor: WebAcceptor = new AcceptorFactory(request);
 					cb(acceptor);
