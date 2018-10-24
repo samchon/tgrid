@@ -13,7 +13,7 @@ export class SharedWorkerServer
 	 * 
 	 * @param cb Callback function called whenever client connects.
 	 */
-	public constructor(cb: (acceptor: SharedWorkerAcceptor) => void)
+	public constructor(cb: (acceptor: SharedWorkerAcceptor) => void | Promise<void>)
 	{
 		this.acceptors_ = new HashSet();
 		addEventListener("open", (evt: OpenEvent) =>

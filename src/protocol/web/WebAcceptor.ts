@@ -58,7 +58,7 @@ export class WebAcceptor extends CommunicatorBase
 			cookies?: WebAcceptor.ICookie[]
 		): Promise<void>
 	{
-		return new Promise(resolve =>
+		return new Promise((resolve, reject) =>
 		{
 			// PREPARE EVENT LISTENERS
 			this.request_.on("requestAccepted", connection =>
@@ -72,7 +72,14 @@ export class WebAcceptor extends CommunicatorBase
 			});
 
 			// DO ACCEPT
-			this.request_.accept(protocol, allowOrigin, cookies);
+			try
+			{
+				this.request_.accept(protocol, allowOrigin, cookies);
+			}
+			catch (exp)
+			{
+				reject(exp);
+			}
 		});
 	}
 

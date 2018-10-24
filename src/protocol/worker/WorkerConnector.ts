@@ -110,6 +110,9 @@ export class WorkerConnector<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		this.worker_.postMessage(JSON.stringify(invoke));

@@ -1,4 +1,5 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
@@ -8,6 +9,7 @@ import { compile } from "./internal/web-compiler";
 
 export class SharedWorkerConnector<Listener extends Object = {}>
 	extends CommunicatorBase<Listener>
+	implements IConnector<SharedWorkerConnector.State, Listener>
 {
 	/**
 	 * @hidden
@@ -106,8 +108,19 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 		return this.state_;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public wait(): Promise<void>;
+
+	/**
+	 * @inheritDoc
+	 */
 	public wait(ms: number): Promise<boolean>;
+
+	/**
+	 * @inheritDoc
+	 */
 	public wait(at: Date): Promise<boolean>;
 
 	public async wait(param: number | Date = null): Promise<void|boolean>
@@ -126,6 +139,9 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		this.port_.postMessage(JSON.stringify(invoke));

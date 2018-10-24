@@ -65,14 +65,20 @@ export class WebServer
 		{
 			// PROTOCOL - ADAPTOR & ACCEPTOR
 			if (this.protocol_ === null)
-			{
-				this.protocol_ = new ws.server({ httpServer: this.server_ });
-				this.protocol_.on("request", request =>
+			try
 				{
-					let acceptor: WebAcceptor = new AcceptorFactory(request);
-					cb(acceptor);
-				});
-			}
+					this.protocol_ = new ws.server({ httpServer: this.server_ });
+					this.protocol_.on("request", request =>
+					{
+						let acceptor: WebAcceptor = new AcceptorFactory(request);
+						cb(acceptor);
+					});
+				}
+				catch (exp)
+				{
+					reject(exp);
+					return;	
+				}
 
 			// PREPARE RETURNS
 			this.server_.on("listening", () =>

@@ -78,6 +78,9 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		this.port_.postMessage(JSON.stringify(invoke));

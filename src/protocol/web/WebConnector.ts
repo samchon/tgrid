@@ -1,4 +1,5 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
 import { LogicError, RuntimeError } from "tstl/exception";
@@ -17,6 +18,7 @@ var g: IFeature = is_node()
 
 export class WebConnector<Listener extends object = {}>
 	extends CommunicatorBase<Listener>
+	implements IConnector<WebConnector.State, Listener>
 {
 	/**
 	 * @hidden
@@ -81,7 +83,17 @@ export class WebConnector<Listener extends object = {}>
 			}
 
 			// OPEN A SOCKET
-			this.socket_ = new g.WebSocket(url, protocols);
+			try
+			{
+				this.socket_ = new g.WebSocket(url, protocols);
+			}
+			catch (exp)
+			{
+				reject(exp);
+				return;
+			}
+
+			// SET EVENT HANDLERS
 			this.socket_.onopen = () =>
 			{
 				// RE-DEFINE HANDLERS
@@ -155,23 +167,17 @@ export class WebConnector<Listener extends object = {}>
 	public handleError: (error: Error) => void;
 
 	/**
-	 * Wait for server to listen.
+	 * @inheritDoc
 	 */
 	public wait(): Promise<void>;
 
 	/**
-	 * Wait for server to listen or timeout.
-	 * 
-	 * @param ms The maximum milliseconds for waiting.
-	 * @return Whether awaken by completion or timeout.
+	 * @inheritDoc
 	 */
 	public wait(ms: number): Promise<boolean>;
 
 	/**
-	 * Wait for server to listen or time expiration. 
-	 * 
-	 * @param at The maximum time point to wait.
-	 * @return Whether awaken by completion or time expiration.
+	 * @inheritDoc
 	 */
 	public wait(at: Date): Promise<boolean>;
 

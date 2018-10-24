@@ -16,7 +16,7 @@ export function test_worker_compile(): Promise<void>
 	return _Test_worker(worker =>
 	{
 		return worker.compile(fs.readFileSync(PATH + ".bundle.js", "utf8"));
-	}, true);
+	});
 }
 
 async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>, talk: boolean = false): Promise<void>
