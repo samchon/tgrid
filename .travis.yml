@@ -3,6 +3,7 @@ node_js:
   - 'stable'
 before_install:
   - npm install -g typescript
+  - npm install -g browserify
 install:
   - npm install
 script:
