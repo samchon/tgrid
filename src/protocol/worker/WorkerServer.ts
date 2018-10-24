@@ -2,7 +2,7 @@ import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { Invoke } from "../../base/Invoke";
 
 import { DomainError } from "tstl/exception";
-const detect = require("browser-detect");
+import { is_node } from "tstl/utility/node";
 
 //----
 // CAPSULIZATION
@@ -10,7 +10,7 @@ const detect = require("browser-detect");
 /**
  * @hidden
  */
-var g: IFeature = detect().name === "node"
+var g: IFeature = is_node()
 	? require("./internal/worker-server-polyfill")
 	: <any>window;
 
