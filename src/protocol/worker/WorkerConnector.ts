@@ -57,7 +57,15 @@ export class WorkerConnector<Listener extends object = {}>
 
 	public async compile(content: string): Promise<void>
 	{
-		return this.connect(Compiler.compile(content));
+		if (Compiler.remove)
+		{
+			let path: string = await Compiler.compile(content);
+
+			await this.connect(path);
+			await Compiler.remove(path);
+		}
+		else
+			this.connect(Compiler.compile(content) as string);
 	}
 
 	public connect(jsFile: string): Promise<void>
@@ -173,5 +181,6 @@ interface IWorker
  */
 interface CompilerScope
 {
-	compile(content: string): string;
+	compile(content: string): string | Promise<string>;
+	remove?(path: string): Promise<void>;
 }

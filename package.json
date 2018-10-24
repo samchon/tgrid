@@ -6,17 +6,19 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.0.11",
+  "version": "0.0.12",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
     "compile": "tsc",
     "clean": "node build/clean",
-    "build": "tsc && npm run test",
+    "build": "tsc && npm run bundle-worker && npm run test",
+    "bundle-worker": "browserify test/protocol/instances/worker-server.js -o test/protocol/instances/worker-server.bundle.js",
     "test": "node test/main"
   },
   "dependencies": {
-    "tstl": "^2.0.7",
+    "browser-detect": "^0.2.28",
+    "tstl": "^2.0.8",
     "websocket": "^1.0.28"
   },
   "devDependencies": {

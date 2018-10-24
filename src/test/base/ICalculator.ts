@@ -7,21 +7,21 @@ export type ICalculator = Promisify<Calculator>;
 
 export namespace ICalculator
 {
-	export async function main(driver: ICalculator): Promise<void>
+	export async function main(driver: ICalculator, talk: boolean = false): Promise<void>
 	{
 		// VALIDATOR
 		let validator: Calculator = new Calculator();
 
 		// CALL FUNCTIONS IN SERVER FROM CLIENT
 		for (let i: number = 0; i < 100; ++i)
-			validate(driver, validator);
+			validate(driver, validator, talk);
 
 		// EXCEPTION THROWN BY THE SERVER
 		if (await get_exception(driver) === null)
 			throw new std.DomainError("Throwing exception doesn't work.");
 	}
 
-	async function validate(driver: ICalculator, validator: Calculator): Promise<void>
+	async function validate(driver: ICalculator, validator: Calculator, talk: boolean): Promise<void>
 	{
 		if (driver === <any>validator)
 			throw new std.InvalidArgument("Mistaken arguments.");
@@ -34,6 +34,9 @@ export namespace ICalculator
 		// CALL FUNCTION & GET ANSWER
 		let ret: number = await eval(`driver.${method}`)(x, y);
 		let answer: number = eval(`validator.${method}(x, y)`);
+
+		if (talk)
+			console.log(method, x, y, ret, answer);
 		
 		// VALIDATE
 		if (ret !== answer)

@@ -4,7 +4,7 @@ import { Invoke } from "../../base/Invoke";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
-import { compile } from "./internal/node-compiler";
+import { compile } from "./internal/web-compiler";
 
 export class SharedWorkerConnector<Listener extends Object = {}>
 	extends CommunicatorBase<Listener>
