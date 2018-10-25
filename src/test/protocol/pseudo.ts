@@ -20,8 +20,8 @@ export async function test_pseudo(): Promise<void>
 	// INTERACTS
 	//----
 	// GET DRIVER
-	let driver: ICalculator = client.getDriver<ICalculator>();
+	let controller: ICalculator = client.getController<ICalculator>();
 
 	// DO TEST
-	await ICalculator.main(driver);
+	await ICalculator.main(controller);
 }

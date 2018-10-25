@@ -3,7 +3,7 @@ import { CommunicatorBase } from "./CommunicatorBase";
 import { IProtocol } from "./IProtocol";
 import { Invoke } from "./Invoke";
 
-export class Communicator<Listener extends object = {}>
+export class Communicator<Provider extends object = {}>
 	extends CommunicatorBase
 	implements IProtocol
 {
@@ -25,11 +25,11 @@ export class Communicator<Listener extends object = {}>
 	 * 
 	 * @param sender A function sending data to remote system.
 	 * @param readyInspector A function returning error when network is not ready. If ready, returns `null`.
-	 * @param listener A controller provided for the remote system.
+	 * @param provider A provider for the remote system.
 	 */
-	public constructor(sender: Sender, readyInspector: ReadyInspector, listener: Listener = null)
+	public constructor(sender: Sender, readyInspector: ReadyInspector, provider: Provider = null)
 	{
-		super(listener);
+		super(provider);
 
 		this.sender_ = sender;
 		this.ready_inspector_ = readyInspector;

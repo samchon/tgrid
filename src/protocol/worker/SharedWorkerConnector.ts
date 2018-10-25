@@ -7,9 +7,9 @@ import { RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 import { compile } from "./internal/web-compiler";
 
-export class SharedWorkerConnector<Listener extends Object = {}>
-	extends CommunicatorBase<Listener>
-	implements IConnector<SharedWorkerConnector.State, Listener>
+export class SharedWorkerConnector<Provider extends Object = {}>
+	extends CommunicatorBase<Provider>
+	implements IConnector<SharedWorkerConnector.State, Provider>
 {
 	/**
 	 * @hidden
@@ -44,10 +44,10 @@ export class SharedWorkerConnector<Listener extends Object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
-	public constructor(listener: Listener = null)
+	public constructor(provider: Provider = null)
 	{
 		// ASSIGN MEMBERS
-		super(listener);
+		super(provider);
 		this.port_ = null;
 		this.state_ = SharedWorkerConnector.State.NONE;
 

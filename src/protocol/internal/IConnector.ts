@@ -1,7 +1,7 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 
-export interface IConnector<State, Listener extends object>
-	extends CommunicatorBase<Listener>
+export interface IConnector<State, Provider extends object>
+	extends CommunicatorBase<Provider>
 {
 	readonly state: State
 

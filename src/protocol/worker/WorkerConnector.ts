@@ -21,8 +21,8 @@ const Compiler: CompilerScope = is_node()
 	? require("./internal/node-compiler")
 	: require("./internal/web-compiler");
 
-export class WorkerConnector<Listener extends object = {}>
-	extends CommunicatorBase<Listener>
+export class WorkerConnector<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
 {
 	/**
 	 * @hidden
@@ -47,9 +47,9 @@ export class WorkerConnector<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
-	public constructor(listener: Listener = null)
+	public constructor(provider: Provider = null)
 	{
-		super(listener);
+		super(provider);
 
 		this.worker_ = null;
 		this.state_ = WorkerConnector.State.NONE;

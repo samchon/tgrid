@@ -62,11 +62,11 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_.close();
 	}
 
-	public async listen<Listener extends object>
-		(listener: Listener): Promise<void>
+	public async listen<Provider extends object>
+		(provider: Provider): Promise<void>
 	{
 		// ASSIGN LISTENER
-		this.listener_ = listener;
+		this.provider_ = provider;
 		if (this.listening_ === true)
 			return;
 		

@@ -4,7 +4,7 @@ import { Promisify } from "../../base/Promisify";
 export type IVector = Promisify<std.Vector<number>>;
 export namespace IVector
 {
-	export async function main(driver: IVector): Promise<void>
+	export async function main(controller: IVector): Promise<void>
 	{
 		let mySum: number = 0;
 		let serverSum: number = 0;
@@ -14,11 +14,11 @@ export namespace IVector
 			let val: number = std.randint(1, 10);
 
 			mySum += val;
-			await driver.push_back(val);
+			await controller.push_back(val);
 		}
 
-		for (let i: number = 0; i < await driver.size(); ++i)
-			serverSum += await driver.at(i);
+		for (let i: number = 0; i < await controller.size(); ++i)
+			serverSum += await controller.at(i);
 
 		if (mySum !== serverSum)
 			throw new std.DomainError("Error on function returning.");

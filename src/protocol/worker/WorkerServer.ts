@@ -14,8 +14,8 @@ var g: IFeature = is_node()
 	? require("./internal/worker-server-polyfill")
 	: <any>window;
 
-export class WorkerServer<Listener extends object = {}> 
-	extends CommunicatorBase<Listener>
+export class WorkerServer<Provider extends object = {}> 
+	extends CommunicatorBase<Provider>
 {
 	/**
 	 * @hidden
@@ -25,9 +25,9 @@ export class WorkerServer<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
-	public constructor(listener: Listener = null)
+	public constructor(provider: Provider = null)
 	{
-		super(listener);
+		super(provider);
 
 		this.ready_ = false;
 		g.onmessage = this._Handle_message.bind(this);

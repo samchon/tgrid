@@ -97,12 +97,12 @@ export class WebAcceptor extends CommunicatorBase
 	 * 
 	 * Start listening data from the remote client. 
 	 * 
-	 * @param listener A controller provided for the remote client.
+	 * @param provider A provider for the remote client.
 	 */
-	public async listen<Listener extends object = {}>
-		(listener: Listener): Promise<void>
+	public async listen<Provider extends object = {}>
+		(provider: Provider): Promise<void>
 	{
-		this.listener_ = listener;
+		this.provider_ = provider;
 		if (this.listening_ === true)
 			return;
 		

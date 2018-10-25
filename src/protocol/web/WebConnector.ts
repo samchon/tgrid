@@ -16,9 +16,9 @@ var g: IFeature = is_node()
 	? require("./internal/websocket-polyfill")
 	: <any>window;
 
-export class WebConnector<Listener extends object = {}>
-	extends CommunicatorBase<Listener>
-	implements IConnector<WebConnector.State, Listener>
+export class WebConnector<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
+	implements IConnector<WebConnector.State, Provider>
 {
 	/**
 	 * @hidden
@@ -46,11 +46,11 @@ export class WebConnector<Listener extends object = {}>
 	/**
 	 * Initializer Constructor.
 	 * 
-	 * @param listener Listener controller for server.
+	 * @param provider A provider for server.
 	 */
-	public constructor(listener: Listener = null)
+	public constructor(provider: Provider = null)
 	{
-		super(listener);
+		super(provider);
 
 		this.socket_ = null;
 		this.cv_ = new ConditionVariable();

@@ -24,7 +24,7 @@ async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>, talk
 	let worker = new WorkerConnector();
 	await connect(worker);
 
-	await ICalculator.main(worker.getDriver<ICalculator>(), talk)
+	await ICalculator.main(worker.getController<ICalculator>(), talk)
 	await worker.close();
 }
 

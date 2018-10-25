@@ -5,12 +5,12 @@ import { InvalidArgument } from "tstl/exception/LogicError";
 import { Invoke, IFunction, IReturn } from "./Invoke";
 import { Promisify } from "./Promisify";
 
-export abstract class CommunicatorBase<Listener extends object = {}>
+export abstract class CommunicatorBase<Provider extends object = {}>
 {
 	/**
 	 * @hidden
 	 */
-	protected listener_: Listener;
+	protected provider_: Provider;
 
 	/**
 	 * @hidden
@@ -28,11 +28,11 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 	/**
 	 * Default Constructor.
 	 * 
-	 * @param listener A controller provided for the remote system.
+	 * @param provider A provider for the remote system.
 	 */
-	public constructor(listener: Listener = null)
+	public constructor(provider: Provider = null)
 	{
-		this.listener_ = listener;
+		this.provider_ = provider;
 		this.promises_ = new HashMap();
 	}
 
@@ -52,11 +52,11 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 	/* ----------------------------------------------------------------
 		DRIVER
 	---------------------------------------------------------------- */
-	public getDriver<Driver extends object>(): Promisify<Driver>
+	public getController<Controller extends object>(): Promisify<Controller>
 	{
-		return new Proxy<Promisify<Driver>>({} as Promisify<Driver>,
+		return new Proxy<Promisify<Controller>>({} as Promisify<Controller>,
 		{
-			get: (target: Promisify<Driver>, name: string) =>
+			get: (target: Promisify<Controller>, name: string) =>
 			{
 				return this._Proxy_func(name);
 			}
@@ -139,11 +139,11 @@ export abstract class CommunicatorBase<Listener extends object = {}>
 			//----
 			// FIND FUNCTION
 			//----
-			if (this.listener_ === null) // LISTENER MUST BE
-				throw new InvalidArgument("Listener is not specified yet.");
+			if (this.provider_ === null) // PROVIDER MUST BE
+				throw new InvalidArgument("Provider is not specified yet.");
 
 			// FIND FUNCTION (WITH THIS-ARG)
-			let func: Function = <any>this.listener_;
+			let func: Function = <any>this.provider_;
 			let thisArg: any = null;
 
 			let routes: string[] = invoke.name.split(".");
