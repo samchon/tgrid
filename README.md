@@ -6,8 +6,10 @@
 [![Chat on Gitter](https://badges.gitter.im/samchon/tgrid.svg)](https://gitter.im/samchon/tgrid?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **TGrid** is a tiny framework for *Grid Computing in TypeScript*, using such concepts.
-  - *ROC*: Remote Object Call
   - *RFC*: Remote Function Call
+  - *ROC*: Remote Object Call
+  - *OON*: Object Oriented Network
+    - Promise Pattern (`async` & `await`)
 
 Following paradigm of the **TGrid**, you can compose real-time network communication systems very easily. Consider that system nodes are correspondent with objects. All you have to do is just calling functions in those objects with a special symbol `await`.
 
