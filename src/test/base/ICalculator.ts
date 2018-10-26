@@ -1,9 +1,9 @@
 import * as std from "tstl";
 
-import { Promisify } from "../../base/Promisify";
+import { Driver } from "../../base/Driver";
 import { Calculator } from "./Calculator";
 
-export type ICalculator = Promisify<Calculator>;
+export type ICalculator = Driver<Calculator>;
 
 export namespace ICalculator
 {

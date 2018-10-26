@@ -3,7 +3,7 @@ import { Pair, make_pair } from "tstl/utility/Pair";
 import { InvalidArgument } from "tstl/exception/LogicError";
 
 import { Invoke, IFunction, IReturn } from "./Invoke";
-import { Promisify } from "./Promisify";
+import { Driver } from "./Driver";
 
 export abstract class CommunicatorBase<Provider extends object = {}>
 {
@@ -52,11 +52,11 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		DRIVER
 	---------------------------------------------------------------- */
-	public getController<Controller extends object>(): Promisify<Controller>
+	public getDriver<Controller extends object>(): Driver<Controller>
 	{
-		return new Proxy<Promisify<Controller>>({} as Promisify<Controller>,
+		return new Proxy<Driver<Controller>>({} as Driver<Controller>,
 		{
-			get: (target: Promisify<Controller>, name: string) =>
+			get: (target: Driver<Controller>, name: string) =>
 			{
 				return this._Proxy_func(name);
 			}

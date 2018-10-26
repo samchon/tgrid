@@ -54,7 +54,7 @@ async function main(): Promise<void>
     await connector.connect("ws://127.0.0.1:10101");
     await connector.wait();
 
-    let v = connector.getController<Vector<number>>();
+    let v = connector.getDriver<Vector<number>>();
     for (let i: number = 0; i < 5; ++i)
         await v.push_back(i);
 

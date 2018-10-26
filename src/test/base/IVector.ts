@@ -1,7 +1,7 @@
 import * as std from "tstl";
-import { Promisify } from "../../base/Promisify";
+import { Driver } from "../../base/Driver";
 
-export type IVector = Promisify<std.Vector<number>>;
+export type IVector = Driver<std.Vector<number>>;
 export namespace IVector
 {
 	export async function main(controller: IVector): Promise<void>
