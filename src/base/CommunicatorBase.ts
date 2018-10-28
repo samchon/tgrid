@@ -1,6 +1,6 @@
 import { HashMap } from "tstl/container/HashMap";
 import { Pair, make_pair } from "tstl/utility/Pair";
-import { InvalidArgument } from "tstl/exception/LogicError";
+import { DomainError, RuntimeError } from "tstl/exception";
 
 import { Invoke, IFunction, IReturn } from "./Invoke";
 import { Driver } from "./Driver";
@@ -39,12 +39,15 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	protected async destructor(): Promise<void>
+	protected async destructor(error: Error = null): Promise<void>
 	{
+		if (error === null)
+			throw new RuntimeError("Connection has been closed.");
+
 		for (let entry of this.promises_)
 		{
 			let reject: Function = entry.second.second;
-			reject();
+			reject(error);
 		}
 		this.promises_.clear();
 	}
@@ -140,7 +143,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			// FIND FUNCTION
 			//----
 			if (this.provider_ === null) // PROVIDER MUST BE
-				throw new InvalidArgument("Provider is not specified yet.");
+				throw new DomainError("Provider is not specified yet.");
 
 			// FIND FUNCTION (WITH THIS-ARG)
 			let func: Function = <any>this.provider_;
