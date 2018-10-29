@@ -37,7 +37,7 @@ export async function test_web(): Promise<void>
 			await ICalculator.main(<ICalculator>controller);
 		else
 			await IVector.main(<IVector>controller);
-
+		
 		await connector.close();
 	}
 
@@ -45,12 +45,12 @@ export async function test_web(): Promise<void>
 	await server.close();
 }
 
-export async function test_web_deny(): Promise<void>
+export async function test_web_reject(): Promise<void>
 {
 	let server = new WebServer();
 	await server.open(PORT, async acceptor =>
 	{
-		await acceptor.deny(404, "Unable to find the matched record.");
+		await acceptor.reject(404, "Unable to find the matched record.");
 		await acceptor.close();
 	});
 
@@ -68,5 +68,5 @@ export async function test_web_deny(): Promise<void>
 	await server.close();
 
 	if (!error)
-		throw new Error("Catching deny has failed.");
+		throw new Error("Catching reject has failed.");
 }

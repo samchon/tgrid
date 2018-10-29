@@ -32,6 +32,9 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.eraser_ = eraser;
 	}
 
+	/**
+	 * Close connection.
+	 */
 	public async close(): Promise<void>
 	{
 		// DESTRUCT & INFORM TO CLIENT
@@ -46,6 +49,9 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
+	/**
+	 * Accept connection.
+	 */
 	public async accept(): Promise<void>
 	{
 		this.port_.onmessage = this._Handle_message.bind(this);
@@ -54,9 +60,12 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_.postMessage("ACCEPT");
 	}
 
-	public async deny(): Promise<void>
+	/**
+	 * Reject connection.
+	 */
+	public async reject(): Promise<void>
 	{
-		this.port_.postMessage("DENY");
+		this.port_.postMessage("REJECT");
 
 		this.eraser_();
 		this.port_.close();

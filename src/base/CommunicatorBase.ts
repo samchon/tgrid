@@ -42,7 +42,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	protected async destructor(error: Error = null): Promise<void>
 	{
 		if (error === null)
-			throw new RuntimeError("Connection has been closed.");
+			error = new RuntimeError("Connection has been closed.");
 
 		for (let entry of this.promises_)
 		{
@@ -55,11 +55,16 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		DRIVER
 	---------------------------------------------------------------- */
+	/**
+	 * Get driver for remote controller.
+	 * 
+	 * @return A Driver for the remote Controller.
+	 */
 	public getDriver<Controller extends object>(): Driver<Controller>
 	{
 		return new Proxy<Driver<Controller>>({} as Driver<Controller>,
 		{
-			get: (target: Driver<Controller>, name: string) =>
+			get: ({}, name: string) =>
 			{
 				return this._Proxy_func(name);
 			}
@@ -76,7 +81,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			return this._Call_function(name, ...params);
 		},
 		{
-			get: (target: any, newName: string) =>
+			get: ({}, newName: string) =>
 			{
 				return this._Proxy_func(`${name}.${newName}`);
 			}

@@ -83,12 +83,12 @@ export class WebAcceptor extends CommunicatorBase
 		});
 	}
 
-	public deny(status: number, reason: string): Promise<void>
+	public reject(status?: number, reason?: string, extraHeaders?: object): Promise<void>
 	{
 		return new Promise(resolve =>
 		{
 			this.request_.on("requestRejected", resolve);
-			this.request_.reject(status, reason);
+			this.request_.reject(status, reason, extraHeaders);
 		});
 	}
 

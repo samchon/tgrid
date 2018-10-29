@@ -88,12 +88,15 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		});
 	}
 
+	/**
+	 * Close connection.
+	 */
 	public close(): Promise<void>
 	{
 		// 1. REQUEST CLOSE TO SERVER
 		// 2. DO CLOSE IN SERVER
 		// 3. RESOLVE
-		return new Promise((resolve, reject) =>
+		return new Promise(resolve =>
 		{
 			this.closer_ = resolve;
 			this.port_.postMessage("CLOSE");
@@ -103,6 +106,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public get state(): SharedWorkerConnector.State
 	{
 		return this.state_;
@@ -165,7 +171,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			this.state_ = SharedWorkerConnector.State.OPEN;
 			this.connector_.first();
 		}
-		else if (evt.data === "DENY")
+		else if (evt.data === "REJECT")
 		{
 			this.state_ = SharedWorkerConnector.State.CLOSED;
 			this.connector_.second(new RuntimeError("Denied by server."));

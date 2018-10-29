@@ -150,6 +150,9 @@ export class WebConnector<Provider extends object = {}>
 		return this.socket_.extensions;
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	public get state(): WebConnector.State
 	{
 		if (!this.socket_)

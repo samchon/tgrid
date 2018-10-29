@@ -93,6 +93,9 @@ export class WorkerConnector<Provider extends object = {}>
 		});
 	}
 
+	/**
+	 * Close worker connection.
+	 */
 	public close(): Promise<void>
 	{
 		// 1. REQUEST CLOSE TO SERVER
@@ -105,6 +108,14 @@ export class WorkerConnector<Provider extends object = {}>
 
 			this.worker_.postMessage("CLOSE");
 		});
+	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	public get state(): WorkerConnector.State
+	{
+		return this.state_;
 	}
 	
 	/* ----------------------------------------------------------------

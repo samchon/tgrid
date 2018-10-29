@@ -3,6 +3,7 @@ import * as http from "http";
 import * as https from "https";
 
 import { WebAcceptor } from "./WebAcceptor";
+import { DomainError } from "tstl/exception";
 
 export class WebServer
 {
@@ -97,6 +98,9 @@ export class WebServer
 		});
 	}
 
+	/**
+	 * Close server.
+	 */
 	public close(): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
@@ -104,7 +108,7 @@ export class WebServer
 			if (this.state_ !== WebServer.State.OPEN)
 			{
 				// SERVER IS NOT OPENED, OR CLOSED.
-				reject(new Error("Server is not opened."));
+				reject(new DomainError("Server is not opened."));
 				return;
 			}
 			
@@ -118,6 +122,19 @@ export class WebServer
 			});
 			this.server_.close();
 		});
+	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	/**
+	 * Get state.
+	 * 
+	 * @return Current state.
+	 */
+	public get state(): WebServer.State
+	{
+		return this.state_;
 	}
 }
 

@@ -35,14 +35,17 @@ export class Communicator<Provider extends object = {}>
 		this.ready_inspector_ = readyInspector;
 	}
 
-	public destory(): Promise<void>
+	public destory(error: Error = null): Promise<void>
 	{
-		return this.destructor();
+		return this.destructor(error);
 	}
 
 	/* ----------------------------------------------------------------
 		COMMUNICATIONS
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public sendData(invoke: Invoke): void
 	{
 		this.sender_(invoke);

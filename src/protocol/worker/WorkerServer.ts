@@ -33,6 +33,9 @@ export class WorkerServer<Provider extends object = {}>
 		g.onmessage = this._Handle_message.bind(this);
 	}
 
+	/**
+	 * Close server.
+	 */
 	public async close(): Promise<void>
 	{
 		// DESTRUCT & INFORM TO CLIENT

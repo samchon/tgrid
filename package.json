@@ -6,14 +6,14 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "compile": "tsc",
-    "clean": "node build/clean",
-    "build": "tsc && npm run bundle-worker && npm run test",
+    "compile": "tsc && npm run bundle-worker",
+    "build": "npm run compile && npm run test",
     "bundle-worker": "browserify test/protocol/instances/worker-server.js -o test/protocol/instances/worker-server.bundle.js",
+    "clean": "node build/clean",
     "test": "node test/main"
   },
   "dependencies": {
@@ -36,10 +36,13 @@
   "license": "BSD-3-Clause",
   "keywords": [
     "TGrid",
-    "typescript grid computing",
+    "typescript grid computing framework",
+    "real timet network communication",
     "RFC",
     "ROC",
+    "OON",
     "remote function call",
-    "remote object call"
+    "remote object call",
+    "object oriented network"
   ]
 }

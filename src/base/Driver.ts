@@ -1,5 +1,7 @@
 /**
- * Driver for controller.
+ * Driver for remote controller.
+ * 
+ * @tparam Controller A controller defining features provided from the remote system.
  */
 export type Driver<Controller extends object> = Promisify<Controller>;
 
