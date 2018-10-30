@@ -10,6 +10,7 @@ node_modules/
 build/
 src/
 test/
+bundle/
 
 *.log
 *.*ignore

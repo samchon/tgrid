@@ -1,4 +1,5 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { ICommunicator } from "../internal/ICommunicator";
 import { Invoke } from "../../base/Invoke";
 
 import { DomainError } from "tstl/exception";
@@ -12,15 +13,21 @@ import { is_node } from "tstl/utility/node";
  */
 var g: IFeature = is_node()
 	? require("./internal/worker-server-polyfill")
-	: <any>window;
+	: self;
 
 export class WorkerServer<Provider extends object = {}> 
 	extends CommunicatorBase<Provider>
+	implements ICommunicator
 {
 	/**
 	 * @hidden
 	 */
 	private ready_: boolean;
+
+	/**
+	 * @inheritdoc
+	 */
+	public handleClose: ()=>void;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -30,6 +37,8 @@ export class WorkerServer<Provider extends object = {}>
 		super(provider);
 
 		this.ready_ = false;
+		this.handleClose = null;
+
 		g.onmessage = this._Handle_message.bind(this);
 	}
 
@@ -38,11 +47,13 @@ export class WorkerServer<Provider extends object = {}>
 	 */
 	public async close(): Promise<void>
 	{
-		// DESTRUCT & INFORM TO CLIENT
+		// HANDLERS
 		await this.destructor();
-		g.postMessage("CLOSE");
-
+		if (this.handleClose)
+			this.handleClose();
+		
 		// DO CLOSE
+		g.postMessage("CLOSE");
 		g.close();
 	}
 

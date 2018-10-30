@@ -1,0 +1,40 @@
+const fs = require("fs");
+const browserify = require('browserify');
+
+function bundle(path, output)
+{
+	return new Promise((resolve, reject) =>
+	{
+		let b = browserify([path]);
+		b.bundle((err, src) =>
+		{
+			if (err)
+				reject(err);
+			else
+			{
+				fs.writeFile(output, src, (err) =>
+				{
+					if (err)
+						reject(err);
+					else
+						resolve();
+				});
+			}
+		});
+	});
+}
+
+async function main()
+{
+	const INSTANCES = 
+	[
+		"worker-server",
+		"worker-client",
+		"shared-worker-server",
+		"shared-worker-client",
+		"web-client"
+	];
+	for (let instance of INSTANCES)
+		await bundle(`test/protocol/browser/${instance}.js`, `bundle/${instance}.js`);
+}
+main();

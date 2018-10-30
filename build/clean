@@ -45,4 +45,8 @@ function iterate(path)
 		fs.rmdirSync(path);
 }
 
-iterate(__dirname + "/..");
+function main()
+{
+	iterate(__dirname + "/..");
+}
+main();

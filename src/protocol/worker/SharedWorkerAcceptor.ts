@@ -18,6 +18,11 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	 */
 	private listening_: boolean;
 
+	/**
+	 * @inheritDoc
+	 */
+	public handleClose: ()=>void;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -28,8 +33,12 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	{
 		super();
 
+		// ASSIGN MEMBER
 		this.port_ = port;
+
+		// HANDLERS
 		this.eraser_ = eraser;
+		this.handleClose = null;
 	}
 
 	/**
@@ -37,12 +46,15 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	 */
 	public async close(): Promise<void>
 	{
-		// DESTRUCT & INFORM TO CLIENT
+		// CALL HANDLERS
+		this.eraser_();
 		await this.destructor();
-		this.port_.postMessage("CLOSE");
+
+		if (this.handleClose)
+			this.handleClose();
 
 		// DO CLOSE
-		this.eraser_();
+		this.port_.postMessage("CLOSE");
 		this.port_.close();
 	}
 
@@ -81,7 +93,7 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		
 		// INFORM READY TO CLIENT
 		this.listening_ = true;
-		this.port_.postMessage("LISTENING");
+		this.port_.postMessage("PROVIDE");
 	}
 
 	/* ----------------------------------------------------------------

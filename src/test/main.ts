@@ -12,12 +12,11 @@ async function iterate(path: string): Promise<void>
 		
 		if (stat.isDirectory() === true)
 		{
-			await iterate(current_path);
+			if (file !== "browser")
+				await iterate(current_path);
 			continue;
 		}
 		else if (file.substr(-3) !== ".js" || current_path === PATH + "/main.js")
-			continue;
-		else if (current_path.indexOf("instances") !== -1)
 			continue;
 
 		let external: any = await import(current_path);

@@ -9,7 +9,7 @@ import { compile } from "./internal/web-compiler";
 
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>
-	implements IConnector<SharedWorkerConnector.State, Provider>
+	implements IConnector<SharedWorkerConnector.State>
 {
 	/**
 	 * @hidden
@@ -46,14 +46,16 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	---------------------------------------------------------------- */
 	public constructor(provider: Provider = null)
 	{
-		// ASSIGN MEMBERS
 		super(provider);
+
+		// ASSIGN MEMBERS
 		this.port_ = null;
 		this.state_ = SharedWorkerConnector.State.NONE;
-
-		// PROMISES
-		this.cv_ = new ConditionVariable();
 		this.server_is_listening_ = false;
+
+		// HANDLERS
+		this.cv_ = new ConditionVariable();
+		this.handleClose = null;
 	}
 
 	public compile(content: string): Promise<void>
@@ -117,6 +119,11 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/**
 	 * @inheritDoc
 	 */
+	public handleClose: ()=>void;
+
+	/**
+	 * @inheritDoc
+	 */
 	public wait(): Promise<void>;
 
 	/**
@@ -176,21 +183,34 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			this.state_ = SharedWorkerConnector.State.CLOSED;
 			this.connector_.second(new RuntimeError("Denied by server."));
 		}
-		else if (evt.data === "LISTENING")
+		else if (evt.data === "PROVIDE")
 		{
 			this.server_is_listening_ = true;
 			this.cv_.notify_all();
 		}
 		else if (evt.data === "CLOSE")
 		{
-			this.state_ = SharedWorkerConnector.State.CLOSED;
-			this.destructor().then(() =>
-			{
-				this.closer_();
-			});
+			this._Handle_close();
 		}
 		else
 			this.replyData(JSON.parse(evt.data));
+	}
+
+	/**
+	 * @hidden
+	 */
+	private _Handle_close(): void
+	{
+		// STATE AND PROMISE RETURN
+		this.state_ = SharedWorkerConnector.State.CLOSED;
+		this.destructor().then(() =>
+		{
+			this.closer_();
+		});
+
+		// CLOSE HANDLER
+		if (this.handleClose)
+			this.handleClose();
 	}
 }
 

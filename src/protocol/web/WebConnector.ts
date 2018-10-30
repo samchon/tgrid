@@ -1,4 +1,5 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
@@ -14,11 +15,11 @@ import { is_node } from "tstl/utility/node";
  */
 var g: IFeature = is_node()
 	? require("./internal/websocket-polyfill")
-	: <any>window;
+	: <any>self;
 
 export class WebConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements IConnector<WebConnector.State, Provider>
+	implements IConnector<WebConnector.State>, IWebCommunicator
 {
 	/**
 	 * @hidden
@@ -166,7 +167,14 @@ export class WebConnector<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		EVENT HANDLERS
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public handleClose: (code: number, reason: string) => void;
+
+	/**
+	 * @inheritDoc
+	 */
 	public handleError: (error: Error) => void;
 
 	/**
@@ -226,7 +234,7 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	private _Handle_message(evt: MessageEvent): void
 	{
-		if (evt.data === "LISTENING")
+		if (evt.data === "PROVIDE")
 		{
 			this.server_is_listening_ = true;
 			this.cv_.notify_all();

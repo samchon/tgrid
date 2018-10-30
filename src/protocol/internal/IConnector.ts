@@ -1,7 +1,7 @@
-import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { ICommunicator } from "./ICommunicator";
 
-export interface IConnector<State, Provider extends object>
-	extends CommunicatorBase<Provider>
+export interface IConnector<State>
+	extends ICommunicator
 {
 	/**
 	 * Get state.
@@ -11,12 +11,16 @@ export interface IConnector<State, Provider extends object>
 	readonly state: State
 
 	/**
-	 * Wait for server to provide.
+	 * Wait server to provide.
+	 * 
+	 * Wait server to specify its `Provider` permanently. 
 	 */
 	wait(): Promise<void>;
 
 	/**
-	 * Wait for server to provide or timeout.
+	 * Wait server to provide or timeout.
+	 * 
+	 * Wait server to specify its `Provider` for specified milliseconds.
 	 * 
 	 * @param ms The maximum milliseconds for waiting.
 	 * @return Whether awaken by completion or timeout.
@@ -24,7 +28,9 @@ export interface IConnector<State, Provider extends object>
 	wait(ms: number): Promise<boolean>;
 
 	/**
-	 * Wait for server to provide or time expiration. 
+	 * Wait server to provide or time expiration. 
+	 * 
+	 * Wait server to specify its `Provider` until time expiration.
 	 * 
 	 * @param at The maximum time point to wait.
 	 * @return Whether awaken by completion or time expiration.

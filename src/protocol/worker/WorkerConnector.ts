@@ -1,4 +1,5 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
 import { DomainError } from "tstl/exception";
@@ -10,9 +11,9 @@ import { is_node } from "tstl/utility/node";
 /**
  * @hidden
  */
-const g: IWorker = is_node()
+var g: IWorker = is_node()
 	? require("./internal/worker-connector-polyfill")
-	: <any>window;
+	: self;
 
 /**
  * @hidden
@@ -23,6 +24,7 @@ const Compiler: CompilerScope = is_node()
 
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
+	implements Pick<IConnector<WorkerConnector.State>, "state" | "handleClose">
 {
 	/**
 	 * @hidden
@@ -50,9 +52,11 @@ export class WorkerConnector<Provider extends object = {}>
 	public constructor(provider: Provider = null)
 	{
 		super(provider);
-
+		
+		// ASSIGN MEMBERS
 		this.worker_ = null;
 		this.state_ = WorkerConnector.State.NONE;
+		this.handleClose = null;
 	}
 
 	public async compile(content: string): Promise<void>
@@ -113,10 +117,18 @@ export class WorkerConnector<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public get state(): WorkerConnector.State
 	{
 		return this.state_;
 	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public handleClose: ()=>void;
 	
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
@@ -147,7 +159,7 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	protected _Handle_message(evt: MessageEvent): void
+	private _Handle_message(evt: MessageEvent): void
 	{
 		if (evt.data === "READY")
 		{
@@ -155,15 +167,26 @@ export class WorkerConnector<Provider extends object = {}>
 			this.connector_();
 		}
 		else if (evt.data === "CLOSE")
-		{
-			this.state_ = WorkerConnector.State.CLOSED;
-			this.destructor().then(() =>
-			{
-				this.closer_();
-			});
-		}
+			this._Handle_close();
 		else
 			this.replyData(JSON.parse(evt.data));
+	}
+
+	/**
+	 * @hidden
+	 */
+	private _Handle_close(): void
+	{
+		// STATE & PROMISE RETURN
+		this.state_ = WorkerConnector.State.CLOSED;
+		this.destructor().then(() =>
+		{
+			this.closer_();
+		});
+
+		// CALL HANDLER
+		if (this.handleClose)
+			this.handleClose();
 	}
 }
 

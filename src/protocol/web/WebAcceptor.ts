@@ -1,10 +1,12 @@
 import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { Invoke } from "../../base/Invoke";
+
 import { LogicError, RuntimeError } from "tstl/exception";
 
-export class WebAcceptor extends CommunicatorBase
+export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
 {
 	/**
 	 * @hidden
@@ -52,6 +54,13 @@ export class WebAcceptor extends CommunicatorBase
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
+	/**
+	 * Accept connection.
+	 * 
+	 * @param protocol 
+	 * @param allowOrigin 
+	 * @param cookies 
+	 */
 	public accept(
 			protocol?: string, 
 			allowOrigin?: string, 
@@ -83,6 +92,13 @@ export class WebAcceptor extends CommunicatorBase
 		});
 	}
 
+	/**
+	 * Reject connection.
+	 * 
+	 * @param status Status code.
+	 * @param reason Detailed reason to reject.
+	 * @param extraHeaders Extra headers if required.
+	 */
 	public reject(status?: number, reason?: string, extraHeaders?: object): Promise<void>
 	{
 		return new Promise(resolve =>
@@ -107,7 +123,7 @@ export class WebAcceptor extends CommunicatorBase
 			return;
 		
 		this.listening_ = true;
-		this.connection_.sendUTF("LISTENING");
+		this.connection_.sendUTF("PROVIDE");
 	}
 
 	/* ----------------------------------------------------------------
@@ -131,7 +147,14 @@ export class WebAcceptor extends CommunicatorBase
 			.toString();
 	}
 
-	public handleClose: (code: number, reason: string)=>void;
+	/**
+	 * @inheritDoc
+	 */
+	public handleClose: (code: number, reason: string) => void;
+
+	/**
+	 * @inheritDoc
+	 */
 	public handleError: (error: Error)=>void;
 
 	/* ----------------------------------------------------------------

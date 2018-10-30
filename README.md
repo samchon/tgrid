@@ -33,11 +33,12 @@ npm install --save tgrid
 import { Vector } from "tstl/container";
 import { WebServer } from "tgrid/protocol/web";
 
-function main(): void
+async function main(): Promise<void>
 {
     let server = new WebServer();
-    server.open(10101, async acceptor =>
+    await server.open(10101, async acceptor =>
     {
+        // accept connection & provide Vector
         await acceptor.accept();
         await acceptor.listen(new Vector<number>());
     });
@@ -52,18 +53,32 @@ import { WebConnector } from "tgrid/protocol/web";
 
 async function main(): Promise<void>
 {
+    //----
+    // PREPARE
+    //----
+    // do connect
     let connector = new WebConnector();
     await connector.connect("ws://127.0.0.1:10101");
+
+    // wait server to provide the Vector
     await connector.wait();
 
+    // get Driver<Controller>
     let v = connector.getDriver<Vector<number>>();
+
+    //----
+    // CALL FUNCTIONS IN THE REMOTE SYSTEM
+    //----
+    // insert elements
     for (let i: number = 0; i < 5; ++i)
         await v.push_back(i);
 
+    // access elements
     console.log("size:", await v.size());
     for (let i: number = 0; i < await v.size(); ++i)
         console.log("  element:", await v.at(i));
 
+    // close connection
     await connector.close();
 }
 main();

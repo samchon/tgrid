@@ -16,7 +16,8 @@ export class SharedWorkerServer
 	public constructor(cb: (acceptor: SharedWorkerAcceptor) => void | Promise<void>)
 	{
 		this.acceptors_ = new HashSet();
-		addEventListener("open", (evt: OpenEvent) =>
+
+		addEventListener("connect", (evt: OpenEvent) =>
 		{
 			let port: MessagePort = evt.ports[evt.ports.length - 1];
 			let acceptor = new AcceptorFactory(port, () =>
