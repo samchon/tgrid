@@ -5,7 +5,6 @@ import { Invoke } from "../../base/Invoke";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
-import { compile } from "./internal/web-compiler";
 
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>
@@ -56,11 +55,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		// HANDLERS
 		this.cv_ = new ConditionVariable();
 		this.handleClose = null;
-	}
-
-	public compile(content: string): Promise<void>
-	{
-		return this.connect(compile(content));
 	}
 
 	public connect(jsFile: string): Promise<void>

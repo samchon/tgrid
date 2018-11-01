@@ -69,7 +69,7 @@ export class WorkerConnector<Provider extends object = {}>
 			await Compiler.remove(path);
 		}
 		else
-			this.connect(Compiler.compile(content) as string);
+			await this.connect(Compiler.compile(content) as string);
 	}
 
 	public connect(jsFile: string): Promise<void>
