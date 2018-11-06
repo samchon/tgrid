@@ -34,7 +34,7 @@ npm run build
 #----
 # SPECIAL COMMANDS
 #----
-tsc # COMPILE ONLY
+npm run compile # COMPILE ONLY
 npm run test # TEST ONLY
 npm run clean # CLEAN COMPILED RESULTS UP
 ```
