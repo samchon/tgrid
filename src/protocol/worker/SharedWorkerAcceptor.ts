@@ -1,7 +1,10 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../base/Invoke";
 
-export class SharedWorkerAcceptor extends CommunicatorBase
+export class SharedWorkerAcceptor 
+	extends CommunicatorBase
+	implements IAcceptor
 {
 	/**
 	 * @hidden
@@ -58,6 +61,11 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_.close();
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: ()=>Promise<void>;
+
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
@@ -83,6 +91,9 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		this.port_.close();
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public async listen<Provider extends object>
 		(provider: Provider): Promise<void>
 	{
@@ -100,9 +111,9 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * @hidden
 	 */
-	public sendData(invoke: Invoke): void
+	protected sender(invoke: Invoke): void
 	{
 		this.port_.postMessage(JSON.stringify(invoke));
 	}
@@ -110,7 +121,12 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected readonly replier: (invoke: Invoke)=>void;
+
+	/**
+	 * @hidden
+	 */
+	protected inspector(): Error
 	{
 		return null;
 	}
@@ -123,6 +139,6 @@ export class SharedWorkerAcceptor extends CommunicatorBase
 		if (evt.data === "CLOSE")
 			this.close();
 		else
-			this.replyData(JSON.parse(evt.data));
+			this.replier(JSON.parse(evt.data));
 	}
 }

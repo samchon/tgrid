@@ -1,11 +1,8 @@
 import { CommunicatorBase } from "./CommunicatorBase";
-
-import { IProtocol } from "./IProtocol";
 import { Invoke } from "./Invoke";
 
 export class Communicator<Provider extends object = {}>
 	extends CommunicatorBase
-	implements IProtocol
 {
 	/**
 	 * @hidden
@@ -15,7 +12,7 @@ export class Communicator<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private ready_inspector_: ReadyInspector;
+	private inspector_: ReadyInspector;
 	
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
@@ -23,8 +20,8 @@ export class Communicator<Provider extends object = {}>
 	/**
 	 * Initializer Constructor.
 	 * 
-	 * @param sender A function sending data to remote system.
-	 * @param readyInspector A function returning error when network is not ready. If ready, returns `null`.
+	 * @param sender A function sending data to the remote system.
+	 * @param readyInspector A predicator function insepcts whether the *network communication* is ready. It must return null, if ready, otherwise *Error* object explaining why.
 	 * @param provider A provider for the remote system.
 	 */
 	public constructor(sender: Sender, readyInspector: ReadyInspector, provider: Provider = null)
@@ -32,33 +29,76 @@ export class Communicator<Provider extends object = {}>
 		super(provider);
 
 		this.sender_ = sender;
-		this.ready_inspector_ = readyInspector;
+		this.inspector_ = readyInspector;
 	}
 
+	/**
+	 * Destory the communicator.
+	 * 
+	 * A destory function should be called when the network communication has been closed. It would destroy all function calls in the remote system (via {@link `Driver<Controller>` getDriver}), which are not returned yet.
+	 * 
+	 * The *error* instance would be thrown to those function calls. If the disconnection is abnormal, then write the detailed reason why into the *error* instance.
+	 * 
+	 * @param error An error instance to be thrown to the unreturned functions.
+	 */
 	public destory(error: Error = null): Promise<void>
 	{
 		return this.destructor(error);
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: (error: Error) => Promise<void>;
+
 	/* ----------------------------------------------------------------
 		COMMUNICATIONS
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * Data Replier.
+	 * 
+	 * A function should be called when data has come from the remote system.
+	 * 
+	 * When you receive a message from the remote system, then parse the message with your special protocol and covert it to be an *Invoke* object. After the conversion, call this method.
+	 * 
+	 * @param invoke Structured data converted by your special protocol.
 	 */
-	public sendData(invoke: Invoke): void
+	public replyData(invoke: Invoke): void
 	{
-		this.sender_(invoke);
+		return this.replier(invoke);
 	}
 
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected sender(invoke: Invoke): void
 	{
-		return this.ready_inspector_();
+		return this.sender_(invoke);
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected replier(invoke: Invoke): void
+	{
+		return super.replier(invoke);
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected inspector(): Error
+	{
+		return this.inspector_();
 	}
 }
 
+/**
+ * @hidden
+ */
 type Sender = (invoke: Invoke) => void;
+
+/**
+ * @hidden
+ */
 type ReadyInspector = () => Error;

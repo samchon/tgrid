@@ -57,13 +57,18 @@ export class WorkerServer<Provider extends object = {}>
 		g.close();
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: ()=>Promise<void>;
+
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * @hidden
 	 */
-	public sendData(invoke: Invoke): void
+	protected sender(invoke: Invoke): void
 	{
 		g.postMessage(JSON.stringify(invoke));
 	}
@@ -71,7 +76,7 @@ export class WorkerServer<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected inspector(): Error
 	{
 		return this.ready_
 			? null
@@ -93,7 +98,7 @@ export class WorkerServer<Provider extends object = {}>
 			this.close();
 		}
 		else
-			this.replyData(JSON.parse(evt.data));
+			this.replier(JSON.parse(evt.data));
 	}
 }
 

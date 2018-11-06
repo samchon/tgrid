@@ -78,7 +78,17 @@ async function main(): Promise<void>
     for (let i: number = 0; i < await v.size(); ++i)
         console.log("  element:", await v.at(i));
 
-    // close connection
+    // catching exception is also possible
+    try 
+    {
+        await v.at(9999);
+    } 
+    catch (exp) 
+    {
+        console.log(`${exp.name}: "${exp.message}"`);
+    }
+
+    // close the connection
     await connector.close();
 }
 main();
@@ -91,6 +101,7 @@ main();
 >   element: 2
 >   element: 3
 >   element: 4
+> out_of_range: "Target index is greater than Vector's size."
 > ```
 
 

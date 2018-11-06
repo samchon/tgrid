@@ -133,6 +133,11 @@ export class WebConnector<Provider extends object = {}>
 		});
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: ()=>Promise<void>;
+
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -209,9 +214,9 @@ export class WebConnector<Provider extends object = {}>
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * @hidden
 	 */
-	public sendData(invoke: Invoke): void
+	protected sender(invoke: Invoke): void
 	{
 		this.socket_.send(JSON.stringify(invoke));
 	}
@@ -219,7 +224,12 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected readonly replier: (invoke: Invoke)=>void;
+
+	/**
+	 * @hidden
+	 */
+	protected inspector(): Error
 	{
 		if (this.socket_.readyState !== g.WebSocket.OPEN)
 			return new LogicError("Not connected.");
@@ -240,7 +250,7 @@ export class WebConnector<Provider extends object = {}>
 			this.cv_.notify_all();
 		}
 		else
-			this.replyData(JSON.parse(evt.data));
+			this.replier(JSON.parse(evt.data));
 	}
 
 	/**

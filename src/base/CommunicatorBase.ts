@@ -37,7 +37,13 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	}
 
 	/**
-	 * @hidden
+	 * The destructor.
+	 * 
+	 * It's a destructor function should be called when the network communication has been closed. It would destroy all function calls in the remote system (via {@link `Driver<Controller>` getDriver}), which are not returned yet.
+	 * 
+	 * The *error* instance would be thrown to those function calls. If the disconnection is abnormal, then write the detailed reason why into the *error* instance.
+	 * 
+	 * @param error An error instance to be thrown to the unreturned functions.
 	 */
 	protected async destructor(error: Error = null): Promise<void>
 	{
@@ -96,7 +102,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		return new Promise((resolve, reject) =>
 		{
 			// READY TO SEND ?
-			let error: Error = this._Is_ready();
+			let error: Error = this.inspector();
 			if (error)
 			{
 				reject(error);
@@ -113,21 +119,41 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 
 			// DO SEND WITH PROMISE
 			this.promises_.emplace(invoke.uid, make_pair(resolve, reject));
-			this.sendData(invoke);
+			this.sender(invoke);
 		});
 	}
 
 	/**
-	 * @hidden
+	 * Inspect ready to communicate.
+	 * 
+	 * A predicator method that inspects whether the *communication* is ready or not. Override this method to return *null* when be ready, otherwise return an *Error* object explaining why.
+	 * 
+	 * @return Returns *null*, if ready, otherwise *Error* object explainig why.
 	 */
-	protected abstract _Is_ready(): Error;
+	protected abstract inspector(): Error;
 
 	/* ----------------------------------------------------------------
 		COMMUNICATORS
 	---------------------------------------------------------------- */
-	public abstract sendData(invoke: Invoke): void;
+	/**
+	 * Data Sender.
+	 * 
+	 * A function sending data to the remote system. Override this method to send the *invoke* object to the remote system, as a structured data with your special protocol.
+	 * 
+	 * @param invoke Structured data to send.
+	 */
+	protected abstract sender(invoke: Invoke): void;
 
-	public replyData(invoke: Invoke): void
+	/**
+	 * Data Replier.
+	 * 
+	 * A function should be called when data has come from the remote system.
+	 * 
+	 * When you receive a message from the remote system, then parse the message with your special protocol and covert it to be an *Invoke* object. After the conversion, call this method.
+	 * 
+	 * @param invoke Structured data converted by your special protocol.
+	 */
+	protected replier(invoke: Invoke): void
 	{
 		if ((invoke as IFunction).name)
 			this._Handle_function(invoke as IFunction);
@@ -216,6 +242,6 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 
 		// RETURNS
 		let ret: IReturn = {uid: uid, success: flag, value: val};
-		this.sendData(ret);
+		this.sender(ret);
 	}
 }

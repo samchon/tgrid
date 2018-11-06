@@ -2,11 +2,14 @@ import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
+import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../base/Invoke";
 
 import { LogicError, RuntimeError } from "tstl/exception";
 
-export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
+export class WebAcceptor 
+	extends CommunicatorBase 
+	implements IWebCommunicator, IAcceptor
 {
 	/**
 	 * @hidden
@@ -50,6 +53,11 @@ export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
 				this.connection_.close();
 		});
 	}
+
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: ()=>Promise<void>;
 
 	/* ----------------------------------------------------------------
 		HANDSHAKES
@@ -109,13 +117,9 @@ export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
 	}
 
 	/**
-	 * Start listening.
-	 * 
-	 * Start listening data from the remote client. 
-	 * 
-	 * @param provider A provider for the remote client.
+	 * @inheritdoc
 	 */
-	public async listen<Provider extends object = {}>
+	public async listen<Provider extends object>
 		(provider: Provider): Promise<void>
 	{
 		this.provider_ = provider;
@@ -161,9 +165,9 @@ export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * @hidden
 	 */
-	public sendData(invoke: Invoke): void
+	protected sender(invoke: Invoke): void
 	{
 		this.connection_.sendUTF(JSON.stringify(invoke));
 	}
@@ -171,7 +175,12 @@ export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected readonly replier: (invoke: Invoke)=>void;
+
+	/**
+	 * @hidden
+	 */
+	protected inspector(): Error
 	{
 		if (!this.connection_)
 			return new LogicError("Not accepted.");
@@ -187,7 +196,7 @@ export class WebAcceptor extends CommunicatorBase implements IWebCommunicator
 	private _Handle_message(message: ws.IMessage): void
 	{
 		let invoke: Invoke = JSON.parse(message.utf8Data);
-		this.replyData(invoke);
+		this.replier(invoke);
 	}
 
 	/**

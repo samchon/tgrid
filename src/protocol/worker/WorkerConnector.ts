@@ -59,6 +59,11 @@ export class WorkerConnector<Provider extends object = {}>
 		this.handleClose = null;
 	}
 
+	/**
+	 * Connec to worker server with compilation.
+	 * 
+	 * @param content JS Source file to be server with compilation.
+	 */
 	public async compile(content: string): Promise<void>
 	{
 		if (Compiler.remove)
@@ -72,6 +77,11 @@ export class WorkerConnector<Provider extends object = {}>
 			await this.connect(Compiler.compile(content) as string);
 	}
 
+	/**
+	 * Connect to worker server.
+	 * 
+	 * @param jsFile JS File to be worker server.
+	 */
 	public connect(jsFile: string): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
@@ -114,6 +124,11 @@ export class WorkerConnector<Provider extends object = {}>
 		});
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: ()=>Promise<void>;
+
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -134,9 +149,9 @@ export class WorkerConnector<Provider extends object = {}>
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * @hidden
 	 */
-	public sendData(invoke: Invoke): void
+	protected sender(invoke: Invoke): void
 	{
 		this.worker_.postMessage(JSON.stringify(invoke));
 	}
@@ -144,7 +159,12 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected readonly replier: (invoke: Invoke)=>void;
+
+	/**
+	 * @hidden
+	 */
+	protected inspector(): Error
 	{
 		if (this.state_ === WorkerConnector.State.OPEN)
 			return null;
@@ -169,7 +189,7 @@ export class WorkerConnector<Provider extends object = {}>
 		else if (evt.data === "CLOSE")
 			this._Handle_close();
 		else
-			this.replyData(JSON.parse(evt.data));
+			this.replier(JSON.parse(evt.data));
 	}
 
 	/**

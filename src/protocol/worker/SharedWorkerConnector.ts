@@ -99,6 +99,11 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		});
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected readonly destructor: ()=>Promise<void>;
+
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -147,9 +152,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * @hidden
 	 */
-	public sendData(invoke: Invoke): void
+	protected sender(invoke: Invoke): void
 	{
 		this.port_.postMessage(JSON.stringify(invoke));
 	}
@@ -157,7 +162,12 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/**
 	 * @hidden
 	 */
-	protected _Is_ready(): Error
+	protected readonly replier: (invoke: Invoke)=>void;
+
+	/**
+	 * @hidden
+	 */
+	protected inspector(): Error
 	{
 		return null;
 	}
@@ -187,7 +197,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			this._Handle_close();
 		}
 		else
-			this.replyData(JSON.parse(evt.data));
+			this.replier(JSON.parse(evt.data));
 	}
 
 	/**
