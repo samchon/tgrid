@@ -173,7 +173,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			//----
 			// FIND FUNCTION
 			//----
-			if (this.provider_ === null) // PROVIDER MUST BE
+			if (!this.provider_) // PROVIDER MUST BE
 				throw new DomainError("Provider is not specified yet.");
 
 			// FIND FUNCTION (WITH THIS-ARG)

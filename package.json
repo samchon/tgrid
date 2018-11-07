@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.0.19",
+  "version": "0.0.20",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -36,7 +36,7 @@
   "bugs": {
     "url": "https://github.com/samchon/tgrid/issues"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "keywords": [
     "TGrid",
     "typescript grid computing framework",

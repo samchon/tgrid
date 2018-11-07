@@ -2,18 +2,8 @@ import { CommunicatorBase } from "./CommunicatorBase";
 import { Invoke } from "./Invoke";
 
 export class Communicator<Provider extends object = {}>
-	extends CommunicatorBase
+	extends CommunicatorBase<Provider>
 {
-	/**
-	 * @hidden
-	 */
-	private sender_: Sender;
-
-	/**
-	 * @hidden
-	 */
-	private inspector_: ReadyInspector;
-	
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
@@ -21,15 +11,15 @@ export class Communicator<Provider extends object = {}>
 	 * Initializer Constructor.
 	 * 
 	 * @param sender A function sending data to the remote system.
-	 * @param readyInspector A predicator function insepcts whether the *network communication* is ready. It must return null, if ready, otherwise *Error* object explaining why.
+	 * @param readyInspector A predicator function inspects whether the *network communication* is ready. It must return null, if ready, otherwise *Error* object explaining why.
 	 * @param provider A provider for the remote system.
 	 */
 	public constructor(sender: Sender, readyInspector: ReadyInspector, provider: Provider = null)
 	{
 		super(provider);
 
-		this.sender_ = sender;
-		this.inspector_ = readyInspector;
+		this.sendData = sender;
+		this.inspectReady = readyInspector;
 	}
 
 	/**
@@ -50,6 +40,29 @@ export class Communicator<Provider extends object = {}>
 	 * @hidden
 	 */
 	protected readonly destructor: (error: Error) => Promise<void>;
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	public get provider(): Provider
+	{
+		return this.provider_;
+	}
+
+	public set provider(obj: Provider)
+	{
+		this.provider_ = obj;
+	}
+
+	/**
+	 * A function sending data to the remote system.
+	 */
+	public sendData: Sender;
+
+	/**
+	 * A predicator inspects whether the *network communication* is ready.
+	 */
+	public inspectReady: ReadyInspector;
 
 	/* ----------------------------------------------------------------
 		COMMUNICATIONS
@@ -73,7 +86,7 @@ export class Communicator<Provider extends object = {}>
 	 */
 	protected sender(invoke: Invoke): void
 	{
-		return this.sender_(invoke);
+		return this.sendData(invoke);
 	}
 
 	/**
@@ -89,7 +102,7 @@ export class Communicator<Provider extends object = {}>
 	 */
 	protected inspector(): Error
 	{
-		return this.inspector_();
+		return this.inspectReady();
 	}
 }
 
