@@ -5,7 +5,7 @@ import { Calculator } from "../base/Calculator";
 import { ICalculator } from "../base/ICalculator";
 import { IVector } from "../base/IVector";
 
-const PORT: number = 10919;
+const PORT: number = 10101;
 
 export async function test_web(): Promise<void>
 {
