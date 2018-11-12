@@ -26,24 +26,16 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
 	/**
-	 * Default Constructor.
-	 * 
-	 * @param provider A provider for the remote system.
+	 * @hidden
 	 */
-	public constructor(provider: Provider = null)
+	protected constructor(provider: Provider = null)
 	{
 		this.provider_ = provider;
 		this.promises_ = new HashMap();
 	}
 
 	/**
-	 * The destructor.
-	 * 
-	 * It's a destructor function should be called when the network communication has been closed. It would destroy all function calls in the remote system (via {@link `Driver<Controller>` getDriver}), which are not returned yet.
-	 * 
-	 * The *error* instance would be thrown to those function calls. If the disconnection is abnormal, then write the detailed reason why into the *error* instance.
-	 * 
-	 * @param error An error instance to be thrown to the unreturned functions.
+	 * @hidden
 	 */
 	protected async destructor(error: Error = null): Promise<void>
 	{
@@ -124,11 +116,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	}
 
 	/**
-	 * Inspect ready to communicate.
-	 * 
-	 * A predicator method that inspects whether the *communication* is ready or not. Override this method to return *null* when be ready, otherwise return an *Error* object explaining why.
-	 * 
-	 * @return Returns *null*, if ready, otherwise *Error* object explainig why.
+	 * @hidden
 	 */
 	protected abstract inspector(): Error;
 
@@ -136,22 +124,12 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		COMMUNICATORS
 	---------------------------------------------------------------- */
 	/**
-	 * Data Sender.
-	 * 
-	 * A function sending data to the remote system. Override this method to send the *invoke* object to the remote system, as a structured data with your special protocol.
-	 * 
-	 * @param invoke Structured data to send.
+	 * @hidden
 	 */
 	protected abstract sender(invoke: Invoke): void;
 
 	/**
-	 * Data Replier.
-	 * 
-	 * A function should be called when data has come from the remote system.
-	 * 
-	 * When you receive a message from the remote system, then parse the message with your special protocol and covert it to be an *Invoke* object. After the conversion, call this method.
-	 * 
-	 * @param invoke Structured data converted by your special protocol.
+	 * @hidden
 	 */
 	protected replier(invoke: Invoke): void
 	{

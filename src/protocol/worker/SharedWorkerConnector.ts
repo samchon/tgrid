@@ -6,6 +6,8 @@ import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
+import { compile as _Compile } from "./internal/web-compiler";
+
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>
 	implements IConnector<SharedWorkerConnector.State>
@@ -99,11 +101,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -158,11 +155,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	{
 		this.port_.postMessage(JSON.stringify(invoke));
 	}
-
-	/**
-	 * @hidden
-	 */
-	protected readonly replier: (invoke: Invoke)=>void;
 
 	/**
 	 * @hidden
@@ -228,5 +220,10 @@ export namespace SharedWorkerConnector
 		CLOSING,
 		CLOSED,
 		DENIED
+	}
+	
+	export function compile(content: string): string
+	{
+		return _Compile(content);
 	}
 }

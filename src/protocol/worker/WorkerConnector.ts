@@ -124,11 +124,6 @@ export class WorkerConnector<Provider extends object = {}>
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -155,11 +150,6 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		this.worker_.postMessage(JSON.stringify(invoke));
 	}
-
-	/**
-	 * @hidden
-	 */
-	protected readonly replier: (invoke: Invoke)=>void;
 
 	/**
 	 * @hidden
