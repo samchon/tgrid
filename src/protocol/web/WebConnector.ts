@@ -133,11 +133,6 @@ export class WebConnector<Provider extends object = {}>
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -220,11 +215,6 @@ export class WebConnector<Provider extends object = {}>
 	{
 		this.socket_.send(JSON.stringify(invoke));
 	}
-
-	/**
-	 * @hidden
-	 */
-	protected readonly replier: (invoke: Invoke)=>void;
 
 	/**
 	 * @hidden

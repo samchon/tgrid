@@ -49,11 +49,6 @@ export class WorkerServer<Provider extends object = {}>
 		g.close();
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */

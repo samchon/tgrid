@@ -1,5 +1,5 @@
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
-import { HashSet } from "tstl/container";
+import { HashSet } from "tstl/container/HashSet";
 
 export class SharedWorkerServer
 {

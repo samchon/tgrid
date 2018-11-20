@@ -61,11 +61,6 @@ export class SharedWorkerAcceptor
 		this.port_.close();
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
@@ -117,12 +112,7 @@ export class SharedWorkerAcceptor
 	{
 		this.port_.postMessage(JSON.stringify(invoke));
 	}
-
-	/**
-	 * @hidden
-	 */
-	protected readonly replier: (invoke: Invoke)=>void;
-
+	
 	/**
 	 * @hidden
 	 */

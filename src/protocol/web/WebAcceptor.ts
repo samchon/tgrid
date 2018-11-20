@@ -54,11 +54,6 @@ export class WebAcceptor
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
@@ -171,11 +166,6 @@ export class WebAcceptor
 	{
 		this.connection_.sendUTF(JSON.stringify(invoke));
 	}
-
-	/**
-	 * @hidden
-	 */
-	protected readonly replier: (invoke: Invoke)=>void;
 
 	/**
 	 * @hidden

@@ -58,7 +58,7 @@ export class WebServer
 	 * Open server.
 	 * 
 	 * @param port Port number to listen.
-	 * @param cb Callback function called whenever client connects.
+	 * @param cb Callback function whenever client connects.
 	 */
 	public open(port: number, cb: (acceptor: WebAcceptor) => void | Promise<void>): Promise<void>
 	{
@@ -150,6 +150,9 @@ export namespace WebServer
 	}
 }
 
+/**
+ * @hidden
+ */
 const AcceptorFactory:
 {
 	new(request: ws.request): WebAcceptor;

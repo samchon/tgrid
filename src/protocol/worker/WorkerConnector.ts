@@ -2,7 +2,7 @@ import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/LogicError";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -55,7 +55,9 @@ export class WorkerConnector<Provider extends object = {}>
 		
 		// ASSIGN MEMBERS
 		this.worker_ = null;
+		this.connector_ = null;
 		this.closers_ = [];
+
 		this.state_ = WorkerConnector.State.NONE;
 	}
 
@@ -124,11 +126,6 @@ export class WorkerConnector<Provider extends object = {}>
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: ()=>Promise<void>;
-
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
@@ -161,11 +158,6 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		this.worker_.postMessage(JSON.stringify(invoke));
 	}
-
-	/**
-	 * @hidden
-	 */
-	protected readonly replier: (invoke: Invoke)=>void;
 
 	/**
 	 * @hidden
@@ -207,10 +199,10 @@ export class WorkerConnector<Provider extends object = {}>
 		this.state_ = WorkerConnector.State.CLOSED;
 		this.destructor().then(() =>
 		{
-			// CLOSE OR JOIN(s)
+			// CALL CLOSERS
 			for (let closer of this.closers_)
 				closer();
-			
+
 			// CLEAR CLOSERS
 			this.closers_ = [];
 		});
