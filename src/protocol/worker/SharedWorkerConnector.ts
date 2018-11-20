@@ -3,7 +3,7 @@ import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { RuntimeError } from "tstl/exception";
+import { RuntimeError } from "tstl/exception/RuntimeError";
 import { Pair } from "tstl/utility/Pair";
 
 import { compile as _Compile } from "./internal/web-compiler";
