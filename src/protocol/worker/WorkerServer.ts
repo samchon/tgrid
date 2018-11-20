@@ -2,7 +2,6 @@ import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { ICommunicator } from "../internal/ICommunicator";
 import { Invoke } from "../../base/Invoke";
 
-import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -20,11 +19,6 @@ export class WorkerServer<Provider extends object = {}>
 	implements ICommunicator
 {
 	/**
-	 * @hidden
-	 */
-	private ready_: boolean;
-
-	/**
 	 * @inheritdoc
 	 */
 	public handleClose: ()=>void;
@@ -36,9 +30,7 @@ export class WorkerServer<Provider extends object = {}>
 	{
 		super(provider);
 
-		this.ready_ = false;
 		this.handleClose = null;
-
 		g.onmessage = this._Handle_message.bind(this);
 	}
 
@@ -78,9 +70,7 @@ export class WorkerServer<Provider extends object = {}>
 	 */
 	protected inspector(): Error
 	{
-		return this.ready_
-			? null
-			: new DomainError("Not ready yet.");
+		return null;
 	}
 
 	/**
@@ -89,14 +79,9 @@ export class WorkerServer<Provider extends object = {}>
 	private _Handle_message(evt: MessageEvent): void
 	{
 		if (evt.data === "READY")
-		{
 			g.postMessage("READY");
-			this.ready_ = true;
-		}
 		else if (evt.data === "CLOSE")
-		{
 			this.close();
-		}
 		else
 			this.replier(JSON.parse(evt.data));
 	}

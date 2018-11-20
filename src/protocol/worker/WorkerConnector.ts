@@ -24,7 +24,7 @@ const Compiler: CompilerScope = is_node()
 
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements Pick<IConnector<WorkerConnector.State>, "state" | "handleClose">
+	implements Pick<IConnector<WorkerConnector.State>, "state">
 {
 	/**
 	 * @hidden
@@ -34,17 +34,17 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private state_: WorkerConnector.State;
-
-	/**
-	 * @hidden
-	 */
 	private connector_: ()=>void;
 
 	/**
 	 * @hidden
 	 */
-	private closer_: ()=>void;
+	private closers_: Array<()=>void>;
+
+	/**
+	 * @hidden
+	 */
+	private state_: WorkerConnector.State;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -55,8 +55,8 @@ export class WorkerConnector<Provider extends object = {}>
 		
 		// ASSIGN MEMBERS
 		this.worker_ = null;
+		this.closers_ = [];
 		this.state_ = WorkerConnector.State.NONE;
-		this.handleClose = null;
 	}
 
 	/**
@@ -117,7 +117,7 @@ export class WorkerConnector<Provider extends object = {}>
 		// 3. RESOLVE
 		return new Promise(resolve =>
 		{
-			this.closer_ = resolve;
+			this.closers_.push(resolve);
 			this.state_ = WorkerConnector.State.CLOSING;
 
 			this.worker_.postMessage("CLOSE");
@@ -141,9 +141,15 @@ export class WorkerConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * @inheritDoc
+	 * Join worker.
 	 */
-	public handleClose: ()=>void;
+	public join(): Promise<void>
+	{
+		return new Promise(resolve =>
+		{
+			this.closers_.push(resolve);
+		});
+	}
 	
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
@@ -201,12 +207,13 @@ export class WorkerConnector<Provider extends object = {}>
 		this.state_ = WorkerConnector.State.CLOSED;
 		this.destructor().then(() =>
 		{
-			this.closer_();
+			// CLOSE OR JOIN(s)
+			for (let closer of this.closers_)
+				closer();
+			
+			// CLEAR CLOSERS
+			this.closers_ = [];
 		});
-
-		// CALL HANDLER
-		if (this.handleClose)
-			this.handleClose();
 	}
 }
 
