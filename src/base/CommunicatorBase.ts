@@ -1,5 +1,6 @@
+import { Vector } from "tstl/container/Vector";
 import { HashMap } from "tstl/container/HashMap";
-import { Pair, make_pair } from "tstl/utility/Pair";
+import { Pair } from "tstl/utility/Pair";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 import { Invoke, IFunction, IReturn } from "./Invoke";
@@ -22,6 +23,11 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	 */
 	private promises_: HashMap<number, Pair<Function, Function>>;
 
+	/**
+	 * @hidden
+	 */
+	private joiners_: Vector<Pair<Function, Function>>;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
@@ -31,7 +37,9 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	protected constructor(provider: Provider = null)
 	{
 		this.provider_ = provider;
+
 		this.promises_ = new HashMap();
+		this.joiners_ = new Vector();
 	}
 
 	/**
@@ -39,15 +47,38 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	 */
 	protected async destructor(error: Error = null): Promise<void>
 	{
-		if (error === null)
-			error = new RuntimeError("Connection has been closed.");
-
+		// REJECT UNRETURNED FUNCTIONS
+		let rejectError: Error = error 
+			? error 
+			: new RuntimeError("Connection has been closed.");
+		
 		for (let entry of this.promises_)
 		{
 			let reject: Function = entry.second.second;
-			reject(error);
+			reject(rejectError);
 		}
+
+		// RESOLVE JOINERS
+		for (let pair of this.joiners_)
+			if (error == null)
+				pair.first();
+			else
+				pair.second(error);
+
+		// CLEAR PROMISES
 		this.promises_.clear();
+		this.joiners_.clear();
+	}
+
+	/**
+	 * Join connection.
+	 */
+	public join(): Promise<void>
+	{
+		return new Promise((resolve, reject) =>
+		{
+			this.joiners_.push_back(new Pair(resolve, reject));
+		});
 	}
 
 	/* ----------------------------------------------------------------
@@ -110,7 +141,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			};
 
 			// DO SEND WITH PROMISE
-			this.promises_.emplace(invoke.uid, make_pair(resolve, reject));
+			this.promises_.emplace(invoke.uid, new Pair(resolve, reject));
 			this.sender(invoke);
 		});
 	}

@@ -2,7 +2,7 @@ import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
-import { DomainError } from "tstl/exception/LogicError";
+import { LogicError } from "tstl/exception/LogicError";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -39,11 +39,6 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private closers_: Array<()=>void>;
-
-	/**
-	 * @hidden
-	 */
 	private state_: WorkerConnector.State;
 
 	/* ----------------------------------------------------------------
@@ -56,7 +51,6 @@ export class WorkerConnector<Provider extends object = {}>
 		// ASSIGN MEMBERS
 		this.worker_ = null;
 		this.connector_ = null;
-		this.closers_ = [];
 
 		this.state_ = WorkerConnector.State.NONE;
 	}
@@ -110,20 +104,26 @@ export class WorkerConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Close worker connection.
+	 * Close connection.
 	 */
-	public close(): Promise<void>
+	public async close(): Promise<void>
 	{
-		// 1. REQUEST CLOSE TO SERVER
-		// 2. DO CLOSE IN SERVER
-		// 3. RESOLVE
-		return new Promise(resolve =>
-		{
-			this.closers_.push(resolve);
-			this.state_ = WorkerConnector.State.CLOSING;
+		// VALIDATION
+		if (this.state !== WorkerConnector.State.OPEN)
+			throw new LogicError("Not conneced.");
 
-			this.worker_.postMessage("CLOSE");
-		});
+		//----
+		// CLOSE WITH JOIN
+		//----
+		// PROMISE RETURN
+		let ret: Promise<void> = this.join();
+
+		// REQUEST CLOSE TO SERVER
+		this.state_ = WorkerConnector.State.CLOSING;
+		this.worker_.postMessage("CLOSE");
+
+		// LAZY RETURN
+		await ret;
 	}
 
 	/* ----------------------------------------------------------------
@@ -135,17 +135,6 @@ export class WorkerConnector<Provider extends object = {}>
 	public get state(): WorkerConnector.State
 	{
 		return this.state_;
-	}
-
-	/**
-	 * Join worker.
-	 */
-	public join(): Promise<void>
-	{
-		return new Promise(resolve =>
-		{
-			this.closers_.push(resolve);
-		});
 	}
 	
 	/* ----------------------------------------------------------------
@@ -167,11 +156,11 @@ export class WorkerConnector<Provider extends object = {}>
 		if (this.state_ === WorkerConnector.State.OPEN)
 			return null;
 		else if (this.state_ === WorkerConnector.State.NONE)
-			return new DomainError("Connect first.");
+			return new LogicError("Connect first.");
 		else if (this.state_ === WorkerConnector.State.CONNECTING)
-			return new DomainError("Connecting.");
+			return new LogicError("Connecting.");
 		else if (this.state_ === WorkerConnector.State.CLOSED)
-			return new DomainError("The connection has been closed.");
+			return new LogicError("The connection has been closed.");
 	}
 
 	/**
@@ -197,15 +186,7 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		// STATE & PROMISE RETURN
 		this.state_ = WorkerConnector.State.CLOSED;
-		this.destructor().then(() =>
-		{
-			// CALL CLOSERS
-			for (let closer of this.closers_)
-				closer();
-
-			// CLEAR CLOSERS
-			this.closers_ = [];
-		});
+		this.destructor();
 	}
 }
 

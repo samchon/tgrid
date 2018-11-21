@@ -1,6 +1,4 @@
-import { ICommunicator } from "./ICommunicator";
-
-export interface IAcceptor extends ICommunicator
+export interface IAcceptor
 {
 	/**
 	 * Start listening.

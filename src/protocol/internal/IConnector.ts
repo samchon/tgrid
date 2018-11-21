@@ -1,7 +1,4 @@
-import { ICommunicator } from "./ICommunicator";
-
 export interface IConnector<State>
-	extends ICommunicator
 {
 	/**
 	 * Get state.
