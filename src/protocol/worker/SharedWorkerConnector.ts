@@ -3,7 +3,7 @@ import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { RuntimeError } from "tstl/exception/RuntimeError";
+import { LogicError, RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
 import { compile as _Compile } from "./internal/web-compiler";
@@ -37,11 +37,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	private connector_: Pair<()=>void, (error: Error)=>void>;
 
-	/**
-	 * @hidden
-	 */
-	private closer_: ()=>void;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -56,7 +51,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 
 		// HANDLERS
 		this.cv_ = new ConditionVariable();
-		this.handleClose = null;
 	}
 
 	public connect(jsFile: string): Promise<void>
@@ -89,16 +83,21 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/**
 	 * Close connection.
 	 */
-	public close(): Promise<void>
+	public async close(): Promise<void>
 	{
-		// 1. REQUEST CLOSE TO SERVER
-		// 2. DO CLOSE IN SERVER
-		// 3. RESOLVE
-		return new Promise(resolve =>
-		{
-			this.closer_ = resolve;
-			this.port_.postMessage("CLOSE");
-		});
+		// VALIDATION
+		if (this.state !== SharedWorkerConnector.State.OPEN)
+			throw new LogicError("Not conneced.");
+
+		//----
+		// CLOSE WITH JOIN
+		//----
+		// REQUEST CLOSE TO SERVER
+		let ret: Promise<void> = this.join();
+		this.port_.postMessage("CLOSE");
+
+		// LAZY RETURN
+		await ret;
 	}
 
 	/* ----------------------------------------------------------------
@@ -111,11 +110,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	{
 		return this.state_;
 	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public handleClose: ()=>void;
 
 	/**
 	 * @inheritDoc
@@ -197,16 +191,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	private _Handle_close(): void
 	{
-		// STATE AND PROMISE RETURN
+		// STATE & PROMISE RETURN
 		this.state_ = SharedWorkerConnector.State.CLOSED;
-		this.destructor().then(() =>
-		{
-			this.closer_();
-		});
-
-		// CLOSE HANDLER
-		if (this.handleClose)
-			this.handleClose();
+		this.destructor();
 	}
 }
 

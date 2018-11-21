@@ -21,11 +21,6 @@ export class SharedWorkerAcceptor
 	 */
 	private listening_: boolean;
 
-	/**
-	 * @inheritDoc
-	 */
-	public handleClose: ()=>void;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -38,10 +33,7 @@ export class SharedWorkerAcceptor
 
 		// ASSIGN MEMBER
 		this.port_ = port;
-
-		// HANDLERS
 		this.eraser_ = eraser;
-		this.handleClose = null;
 	}
 
 	/**
@@ -52,9 +44,6 @@ export class SharedWorkerAcceptor
 		// CALL HANDLERS
 		this.eraser_();
 		await this.destructor();
-
-		if (this.handleClose)
-			this.handleClose();
 
 		// DO CLOSE
 		this.port_.postMessage("CLOSE");

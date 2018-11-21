@@ -1,7 +1,6 @@
 import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../base/CommunicatorBase";
-import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../base/Invoke";
 
@@ -9,7 +8,7 @@ import { LogicError, RuntimeError } from "tstl/exception";
 
 export class WebAcceptor 
 	extends CommunicatorBase 
-	implements IWebCommunicator, IAcceptor
+	implements IAcceptor
 {
 	/**
 	 * @hidden
@@ -20,11 +19,6 @@ export class WebAcceptor
 	 * @hidden
 	 */
 	private connection_: ws.connection;
-
-	/**
-	 * @hidden
-	 */
-	private closer_: ()=>void;
 
 	/**
 	 * @hidden
@@ -42,16 +36,29 @@ export class WebAcceptor
 		super();
 		
 		this.request_ = request;
+		this.connection_ = null;
 	}
 
-	public close(): Promise<void>
+	/**
+	 * Close connection.
+	 */
+	public async close(): Promise<void>
 	{
-		return new Promise((resolve) =>
-		{
-			this.closer_ = resolve;
-			if (this.connection_)
-				this.connection_.close();
-		});
+		// VALIDATIONS
+		if (this.connection_ === null)
+			throw new LogicError("Not accepted.");
+		else if (!this.connection_.connected)
+			throw new RuntimeError("Not connected.");
+
+		//----
+		// CLOSE WITH JOIN
+		//----
+		// DO CLOSE
+		let ret: Promise<void> = this.join();
+		this.connection_.close();
+
+		// LAZY RETURN
+		await ret;
 	}
 
 	/* ----------------------------------------------------------------
@@ -76,7 +83,6 @@ export class WebAcceptor
 			this.request_.on("requestAccepted", connection =>
 			{
 				this.connection_ = connection;
-				this.connection_.on("error", this._Handle_error.bind(this));
 				this.connection_.on("close", this._Handle_close.bind(this));
 				this.connection_.on("message", this._Handle_message.bind(this));
 
@@ -146,16 +152,6 @@ export class WebAcceptor
 			.toString();
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public handleClose: (code: number, reason: string) => void;
-
-	/**
-	 * @inheritDoc
-	 */
-	public handleError: (error: Error)=>void;
-
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
@@ -192,28 +188,10 @@ export class WebAcceptor
 	/**
 	 * @hidden
 	 */
-	private _Handle_error(error: Error): void
-	{
-		if (this.handleError)
-			this.handleError(error);
-	}
-
-	/**
-	 * @hidden
-	 */
-	private _Handle_close(code: number, reason: string): void
+	private _Handle_close({}: number, {}: string): void
 	{
 		// DESTRUCT UNRETURNED FUNCTIONS
-		this.destructor().then(() =>
-		{
-			// CLOSD BY SERVER ?
-			if (this.closer_)
-				this.closer_();
-			
-			// CUSTOM CLOSE HANDLER
-			if (this.handleClose)
-				this.handleClose(code, reason);
-		});
+		this.destructor();
 	}
 }
 

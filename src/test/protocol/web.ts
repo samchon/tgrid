@@ -40,8 +40,6 @@ export async function test_web(): Promise<void>
 		
 		await connector.close();
 	}
-
-	// CLOSE SERVER TOO
 	await server.close();
 }
 
@@ -51,7 +49,6 @@ export async function test_web_reject(): Promise<void>
 	await server.open(PORT, async acceptor =>
 	{
 		await acceptor.reject(404, "Unable to find the matched record.");
-		await acceptor.close();
 	});
 
 	let connector = new WebConnector();

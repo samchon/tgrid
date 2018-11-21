@@ -1,5 +1,4 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
-import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";
 
@@ -19,7 +18,7 @@ var g: IFeature = is_node()
 
 export class WebConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements IConnector<WebConnector.State>, IWebCommunicator
+	implements IConnector<WebConnector.State>
 {
 	/**
 	 * @hidden
@@ -35,11 +34,6 @@ export class WebConnector<Provider extends object = {}>
 	 * @hidden
 	 */
 	private server_is_listening_: boolean;
-
-	/**
-	 * @hidden
-	 */
-	private closer_: ()=>void;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -118,19 +112,21 @@ export class WebConnector<Provider extends object = {}>
 	 * @param code Closing code.
 	 * @param reason Reason why.
 	 */
-	public close(code?: number, reason?: string): Promise<void>
+	public async close(code?: number, reason?: string): Promise<void>
 	{
-		return new Promise((resolve, reject) =>
-		{
-			if (this.state !== WebConnector.State.OPEN)
-			{
-				reject(new LogicError("Not conneced."));
-				return;
-			}
+		// VALIDATION
+		if (this.state !== WebConnector.State.OPEN)
+			throw new LogicError("Not conneced.");
+		
+		//----
+		// CLOSE WITH JOIN
+		//----
+		// DO CLOSE
+		let ret: Promise<void> = this.join();
+		this.socket_.close(code, reason);
 
-			this.closer_ = resolve;
-			this.socket_.close(code, reason);
-		});
+		// LAZY RETURN
+		await ret;
 	}
 
 	/* ----------------------------------------------------------------
@@ -158,8 +154,6 @@ export class WebConnector<Provider extends object = {}>
 	{
 		if (!this.socket_)
 			return WebConnector.State.NONE;
-		else if (this.closer_)
-			return WebConnector.State.CLOSING;
 		else
 			return this.socket_.readyState;
 	}
@@ -167,16 +161,6 @@ export class WebConnector<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		EVENT HANDLERS
 	---------------------------------------------------------------- */
-	/**
-	 * @inheritDoc
-	 */
-	public handleClose: (code: number, reason: string) => void;
-
-	/**
-	 * @inheritDoc
-	 */
-	public handleError: (error: Error) => void;
-
 	/**
 	 * @inheritDoc
 	 */
@@ -246,31 +230,17 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_error(evt: ErrorEvent): void
+	private _Handle_error({}: ErrorEvent): void
 	{
-		if (this.handleError)
-			this.handleError(evt.error);
+		// NOT IMPLEMENTED YET
 	}
 
 	/**
 	 * @hidden
 	 */
-	private _Handle_close(event: CloseEvent): void
+	private _Handle_close({}: CloseEvent): void
 	{
-		// DESTRUCT UNRETURNED FUNCTIONS
-		this.destructor().then(() =>
-		{
-			// CLOSD BY SERVER ?
-			if (this.closer_)
-			{
-				this.closer_();
-				this.closer_ = null;
-			}
-			
-			// CUSTOM CLOSE HANDLER
-			if (this.handleClose)
-				this.handleClose(event.code, event.reason);
-		});
+		this.destructor();
 	}
 }
 

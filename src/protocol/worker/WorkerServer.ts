@@ -1,5 +1,4 @@
 import { CommunicatorBase } from "../../base/CommunicatorBase";
-import { ICommunicator } from "../internal/ICommunicator";
 import { Invoke } from "../../base/Invoke";
 
 import { is_node } from "tstl/utility/node";
@@ -16,13 +15,7 @@ var g: IFeature = is_node()
 
 export class WorkerServer<Provider extends object = {}> 
 	extends CommunicatorBase<Provider>
-	implements ICommunicator
 {
-	/**
-	 * @inheritdoc
-	 */
-	public handleClose: ()=>void;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -30,7 +23,6 @@ export class WorkerServer<Provider extends object = {}>
 	{
 		super(provider);
 
-		this.handleClose = null;
 		g.onmessage = this._Handle_message.bind(this);
 	}
 
@@ -41,8 +33,6 @@ export class WorkerServer<Provider extends object = {}>
 	{
 		// HANDLERS
 		await this.destructor();
-		if (this.handleClose)
-			this.handleClose();
 		
 		// DO CLOSE
 		g.postMessage("CLOSE");
