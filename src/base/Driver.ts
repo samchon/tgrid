@@ -4,6 +4,7 @@
  * @tparam Controller A controller defining features provided from the remote system.
  */
 export type Driver<Controller extends object> = Promisify<Controller>;
+export var Driver = Proxy;
 
 /**
  * Promisify an object type.

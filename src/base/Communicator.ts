@@ -36,14 +36,12 @@ export class Communicator<Provider extends object = {}>
 		return this.destructor(error);
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected readonly destructor: (error: Error) => Promise<void>;
-
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
+	/**
+	 * A provider for the remote system.
+	 */
 	public get provider(): Provider
 	{
 		return this.provider_;
