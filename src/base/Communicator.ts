@@ -31,7 +31,7 @@ export class Communicator<Provider extends object = {}>
 	 * 
 	 * @param error An error instance to be thrown to the unreturned functions.
 	 */
-	public destory(error: Error = null): Promise<void>
+	public destory(error?: Error): Promise<void>
 	{
 		return this.destructor(error);
 	}

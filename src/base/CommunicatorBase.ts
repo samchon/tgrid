@@ -1,6 +1,6 @@
-import { Vector } from "tstl/container/Vector";
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
+import { ConditionVariable } from "../utils/ConditionVariable";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 import { Invoke, IFunction, IReturn } from "./Invoke";
@@ -26,7 +26,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private joiners_: Vector<Pair<Function, Function>>;
+	private joiners_: ConditionVariable;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
@@ -39,13 +39,13 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		this.provider_ = provider;
 
 		this.promises_ = new HashMap();
-		this.joiners_ = new Vector();
+		this.joiners_ = new ConditionVariable();
 	}
 
 	/**
 	 * @hidden
 	 */
-	protected async destructor(error: Error = null): Promise<void>
+	protected async destructor(error?: Error): Promise<void>
 	{
 		// REJECT UNRETURNED FUNCTIONS
 		let rejectError: Error = error 
@@ -59,26 +59,44 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		}
 
 		// RESOLVE JOINERS
-		for (let pair of this.joiners_)
-			if (error == null)
-				pair.first();
-			else
-				pair.second(error);
-
+		this.joiners_.notify_all(error);
+		
 		// CLEAR PROMISES
 		this.promises_.clear();
-		this.joiners_.clear();
 	}
 
+	/* ----------------------------------------------------------------
+		EVENT HANDLERS
+	---------------------------------------------------------------- */
 	/**
 	 * Join connection.
 	 */
-	public join(): Promise<void>
+	public join(): Promise<void>;
+
+	/**
+	 * Join connection or timeout.
+	 * 
+	 * @param ms The maximum milliseconds for joining.
+	 * @return Whether awaken by disconnection or timeout.
+	 */
+	public join(ms: number): Promise<boolean>;
+
+	/**
+	 * Join connection or time expiration.
+	 * 
+	 * @param at The maximum time point to join.
+	 * @return Whether awaken by disconnection or time expiration.
+	 */
+	public join(at: Date): Promise<boolean>;
+
+	public join(param?: number | Date): Promise<void|boolean>
 	{
-		return new Promise((resolve, reject) =>
-		{
-			this.joiners_.push_back(new Pair(resolve, reject));
-		});
+		if (param === undefined)
+			return this.joiners_.wait();
+		else if (param instanceof Date)
+			return this.joiners_.wait_until(param);
+		else
+			return this.joiners_.wait_for(param);
 	}
 
 	/* ----------------------------------------------------------------
