@@ -1,6 +1,6 @@
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
-import { ConditionVariable } from "../utils/ConditionVariable";
+import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 import { Invoke, IFunction, IReturn } from "./Invoke";
@@ -59,7 +59,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		}
 
 		// RESOLVE JOINERS
-		this.joiners_.notify_all(error);
+		this.joiners_.notify_all();
 		
 		// CLEAR PROMISES
 		this.promises_.clear();
