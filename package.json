@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.1.0-dev.20181127",
+  "version": "0.1.0-dev.20181129",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -14,7 +14,8 @@
     "build": "npm run compile && npm run test",
     "bundle": "node build/bundle",
     "clean": "node build/clean",
-    "test": "node test/main"
+    "test": "node test/main",
+    "api": "node build/api"
   },
   "dependencies": {
     "tstl": "^2.0.13",
@@ -26,6 +27,7 @@
     "@types/sharedworker": "0.0.28",
     "@types/websocket": "0.0.40",
     "browserify": "^16.2.3",
+    "mv": "^2.1.1",
     "whatwg-fetch": "^3.0.0"
   },
   "homepage": "https://github.com/samchon/tgrid#readme",

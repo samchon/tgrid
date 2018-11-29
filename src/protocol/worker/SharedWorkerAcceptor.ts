@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.protocol.worker */
+//================================================================
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../base/Invoke";

@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.base */
+//================================================================
 export type Invoke = IFunction | IReturn;
 
 export interface IFunction<Params extends any[] = any[]>
@@ -14,6 +17,9 @@ export interface IReturn<T = any>
 	value: T;
 }
 
+/**
+ * @hiden
+ */
 interface IBase
 {
 	uid: number;

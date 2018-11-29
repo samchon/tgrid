@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.protocol.web */
+//================================================================
 import { CommunicatorBase } from "../../base/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../base/Invoke";

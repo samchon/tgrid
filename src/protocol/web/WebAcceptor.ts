@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.protocol.web */
+//================================================================
 import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../base/CommunicatorBase";

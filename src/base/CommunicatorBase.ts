@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.base */
+//================================================================
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";

@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.protocol.worker */
+//================================================================
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 import { HashSet } from "tstl/container/HashSet";
 
