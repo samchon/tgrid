@@ -1,2 +1,12 @@
-export import base = require("./base");
-export import protocol = require("./protocol");
+//================================================================ 
+/** @module tgrid */
+//================================================================
+/**
+ * Basic objects.
+ */
+export import basic = require("./basic");
+
+/**
+ * Provided protocols.
+ */
+export import protocols = require("./protocols");

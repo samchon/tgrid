@@ -35,6 +35,6 @@ async function main()
 		"web-client"
 	];
 	for (let instance of INSTANCES)
-		await bundle(`test/protocol/browser/${instance}.js`, `bundle/${instance}.js`);
+		await bundle(`test/protocols/browser/${instance}.js`, `bundle/${instance}.js`);
 }
 main();

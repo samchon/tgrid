@@ -1,6 +1,6 @@
 import * as std from "tstl";
 
-import { WebServer, WebConnector } from "../../protocol/web";
+import { WebServer, WebConnector } from "../../protocols/web";
 import { Latch } from "./Latch";
 
 const PORT: number = 10101;
