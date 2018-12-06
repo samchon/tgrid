@@ -31,7 +31,7 @@ npm install --save tgrid
 #### `example/vector/server.ts`
 ```typescript
 import { Vector } from "tstl/container";
-import { WebServer } from "tgrid/protocol/web";
+import { WebServer } from "tgrid.protocols/web";
 
 async function main(): Promise<void>
 {
@@ -49,7 +49,7 @@ main();
 #### `example/vector/client.ts`
 ```typescript
 import { Vector } from "tstl/container";
-import { WebConnector } from "tgrid/protocol/web";
+import { WebConnector } from "tgrid.protocols/web";
 
 async function main(): Promise<void>
 {

@@ -18,7 +18,7 @@
     "api": "node build/api"
   },
   "dependencies": {
-    "tstl": "^2.0.13",
+    "tstl": "^2.0.14",
     "websocket": "^1.0.28"
   },
   "devDependencies": {

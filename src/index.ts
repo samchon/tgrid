@@ -7,6 +7,6 @@
 export import basic = require("./basic");
 
 /**
- * Provided protocol.
+ * Provided protocols.
  */
-export import protocol = require("./protocol");
+export import protocols = require("./protocols");
