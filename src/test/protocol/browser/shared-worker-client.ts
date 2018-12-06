@@ -1,7 +1,7 @@
 import { sleep_for } from "tstl/thread";
 
 import { SharedWorkerConnector } from "../../../protocol/worker";
-import { ICalculator } from "../../base/ICalculator";
+import { ICalculator } from "../../internal/ICalculator";
 
 window.onload = async () =>
 {

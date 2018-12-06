@@ -1,5 +1,5 @@
 import { SharedWorkerServer } from "../../../protocol/worker";
-import { Calculator } from "../../base/Calculator";
+import { Calculator } from "../../internal/Calculator";
 
 /// chrome://inspect/#workers
 async function main(): Promise<void>

@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.base */
+/** @module tgrid.basic */
 //================================================================
 /**
  * Driver for remote controller.
@@ -17,14 +17,14 @@ export var Driver = Proxy;
  *   - object: promisifies recursively (`O` -> `Promisify<O>`).
  *   - atomic value: be ignored (be `never` type).
  * 
- * @tparam Controller An object type to be promisied.
+ * @tparam Instance An object type to be promisied.
  */
-export type Promisify<Controller extends object> =
+export type Promisify<Instance extends object> =
 {
-	[P in keyof Controller]: Controller[P] extends (...args: any[]) => any
-		? PromisifyFunc<Controller[P]>
-		: Controller[P] extends object
-			? Promisify<Controller[P]>
+	[P in keyof Instance]: Instance[P] extends (...args: any[]) => any
+		? PromisifyFunc<Instance[P]>
+		: Instance[P] extends object
+			? Promisify<Instance[P]>
 			: never;
 }
 

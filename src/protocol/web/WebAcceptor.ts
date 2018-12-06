@@ -3,9 +3,9 @@
 //================================================================
 import * as ws from "websocket";
 
-import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../base/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { LogicError, RuntimeError } from "tstl/exception";
 

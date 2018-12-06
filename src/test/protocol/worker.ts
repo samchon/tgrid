@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
 import { WorkerConnector } from "../../protocol/worker/WorkerConnector";
-import { ICalculator } from "../base/ICalculator";
+import { ICalculator } from "../internal/ICalculator";
 
 export function test_worker_connect(): Promise<void>
 {

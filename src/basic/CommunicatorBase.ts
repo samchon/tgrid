@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.base */
+/** @module tgrid.basic */
 //================================================================
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
@@ -157,8 +157,8 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			let invoke: IFunction =
 			{
 				uid: ++CommunicatorBase.SEQUENCE,
-				name: name,
-				params: params
+				listener: name,
+				parameters: params
 			};
 
 			// DO SEND WITH PROMISE
@@ -185,7 +185,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	 */
 	protected replier(invoke: Invoke): void
 	{
-		if ((invoke as IFunction).name)
+		if ((invoke as IFunction).listener)
 			this._Handle_function(invoke as IFunction);
 		else
 			this._Handle_return(invoke as IReturn);
@@ -210,7 +210,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			let func: Function = <any>this.provider_;
 			let thisArg: any = null;
 
-			let routes: string[] = invoke.name.split(".");
+			let routes: string[] = invoke.listener.split(".");
 			for (let name of routes)
 			{
 				thisArg = func;
@@ -221,7 +221,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			// RETURN VALUE
 			//----
 			// CALL FUNCTION
-			let ret: any = func.apply(thisArg, invoke.params);
+			let ret: any = func.apply(thisArg, invoke.parameters);
 
 			// PROMISE | ATOMIC
 			if (ret && ret.then instanceof Function) // Async

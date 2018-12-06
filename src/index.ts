@@ -4,7 +4,7 @@
 /**
  * Basic objects.
  */
-export import base = require("./base");
+export import basic = require("./basic");
 
 /**
  * Provided protocol.

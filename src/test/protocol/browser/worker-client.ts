@@ -1,7 +1,7 @@
 import "whatwg-fetch";
 
 import { WorkerConnector } from "../../../protocol/worker";
-import { ICalculator } from "../../base/ICalculator";
+import { ICalculator } from "../../internal/ICalculator";
 
 async function get_source(): Promise<string>
 {

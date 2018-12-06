@@ -1,5 +1,5 @@
 import { WorkerServer } from "../../../protocol/worker/WorkerServer";
-import { Calculator } from "../../base/Calculator";
+import { Calculator } from "../../internal/Calculator";
 
 function main(): void
 {

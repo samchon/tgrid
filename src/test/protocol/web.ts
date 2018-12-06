@@ -1,9 +1,9 @@
 import * as std from "tstl";
 
 import { WebServer, WebConnector } from "../../protocol/web";
-import { Calculator } from "../base/Calculator";
-import { ICalculator } from "../base/ICalculator";
-import { IVector } from "../base/IVector";
+import { Calculator } from "../internal/Calculator";
+import { ICalculator } from "../internal/ICalculator";
+import { IVector } from "../internal/IVector";
 
 const PORT: number = 10101;
 

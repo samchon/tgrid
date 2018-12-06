@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocol.worker */
 //================================================================
-import { CommunicatorBase } from "../../base/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../base/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { LogicError } from "tstl/exception/LogicError";
 import { is_node } from "tstl/utility/node";

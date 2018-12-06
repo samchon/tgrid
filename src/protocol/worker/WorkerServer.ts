@@ -1,8 +1,8 @@
 //================================================================ 
 /** @module tgrid.protocol.worker */
 //================================================================
-import { CommunicatorBase } from "../../base/CommunicatorBase";
-import { Invoke } from "../../base/Invoke";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
 
