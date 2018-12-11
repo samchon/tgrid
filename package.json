@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.1.0-dev.20181206",
+  "version": "0.1.0-dev.20181211",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -18,7 +18,7 @@
     "api": "node build/api"
   },
   "dependencies": {
-    "tstl": "^2.0.14",
+    "tstl": "^2.1.0-dev.20181212",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
@@ -48,6 +48,10 @@
     "OON",
     "remote function call",
     "remote object call",
-    "object oriented network"
+    "object oriented network",
+    "web socket",
+    "worker",
+    "shared worker",
+    "thread"
   ]
 }

@@ -19,21 +19,36 @@ export var Driver = Proxy;
  * 
  * @tparam Instance An object type to be promisied.
  */
-export type Promisify<Instance extends object> =
-{
-	[P in keyof Instance]: Instance[P] extends (...args: any[]) => any
-		? PromisifyFunc<Instance[P]>
-		: Instance[P] extends object
+export type Promisify<Instance extends object> = 
+	// IS FUNCTION?
+	Instance extends (...args: any[]) => any
+		? Instance extends (...args: infer Params) => infer Ret
+			? Ret extends Promise<any>
+				? (...args: Params) => Ret
+				: (...args: Params) => Promise<Ret>
+			: never
+	: 
+	{ // IS OBJECT?
+		[P in keyof Instance]: Instance[P] extends object
 			? Promisify<Instance[P]>
 			: never;
-}
+	};
 
-/**
- * @hidden
- */
-type PromisifyFunc<T extends (...args: any[]) => any> =
-	T extends (...args: infer Params) => infer Ret
-		? Ret extends Promise<any>
-			? (...args: Params) => Ret
-			: (...args: Params) => Promise<Ret>
-		: never;
+// export type Promisify2<Instance extends object> = 
+// 	Instance extends (...args: any[]) => any
+// 		? PromisifyFunction<Instance>
+// 		: PromisifyObject<Instance>;
+
+// type PromisifyObject<Instance extends object> = 
+// {
+// 	[P in keyof Instance]: Instance[P] extends object
+// 		? Promisify<Instance[P]>
+// 		: never;
+// };
+
+// type PromisifyFunction<Instance extends (...args: any[]) => any> =
+// 	Instance extends (...args: infer Params) => infer Ret
+// 		? Ret extends Promise<any>
+// 			? (...args: Params) => Ret
+// 			: (...args: Params) => Promise<Ret>
+// 		: never;

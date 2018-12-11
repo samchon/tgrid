@@ -34,11 +34,16 @@ export async function test_web(): Promise<void>
 		await connector.wait();
 
 		// SET DRIVER AND TEST BY CALCULATOR PROCESS
-		let driver: Driver<ICalculator | IVector> = connector.getDriver();
 		if (path === "calculator")
-			await ICalculator.main(driver as Driver<ICalculator>);
+		{
+			let driver: Driver<ICalculator> = connector.getDriver<ICalculator>();
+			await ICalculator.main(driver);
+		}
 		else
-			await IVector.main(driver as Driver<IVector>);
+		{
+			let driver: Driver<IVector> = connector.getDriver<IVector>();
+			await IVector.main(driver);
+		}
 		
 		await connector.close();
 	}
