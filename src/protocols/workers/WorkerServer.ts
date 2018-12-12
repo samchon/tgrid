@@ -5,6 +5,7 @@ import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
+import { URLVariables } from "../../utils/URLVariables";
 
 //----
 // CAPSULIZATION
@@ -16,16 +17,28 @@ var g: IFeature = is_node()
 	? require("./internal/worker-server-polyfill")
 	: self;
 
-export class WorkerServer<Provider extends object = {}> 
-	extends CommunicatorBase<Provider>
+export class WorkerServer 
+	extends CommunicatorBase
 {
+	private args_: string[];
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
-	public constructor(provider: Provider = null)
+	/**
+	 * Default Constructor.
+	 */
+	public constructor()
 	{
-		super(provider);
+		super();
+	}
 
+	/**
+	 * Open server.
+	 */
+	public async open<Provider extends object>(provider: Provider): Promise<void>
+	{
+		this.provider_ = provider;
 		g.onmessage = this._Handle_message.bind(this);
 	}
 
@@ -40,6 +53,27 @@ export class WorkerServer<Provider extends object = {}>
 		// DO CLOSE
 		g.postMessage("CLOSE");
 		g.close();
+	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	/**
+	 * Arguments delivered from the connector.
+	 */
+	public get arguments(): string[]
+	{
+		if (this.args_ === undefined)
+			if (is_node())
+				this.args_ = global.process.argv.slice(2);
+			else
+			{
+				let vars: URLVariables = new URLVariables(self.location.href);
+				this.args_ = vars.has("__m_pArgs")
+					? JSON.parse(vars.get("__m_pArgs"))
+					: [];
+			}
+		return this.args_;
 	}
 
 	/* ----------------------------------------------------------------

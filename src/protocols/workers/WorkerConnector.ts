@@ -14,16 +14,9 @@ import { is_node } from "tstl/utility/node";
 /**
  * @hidden
  */
-var g: IWorker = is_node()
-	? require("./internal/worker-connector-polyfill")
-	: self;
-
-/**
- * @hidden
- */
 const Compiler: CompilerScope = is_node()
-	? require("./internal/node-compiler")
-	: require("./internal/web-compiler");
+	? require("./internal/node-worker")
+	: require("./internal/web-worker");
 
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
@@ -63,25 +56,26 @@ export class WorkerConnector<Provider extends object = {}>
 	 * 
 	 * @param content JS Source file to be server with compilation.
 	 */
-	public async compile(content: string): Promise<void>
+	public async compile(content: string, ...args: string[]): Promise<void>
 	{
 		if (Compiler.remove)
 		{
 			let path: string = await Compiler.compile(content);
 
-			await this.connect(path);
+			await this.connect(path, ...args);
 			await Compiler.remove(path);
 		}
 		else
-			await this.connect(Compiler.compile(content) as string);
+			await this.connect(<string>Compiler.compile(content), ...args);
 	}
 
 	/**
 	 * Connect to worker server.
 	 * 
 	 * @param jsFile JS File to be worker server.
+	 * @param args Arguments to deliver.
 	 */
-	public connect(jsFile: string): Promise<void>
+	public connect(jsFile: string, ...args: string[]): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -91,7 +85,7 @@ export class WorkerConnector<Provider extends object = {}>
 				this.state_ = WorkerConnector.State.CONNECTING;
 
 				// DO CONNECT
-				this.worker_ = new g.Worker(jsFile);
+				this.worker_ = Compiler.execute(jsFile, ...args);
 				this.worker_.onmessage = this._Handle_message.bind(this);
 
 				// GO RETURN
@@ -208,19 +202,9 @@ export namespace WorkerConnector
 /**
  * @hidden
  */
-interface IWorker
-{
-	Worker: 
-	{
-		new(jsFile: string): Worker;
-	};
-}
-
-/**
- * @hidden
- */
 interface CompilerScope
 {
 	compile(content: string): string | Promise<string>;
+	execute(jsFile: string, ...args: string[]): Worker;
 	remove?(path: string): Promise<void>;
 }

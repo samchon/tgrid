@@ -15,7 +15,7 @@ async function get_source(): Promise<string>
 window.onload = async () =>
 {
 	let worker = new WorkerConnector();
-	await worker.compile(await get_source());
+	await worker.compile(await get_source(), "first", "second");
 
 	await ICalculator.main(worker.getDriver<ICalculator>(), true);
 	await worker.close();

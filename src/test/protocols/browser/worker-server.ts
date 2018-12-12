@@ -1,8 +1,12 @@
 import { WorkerServer } from "../../../protocols/workers/WorkerServer";
 import { Calculator } from "../../internal/Calculator";
 
-function main(): void
+async function main(): Promise<void>
 {
-	new WorkerServer(new Calculator());
+	let server = new WorkerServer();
+	if (server.arguments.pop() !== "second")
+		throw new Error("Error on WorkerServer.arguments");
+
+	await server.open(new Calculator());
 }
 main();

@@ -5,7 +5,9 @@ import { Calculator } from "../../internal/Calculator";
 async function main(): Promise<void>
 {
 	let i: number = 0;
-	new SharedWorkerServer(async acceptor =>
+	let server = new SharedWorkerServer();
+	
+	await server.open(async acceptor =>
 	{
 		console.log(++i, "th client has connected.");
 

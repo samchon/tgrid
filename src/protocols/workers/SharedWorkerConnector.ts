@@ -9,7 +9,7 @@ import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { LogicError, RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
-import { compile as _Compile } from "./internal/web-compiler";
+import { compile as _Compile } from "./internal/web-worker";
 
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>

@@ -12,14 +12,20 @@ export class SharedWorkerServer
 	private acceptors_: HashSet<SharedWorkerAcceptor>;
 
 	/**
-	 * Initializer Constructor.
+	 * Default Constructor.
+	 */
+	public constructor()
+	{
+		this.acceptors_ = new HashSet();
+	}
+
+	/**
+	 * Open server.
 	 * 
 	 * @param cb Callback function called whenever client connects.
 	 */
-	public constructor(cb: (acceptor: SharedWorkerAcceptor) => void | Promise<void>)
+	public async open(cb: (acceptor: SharedWorkerAcceptor) => any): Promise<void>
 	{
-		this.acceptors_ = new HashSet();
-
 		addEventListener("connect", (evt: OpenEvent) =>
 		{
 			let port: MessagePort = evt.ports[evt.ports.length - 1];
