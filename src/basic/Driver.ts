@@ -21,7 +21,7 @@ export var Driver = Proxy;
  */
 export type Promisify<Instance extends object> = 
 	// IS FUNCTION?
-	Instance extends (...args: any[]) => any
+	Instance extends Function
 		? Instance extends (...args: infer Params) => infer Ret
 			? Ret extends Promise<any>
 				? (...args: Params) => Ret
