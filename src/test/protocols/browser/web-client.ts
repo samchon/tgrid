@@ -1,5 +1,6 @@
 import { WebConnector } from "../../../protocols/web";
 import { ICalculator } from "../../internal/ICalculator";
+import { complete } from "./internal";
 
 window.onload = async () =>
 {
@@ -9,4 +10,6 @@ window.onload = async () =>
 
 	await ICalculator.main(connector.getDriver<ICalculator>(), true);
 	await connector.close();
+
+	complete();
 };

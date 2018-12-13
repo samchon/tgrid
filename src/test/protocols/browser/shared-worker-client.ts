@@ -1,7 +1,6 @@
-import { sleep_for } from "tstl/thread";
-
 import { SharedWorkerConnector } from "../../../protocols/workers";
 import { ICalculator } from "../../internal/ICalculator";
+import { complete } from "./internal";
 
 window.onload = async () =>
 {
@@ -10,8 +9,7 @@ window.onload = async () =>
 	await worker.wait();
 
 	await ICalculator.main(worker.getDriver<ICalculator>(), true);
-
-	console.log("Disconnected after 5 seconds later.");
-	await sleep_for(5000);
 	await worker.close();
+
+	complete();
 };

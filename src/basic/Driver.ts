@@ -26,7 +26,7 @@ export type Promisify<Instance extends object> =
 			? Ret extends Promise<any>
 				? (...args: Params) => Ret
 				: (...args: Params) => Promise<Ret>
-			: never
+			: (...args: any[]) => Promise<any>
 	: 
 	{ // IS OBJECT?
 		[P in keyof Instance]: Instance[P] extends object
