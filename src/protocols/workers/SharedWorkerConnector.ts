@@ -60,6 +60,26 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	{
 		return new Promise((resolve, reject) => 
 		{
+			//----
+			// INSPECTOR
+			//----
+			if (this.port_ && this.state !== SharedWorkerConnector.State.CLOSED)
+			{
+				let err: Error;
+				if (this.state_ === SharedWorkerConnector.State.CONNECTING)
+					err = new LogicError("On connecting.");
+				else if (this.state_ === SharedWorkerConnector.State.OPEN)
+					err = new LogicError("Already connected.");
+				else
+					err = new LogicError("Closing.");
+
+				reject(err);
+				return;
+			}
+
+			//----
+			// CONNECTOR
+			//----
 			try
 			{
 				// SET STATE -> CONNECTING
@@ -208,8 +228,7 @@ export namespace SharedWorkerConnector
 		CONNECTING,
 		OPEN,
 		CLOSING,
-		CLOSED,
-		DENIED
+		CLOSED
 	}
 	
 	export function compile(content: string): string

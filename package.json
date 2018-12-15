@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.1.0-dev.20181213",
+  "version": "0.1.0-dev.20181215",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -14,11 +14,13 @@
     "build": "npm run compile && npm run test",
     "bundle": "node build/bundle",
     "clean": "node build/clean",
-    "test": "node test/main",
+    "test": "npm run test-node && npm run test-browser",
+    "test-node": "node test/node",
+    "test-browser": "node test/browser",
     "api": "node build/api"
   },
   "dependencies": {
-    "tstl": "^2.1.0-dev.20181213",
+    "tstl": "^2.1.0",
     "websocket": "^1.0.28"
   },
   "devDependencies": {

@@ -65,7 +65,9 @@ export class WebConnector<Provider extends object = {}>
 	{
 		return new Promise((resolve, reject) =>
 		{
+			//----
 			// INSPECTOR
+			//----
 			if (this.socket_ && this.state !== WebConnector.State.CLOSED)
 			{
 				let err: Error;
@@ -80,6 +82,9 @@ export class WebConnector<Provider extends object = {}>
 				return;	
 			}
 
+			//----
+			// CONNECTOR
+			//----
 			// OPEN A SOCKET
 			try
 			{

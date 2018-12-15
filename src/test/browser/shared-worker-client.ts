@@ -1,5 +1,5 @@
-import { SharedWorkerConnector } from "../../../protocols/workers";
-import { ICalculator } from "../../internal/ICalculator";
+import { SharedWorkerConnector } from "../../protocols/workers";
+import { ICalculator } from "../internal/ICalculator";
 import { complete } from "./internal";
 
 window.onload = async () =>

@@ -6,4 +6,5 @@ before_install:
 install:
   - npm install
 script:
-  - npm run build
+  - npm run compile
+  - npm run test-node

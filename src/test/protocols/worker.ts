@@ -7,7 +7,7 @@ export function test_worker_connect(): Promise<void>
 {
 	return _Test_worker(worker =>
 	{
-		return worker.connect(__dirname + "/browser/worker-server.js", "first", "second");
+		return worker.connect(__dirname + "/../browser/worker-server.js", "first", "second");
 	});
 }
 
@@ -15,7 +15,7 @@ export function test_worker_compile(): Promise<void>
 {
 	return _Test_worker(worker =>
 	{
-		return worker.compile(fs.readFileSync("bundle/worker-server.js", "utf8"), "first", "second");
+		return worker.compile(fs.readFileSync(__dirname + "/../../bundle/worker-server.js", "utf8"), "first", "second");
 	});
 }
 

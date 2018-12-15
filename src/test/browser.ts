@@ -24,7 +24,7 @@ async function _Paginate(browser: puppeteer.Browser, url: string): Promise<void>
 	await _Test_page(page);
 }
 
-export async function test_browser(): Promise<void>
+async function main(): Promise<void>
 {
 	//----
 	// PREPARE SERVER & BROWSER
@@ -32,7 +32,7 @@ export async function test_browser(): Promise<void>
 	let server = new HttpServer();
 	server = server.listen
 	({
-		directory: __dirname + "/../../bundle",
+		directory: __dirname + "/../bundle",
 		port: 37792
 	});
 	let browser = await puppeteer.launch({ devtools: true });
@@ -54,3 +54,4 @@ export async function test_browser(): Promise<void>
 	await browser.close();
 	server.close();
 }
+main();

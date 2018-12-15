@@ -5,7 +5,7 @@ import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../basic/Invoke";
 
-import { LogicError } from "tstl/exception/LogicError";
+import { LogicError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -79,6 +79,26 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		return new Promise((resolve, reject) =>
 		{
+			//----
+			// INSPECTOR
+			//----
+			if (this.worker_ && this.state !== WorkerConnector.State.CLOSED)
+			{
+				let err: Error;
+				if (this.state_ === WorkerConnector.State.CONNECTING)
+					err = new LogicError("On connecting.");
+				else if (this.state_ === WorkerConnector.State.OPEN)
+					err = new LogicError("Already connected.");
+				else
+					err = new LogicError("Closing.");
+
+				reject(err);
+				return;
+			}
+
+			//----
+			// CONNECTOR
+			//----
 			try
 			{
 				// SET STATE -> CONNECTING

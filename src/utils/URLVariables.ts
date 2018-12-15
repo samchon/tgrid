@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.utils */
+//================================================================
 import { HashMap } from "tstl/container/HashMap";
 import { not_equal_to } from "tstl/functional";
 
