@@ -1,8 +1,8 @@
-import { URLVariables } from "../../../utils/URLVariables";
-
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
+import { URLVariables } from "../../../utils/URLVariables";
+
 /**
  * @hidden
  */

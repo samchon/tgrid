@@ -1,18 +1,14 @@
+import { IState } from "./IState";
+
 //================================================================ 
 /** @module tgrid.protocols */
 //================================================================
 /**
  * @hidden
  */
-export interface IConnector<State>
+export interface IConnector<State> 
+	extends IState<State>
 {
-	/**
-	 * Get state.
-	 * 
-	 * @return Current state.
-	 */
-	readonly state: State
-
 	/**
 	 * Wait server to provide.
 	 * 

@@ -2,10 +2,12 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IState } from "../internal/IState";
 import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";
+import { DomainError } from "tstl/exception";
 
 //----
 // CAPSULIZATION
@@ -19,8 +21,17 @@ var g: IFeature = is_node()
 
 export class WorkerServer 
 	extends CommunicatorBase
+	implements IState<WorkerServer.State>
 {
+	/**
+	 * @hidden
+	 */
 	private args_: string[];
+
+	/**
+	 * @hidden
+	 */
+	private state_: WorkerServer.State;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -31,15 +42,35 @@ export class WorkerServer
 	public constructor()
 	{
 		super();
+
+		this.state_ = WorkerServer.State.NONE;
 	}
 
 	/**
 	 * Open server.
+	 * 
+	 * @param provider A provider for the remote client.
 	 */
-	public async open<Provider extends object>(provider: Provider): Promise<void>
+	public async open<Provider extends object>(provider: Provider = null): Promise<void>
 	{
-		this.provider_ = provider;
-		g.onmessage = this._Handle_message.bind(this);
+		// INSPECTOR
+		if (is_node() === false)
+		{
+			if (self.document !== undefined)
+				throw new DomainError("This is not Worker.");	
+		}
+		else if (global.process.send === undefined)
+			throw new DomainError("Server has opened yet.");	
+		else if (this.state_ !== WorkerServer.State.NONE)
+			throw new DomainError("Server has opened yet.");
+
+		// DO OPEN
+		this.state_ = WorkerServer.State.OPENING;
+		{
+			this.provider_ = provider;
+			g.onmessage = this._Handle_message.bind(this);
+		}
+		this.state_ = WorkerServer.State.OPEN;
 	}
 
 	/**
@@ -47,12 +78,16 @@ export class WorkerServer
 	 */
 	public async close(): Promise<void>
 	{
-		// HANDLERS
-		await this.destructor();
-		
-		// DO CLOSE
-		g.postMessage("CLOSE");
-		g.close();
+		this.state_ = WorkerServer.State.CLOSING;
+		{
+			// HANDLERS
+			await this.destructor();
+			
+			// DO CLOSE
+			g.postMessage("CLOSE");
+			g.close();
+		}
+		this.state_ = WorkerServer.State.CLOSED;
 	}
 
 	/* ----------------------------------------------------------------
@@ -74,6 +109,14 @@ export class WorkerServer
 					: [];
 			}
 		return this.args_;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public get state(): WorkerServer.State
+	{
+		return this.state_;
 	}
 
 	/* ----------------------------------------------------------------
@@ -106,6 +149,18 @@ export class WorkerServer
 			this.close();
 		else
 			this.replier(JSON.parse(evt.data));
+	}
+}
+
+export namespace WorkerServer
+{
+	export const enum State
+	{
+		NONE = -1,
+		OPENING = 0,
+		OPEN = 1,
+		CLOSING = 2,
+		CLOSED = 3
 	}
 }
 
