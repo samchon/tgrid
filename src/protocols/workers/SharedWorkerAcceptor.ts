@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 export class SharedWorkerAcceptor 
 	extends CommunicatorBase
@@ -24,6 +24,11 @@ export class SharedWorkerAcceptor
 	 */
 	private listening_: boolean;
 
+	/** 
+	 * 
+	 */
+	private closed_: boolean;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
@@ -36,7 +41,12 @@ export class SharedWorkerAcceptor
 
 		// ASSIGN MEMBER
 		this.port_ = port;
-		this.eraser_ = eraser;
+		this.eraser_ = () =>
+		{
+			this.closed_ = true;
+			eraser();
+		};
+		this.closed_ = false;
 	}
 
 	/**
@@ -111,6 +121,14 @@ export class SharedWorkerAcceptor
 	protected inspector(): Error
 	{
 		return null;
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected joinable(): boolean
+	{
+		return this.closed_ === false;
 	}
 
 	/**

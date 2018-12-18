@@ -1,4 +1,4 @@
-import { Communicator } from "../../basic/Communicator";
+import { Communicator } from "../../components/Communicator";
 
 import { Calculator } from "../internal/Calculator";
 import { ICalculator } from "../internal/ICalculator";

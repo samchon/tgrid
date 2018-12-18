@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IState } from "../internal/IState";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";
@@ -136,6 +136,14 @@ export class WorkerServer
 	protected inspector(): Error
 	{
 		return null;
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected joinable(): boolean
+	{
+		return this.state !== WorkerServer.State.CLOSED;
 	}
 
 	/**

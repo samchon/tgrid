@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.basic */
+/** @module tgrid.components */
 //================================================================
 import { CommunicatorBase } from "./CommunicatorBase";
 import { Invoke } from "./Invoke";
@@ -7,6 +7,11 @@ import { Invoke } from "./Invoke";
 export class Communicator<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
 {
+	/**
+	 * @hidden
+	 */
+	private destructed_: boolean;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
@@ -23,6 +28,8 @@ export class Communicator<Provider extends object = {}>
 
 		this.sendData = sender;
 		this.inspectReady = readyInspector;
+
+		this.destructed_ = false;
 	}
 
 	/**
@@ -36,6 +43,7 @@ export class Communicator<Provider extends object = {}>
 	 */
 	public destory(error?: Error): Promise<void>
 	{
+		this.destructed_ = true;
 		return this.destructor(error);
 	}
 
@@ -104,6 +112,14 @@ export class Communicator<Provider extends object = {}>
 	protected inspector(): Error
 	{
 		return this.inspectReady();
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected joinable(): boolean
+	{
+		return !this.destructed_;
 	}
 }
 

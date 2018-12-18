@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { LogicError, RuntimeError } from "tstl/exception";
@@ -179,6 +179,14 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	protected inspector(): Error
 	{
 		return null;
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected joinable(): boolean
+	{
+		return this.state !== SharedWorkerConnector.State.CLOSED;
 	}
 
 	/**

@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 import { LogicError, RuntimeError } from "tstl/exception";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
@@ -219,6 +219,14 @@ export class WebConnector<Provider extends object = {}>
 			return new RuntimeError("Server is not listening.");
 		else
 			return null;
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected joinable(): boolean
+	{
+		return this.state !== WebConnector.State.CLOSED;
 	}
 
 	/**

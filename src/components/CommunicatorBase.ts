@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.basic */
+/** @module tgrid.components */
 //================================================================
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
@@ -29,7 +29,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private joiners_: ConditionVariable;
+	protected join_cv_: ConditionVariable;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
@@ -42,7 +42,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		this.provider_ = provider;
 
 		this.promises_ = new HashMap();
-		this.joiners_ = new ConditionVariable();
+		this.join_cv_ = new ConditionVariable();
 	}
 
 	/**
@@ -62,7 +62,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		}
 
 		// RESOLVE JOINERS
-		this.joiners_.notify_all();
+		this.join_cv_.notify_all();
 		
 		// CLEAR PROMISES
 		this.promises_.clear();
@@ -94,13 +94,20 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 
 	public join(param?: number | Date): Promise<void|boolean>
 	{
+		let predicator = () => !this.joinable();
+
 		if (param === undefined)
-			return this.joiners_.wait();
+			return this.join_cv_.wait(predicator);
 		else if (param instanceof Date)
-			return this.joiners_.wait_until(param);
+			return this.join_cv_.wait_until(param, predicator);
 		else
-			return this.joiners_.wait_for(param);
+			return this.join_cv_.wait_for(param, predicator);
 	}
+
+	/**
+	 * @hidden
+	 */
+	protected abstract joinable(): boolean;
 
 	/* ----------------------------------------------------------------
 		DRIVER

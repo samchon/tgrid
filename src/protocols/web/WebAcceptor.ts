@@ -3,9 +3,9 @@
 //================================================================
 import * as ws from "websocket";
 
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 import { LogicError, RuntimeError } from "tstl/exception";
 
@@ -28,6 +28,11 @@ export class WebAcceptor
 	 */
 	private listening_: boolean;
 
+	/**
+	 * @hidden
+	 */
+	private closed_: boolean;
+
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
@@ -40,6 +45,7 @@ export class WebAcceptor
 		
 		this.request_ = request;
 		this.connection_ = null;
+		this.closed_ = false;
 	}
 
 	/**
@@ -115,7 +121,13 @@ export class WebAcceptor
 	{
 		return new Promise(resolve =>
 		{
-			this.request_.on("requestRejected", resolve);
+			this.request_.on("requestRejected", async () =>
+			{
+				this.closed_ = true;
+				await this.join_cv_.notify_all();
+
+				resolve();
+			});
 			this.request_.reject(status, reason, extraHeaders);
 		});
 	}
@@ -182,6 +194,14 @@ export class WebAcceptor
 	/**
 	 * @hidden
 	 */
+	protected joinable(): boolean
+	{
+		return !this.closed_;
+	}
+
+	/**
+	 * @hidden
+	 */
 	private _Handle_message(message: ws.IMessage): void
 	{
 		let invoke: Invoke = JSON.parse(message.utf8Data);
@@ -194,6 +214,7 @@ export class WebAcceptor
 	private _Handle_close({}: number, {}: string): void
 	{
 		// DESTRUCT UNRETURNED FUNCTIONS
+		this.closed_ = true;
 		this.destructor();
 	}
 }

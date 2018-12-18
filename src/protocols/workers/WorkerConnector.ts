@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 import { LogicError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
@@ -178,6 +178,14 @@ export class WorkerConnector<Provider extends object = {}>
 			return new LogicError("Connecting.");
 		else if (this.state_ === WorkerConnector.State.CLOSED)
 			return new LogicError("The connection has been closed.");
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected joinable(): boolean
+	{
+		return this.state !== WorkerConnector.State.CLOSED;
 	}
 
 	/**
