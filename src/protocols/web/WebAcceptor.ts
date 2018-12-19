@@ -74,6 +74,7 @@ export class WebAcceptor
 			ret = this.join();
 			this.connection_.close();
 		}
+		// state would be closed in destructor() via _Handle_close()
 
 		// DO RETURN
 		await ret;
@@ -159,15 +160,17 @@ export class WebAcceptor
 	}
 
 	/**
-	 * @inheritdoc
+	 * @inheritDoc
 	 */
 	public async listen<Provider extends object>
 		(provider: Provider): Promise<void>
 	{
+		// SET PROVIDER
 		this.provider_ = provider;
 		if (this.listening_ === true)
 			return;
 		
+		// INFORM TO CLIENT
 		this.listening_ = true;
 		this.connection_.sendUTF("PROVIDE");
 	}
@@ -193,6 +196,9 @@ export class WebAcceptor
 			.toString();
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public get state(): WebAcceptor.State
 	{
 		return this.state_;

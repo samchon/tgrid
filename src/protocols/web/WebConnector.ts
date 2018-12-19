@@ -234,15 +234,18 @@ export class WebConnector<Provider extends object = {}>
 	private _Handle_message(evt: MessageEvent): void
 	{
 		if (evt.data === "PROVIDE")
-		{
-			(async() =>
-			{
-				this.server_is_listening_ = true;
-				await this.wait_cv_.notify_all();
-			})();
-		}
+			this._Handle_provide();
 		else
 			this.replier(JSON.parse(evt.data));
+	}
+
+	/**
+	 * @hidden
+	 */
+	private async _Handle_provide(): Promise<void>
+	{
+		this.server_is_listening_ = true;
+		await this.wait_cv_.notify_all();
 	}
 
 	/**

@@ -43,6 +43,7 @@ export class WorkerServer
 	{
 		super();
 
+		this.args_ = null;
 		this.state_ = WorkerServer.State.NONE;
 	}
 
@@ -98,7 +99,7 @@ export class WorkerServer
 	 */
 	public get arguments(): string[]
 	{
-		if (this.args_ === undefined)
+		if (this.args_ === null)
 			if (is_node())
 				this.args_ = global.process.argv.slice(2);
 			else
@@ -112,7 +113,7 @@ export class WorkerServer
 	}
 
 	/**
-	 * @inheritdoc
+	 * @inheritDoc
 	 */
 	public get state(): WorkerServer.State
 	{

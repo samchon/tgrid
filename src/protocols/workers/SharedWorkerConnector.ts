@@ -205,7 +205,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		}
 		else if (evt.data === "PROVIDE")
 		{
-			this._Handle_ready();
+			this._Handle_provide();
 		}
 		else if (evt.data === "REJECT")
 		{
@@ -222,12 +222,15 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/**
 	 * @hidden
 	 */
-	private async _Handle_ready(): Promise<void>
+	private async _Handle_provide(): Promise<void>
 	{
 		this.server_is_listening_ = true;
 		await this.wait_cv_.notify_all();
 	}
 
+	/**
+	 * @hidden
+	 */
 	private async _Handle_reject(): Promise<void>
 	{
 		this.state_ = SharedWorkerConnector.State.CLOSING;
