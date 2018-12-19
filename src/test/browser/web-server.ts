@@ -1,5 +1,5 @@
-import { WebServer } from "../../../protocols/web";
-import { Calculator } from "../../internal/Calculator";
+import { WebServer } from "../../protocols/web";
+import { Calculator } from "../internal/Calculator";
 
 async function main(): Promise<void>
 {
@@ -8,6 +8,9 @@ async function main(): Promise<void>
 	{
 		await acceptor.accept();
 		await acceptor.listen(new Calculator());
+
+		await acceptor.join();
+		await server.close();
 	});
 }
 main();

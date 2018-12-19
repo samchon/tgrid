@@ -2,9 +2,14 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
-import { HashSet } from "tstl/container/HashSet";
 
-export class SharedWorkerServer
+import { is_node } from "tstl/utility/node";
+import { HashSet } from "tstl/container/HashSet";
+import { DomainError } from "tstl";
+import { IState } from "../internal/IState";
+
+export class SharedWorkerServer 
+	implements IState<SharedWorkerServer.State>
 {
 	/**
 	 * @hidden
@@ -12,25 +17,51 @@ export class SharedWorkerServer
 	private acceptors_: HashSet<SharedWorkerAcceptor>;
 
 	/**
-	 * Initializer Constructor.
+	 * @hidden
+	 */
+	private state_: SharedWorkerServer.State;
+
+	/* ----------------------------------------------------------------
+		CONSTRUCTOR
+	---------------------------------------------------------------- */
+	/**
+	 * Default Constructor.
+	 */
+	public constructor()
+	{
+		this.acceptors_ = new HashSet();
+		this.state_ = SharedWorkerServer.State.NONE;
+	}
+
+	/**
+	 * Open server.
 	 * 
 	 * @param cb Callback function called whenever client connects.
 	 */
-	public constructor(cb: (acceptor: SharedWorkerAcceptor) => void | Promise<void>)
+	public async open(cb: (acceptor: SharedWorkerAcceptor) => any): Promise<void>
 	{
-		this.acceptors_ = new HashSet();
+		// INSPECTOR
+		if (is_node() === true)
+			throw new DomainError("SharedWorker is not supported in the NodeJS.");
+		else if (self.document !== undefined)
+			throw new DomainError("This is not SharedWorker.");
 
-		addEventListener("connect", (evt: OpenEvent) =>
+		// DO OPEN
+		this.state_ = SharedWorkerServer.State.OPENING;
 		{
-			let port: MessagePort = evt.ports[evt.ports.length - 1];
-			let acceptor = new AcceptorFactory(port, () =>
+			self.addEventListener("connect", (evt: OpenEvent) =>
 			{
-				this.acceptors_.erase(acceptor);
+				let port: MessagePort = evt.ports[evt.ports.length - 1];
+				let acceptor = new AcceptorFactory(port, () =>
+				{
+					this.acceptors_.erase(acceptor);
+				});
+				
+				this.acceptors_.insert(acceptor);
+				cb(acceptor);
 			});
-			
-			this.acceptors_.insert(acceptor);
-			cb(acceptor);
-		});
+		}
+		this.state_ = SharedWorkerServer.State.OPEN;
 	}
 
 	/**
@@ -40,6 +71,29 @@ export class SharedWorkerServer
 	{
 		for (let acceptor of this.acceptors_)
 			await acceptor.close();
+	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
+	public get state(): SharedWorkerServer.State
+	{
+		return this.state_;
+	}
+}
+
+export namespace SharedWorkerServer
+{
+	export const enum State
+	{
+		NONE = -1,
+		OPENING = 0,
+		OPEN = 1,
+		CLOSING = 2,
+		CLOSED = 3
 	}
 }
 

@@ -1,7 +1,6 @@
 import * as std from "tstl";
 
 import { WebServer, WebConnector } from "../../protocols/web";
-import { Latch } from "./Latch";
 
 const PORT: number = 10101;
 const COUNT: number = 10;
@@ -29,7 +28,7 @@ export async function test_remote_mutex(): Promise<void>
 	});
 
 	// PREPARE LATCH & TIME RECORDER
-	let latch = new Latch(COUNT);
+	let latch = new std.experimental.Latch(COUNT);
 	let time = Date.now();
 
 	// CREATE CLIENTS
@@ -54,7 +53,7 @@ export async function test_remote_mutex(): Promise<void>
 	await server.close();
 }
 
-async function _Test_client(latch: Latch, index: number): Promise<void>
+async function _Test_client(latch: std.experimental.Latch, index: number): Promise<void>
 {
 	let connector = new WebConnector();
 	await connector.connect(`ws://127.0.0.1:${PORT}`);

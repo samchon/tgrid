@@ -1,10 +1,10 @@
 //================================================================ 
-/** @module tgrid.basic */
+/** @module tgrid.components */
 //================================================================
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { DomainError, RuntimeError } from "tstl/exception";
+import { RuntimeError } from "tstl/exception";
 
 import { Invoke, IFunction, IReturn } from "./Invoke";
 import { Driver } from "./Driver";
@@ -29,7 +29,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private joiners_: ConditionVariable;
+	private join_cv_: ConditionVariable;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
@@ -42,7 +42,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		this.provider_ = provider;
 
 		this.promises_ = new HashMap();
-		this.joiners_ = new ConditionVariable();
+		this.join_cv_ = new ConditionVariable();
 	}
 
 	/**
@@ -60,12 +60,12 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			let reject: Function = entry.second.second;
 			reject(rejectError);
 		}
-
-		// RESOLVE JOINERS
-		this.joiners_.notify_all();
 		
 		// CLEAR PROMISES
 		this.promises_.clear();
+
+		// RESOLVE JOINERS
+		await this.join_cv_.notify_all();
 	}
 
 	/* ----------------------------------------------------------------
@@ -92,14 +92,20 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	 */
 	public join(at: Date): Promise<boolean>;
 
-	public join(param?: number | Date): Promise<void|boolean>
+	public async join(param?: number | Date): Promise<void|boolean>
 	{
+		// IS JOINABLE ?
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
+
+		// FUNCTION OVERLOADINGS
 		if (param === undefined)
-			return this.joiners_.wait();
+			await this.join_cv_.wait();
 		else if (param instanceof Date)
-			return this.joiners_.wait_until(param);
+			return await this.join_cv_.wait_until(param);
 		else
-			return this.joiners_.wait_for(param);
+			return await this.join_cv_.wait_for(param);
 	}
 
 	/* ----------------------------------------------------------------
@@ -204,7 +210,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			// FIND FUNCTION
 			//----
 			if (!this.provider_) // PROVIDER MUST BE
-				throw new DomainError("Provider is not specified yet.");
+				throw new RuntimeError("Provider is not specified yet.");
 
 			// FIND FUNCTION (WITH THIS-ARG)
 			let func: Function = <any>this.provider_;

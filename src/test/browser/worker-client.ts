@@ -1,7 +1,8 @@
 import "whatwg-fetch";
 
-import { WorkerConnector } from "../../../protocols/workers";
-import { ICalculator } from "../../internal/ICalculator";
+import { WorkerConnector } from "../../protocols/workers";
+import { ICalculator } from "../internal/ICalculator";
+import { complete } from "./internal";
 
 async function get_source(): Promise<string>
 {
@@ -19,4 +20,5 @@ window.onload = async () =>
 
 	await ICalculator.main(worker.getDriver<ICalculator>(), true);
 	await worker.close();
+	complete();
 };

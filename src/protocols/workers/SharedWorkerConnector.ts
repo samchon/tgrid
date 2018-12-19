@@ -1,15 +1,15 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { LogicError, RuntimeError } from "tstl/exception";
+import { DomainError, RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
-import { compile as _Compile } from "./internal/web-compiler";
+import { compile as _Compile } from "./internal/web-worker";
 
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>
@@ -28,7 +28,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/**
 	 * @hidden
 	 */
-	private cv_: ConditionVariable;
+	private wait_cv_: ConditionVariable;
 
 	/**
 	 * @hidden
@@ -53,17 +53,38 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		this.server_is_listening_ = false;
 
 		// HANDLERS
-		this.cv_ = new ConditionVariable();
+		this.wait_cv_ = new ConditionVariable();
 	}
 
 	public connect(jsFile: string): Promise<void>
 	{
 		return new Promise((resolve, reject) => 
 		{
+			//----
+			// INSPECTOR
+			//----
+			if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
+			{
+				let err: Error;
+				if (this.state_ === SharedWorkerConnector.State.CONNECTING)
+					err = new DomainError("On connecting.");
+				else if (this.state_ === SharedWorkerConnector.State.OPEN)
+					err = new DomainError("Already connected.");
+				else
+					err = new DomainError("Closing.");
+
+				reject(err);
+				return;
+			}
+
+			//----
+			// CONNECTOR
+			//----
 			try
 			{
 				// SET STATE -> CONNECTING
 				this.state_ = SharedWorkerConnector.State.CONNECTING;
+				this.server_is_listening_ = false;
 
 				// DO CONNECT
 				let worker = new SharedWorker(jsFile);
@@ -89,14 +110,17 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	public async close(): Promise<void>
 	{
 		// VALIDATION
-		if (this.state !== SharedWorkerConnector.State.OPEN)
-			throw new LogicError("Not conneced.");
+		if (this.state_ !== SharedWorkerConnector.State.OPEN)
+			throw new DomainError("Not conneced.");
 
 		//----
 		// CLOSE WITH JOIN
 		//----
-		// REQUEST CLOSE TO SERVER
+		// PROMISE RETURN
 		let ret: Promise<void> = this.join();
+
+		// REQUEST CLOSE TO SERVER
+		this.state_ = SharedWorkerConnector.State.CLOSING;
 		this.port_.postMessage("CLOSE");
 
 		// LAZY RETURN
@@ -129,17 +153,22 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	public wait(at: Date): Promise<boolean>;
 
-	public async wait(param: number | Date = null): Promise<void|boolean>
+	public async wait(param?: number | Date): Promise<void|boolean>
 	{
-		if (this.server_is_listening_ === true)
-			return true;
+		// VALIDATION
+		if (this.state_ !== SharedWorkerConnector.State.OPEN)
+			throw new DomainError("Not connected yet.");
 
-		if (param === null)
-			return await this.cv_.wait();
+		// PREPARE PREDICATOR
+		let predicator = () => this.server_is_listening_;
+
+		// SPECIALZE BETWEEN OVERLOADED FUNCTIONS
+		if (param === undefined)
+			return await this.wait_cv_.wait(predicator);
 		else if (param instanceof Date)
-			return await this.cv_.wait_until(param);
+			return await this.wait_cv_.wait_until(param, predicator);
 		else
-			return await this.cv_.wait_for(param as number);
+			return await this.wait_cv_.wait_for(param, predicator);
 	}
 
 	/* ----------------------------------------------------------------
@@ -158,7 +187,10 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	protected inspector(): Error
 	{
-		return null;
+		if (this.state_ !== SharedWorkerConnector.State.OPEN)
+			return new DomainError("Not connected.");
+		else
+			return null;
 	}
 
 	/**
@@ -171,15 +203,13 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			this.state_ = SharedWorkerConnector.State.OPEN;
 			this.connector_.first();
 		}
-		else if (evt.data === "REJECT")
-		{
-			this.state_ = SharedWorkerConnector.State.CLOSED;
-			this.connector_.second(new RuntimeError("Denied by server."));
-		}
 		else if (evt.data === "PROVIDE")
 		{
-			this.server_is_listening_ = true;
-			this.cv_.notify_all();
+			this._Handle_provide();
+		}
+		else if (evt.data === "REJECT")
+		{
+			this._Handle_reject();
 		}
 		else if (evt.data === "CLOSE")
 		{
@@ -192,11 +222,32 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_close(): void
+	private async _Handle_provide(): Promise<void>
 	{
-		// STATE & PROMISE RETURN
+		this.server_is_listening_ = true;
+		await this.wait_cv_.notify_all();
+	}
+
+	/**
+	 * @hidden
+	 */
+	private async _Handle_reject(): Promise<void>
+	{
+		this.state_ = SharedWorkerConnector.State.CLOSING;
+		this.connector_.second(new RuntimeError("Rejected by server."));
+
+		await this._Handle_close();
+	}
+
+	/**
+	 * @hidden
+	 */
+	private async _Handle_close(): Promise<void>
+	{
+		this.server_is_listening_ = false;
+		await this.destructor();
+
 		this.state_ = SharedWorkerConnector.State.CLOSED;
-		this.destructor();
 	}
 }
 
@@ -208,8 +259,7 @@ export namespace SharedWorkerConnector
 		CONNECTING,
 		OPEN,
 		CLOSING,
-		CLOSED,
-		DENIED
+		CLOSED
 	}
 	
 	export function compile(content: string): string

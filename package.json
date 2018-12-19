@@ -6,28 +6,33 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.0.24",
+  "version": "0.0.25",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "compile": "tsc && npm run bundle",
-    "build": "npm run compile && npm run test",
+    "compile": "tsc",
     "bundle": "node build/bundle",
+    "build": "npm run compile && npm run bundle && npm run test",
     "clean": "node build/clean",
-    "test": "node test/main",
+    "test": "npm run test-node && npm run test-browser",
+    "test-node": "node test/node",
+    "test-browser": "node test/browser",
     "api": "node build/api"
   },
   "dependencies": {
-    "tstl": "^2.0.14",
+    "tstl": "^2.1.0",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
     "@types/browserify": "^12.0.36",
     "@types/node": "^10.12.0",
+    "@types/puppeteer": "^1.11.1",
     "@types/sharedworker": "0.0.28",
     "@types/websocket": "0.0.40",
     "browserify": "^16.2.3",
+    "local-web-server": "^2.6.0",
     "mv": "^2.1.1",
+    "puppeteer": "^1.11.0",
     "whatwg-fetch": "^3.0.0"
   },
   "homepage": "https://github.com/samchon/tgrid#readme",
@@ -48,6 +53,10 @@
     "OON",
     "remote function call",
     "remote object call",
-    "object oriented network"
+    "object oriented network",
+    "web socket",
+    "worker",
+    "shared worker",
+    "thread"
   ]
 }

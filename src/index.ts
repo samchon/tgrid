@@ -2,11 +2,16 @@
 /** @module tgrid */
 //================================================================
 /**
- * Basic objects.
+ * Basic components.
  */
-export import basic = require("./basic");
+export import components = require("./components");
 
 /**
  * Provided protocols.
  */
 export import protocols = require("./protocols");
+
+/**
+ * Utility classes.
+ */
+export import utils = require("./utils");

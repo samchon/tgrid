@@ -1,11 +1,11 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
-import { LogicError } from "tstl/exception/LogicError";
+import { DomainError, RuntimeError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -14,16 +14,9 @@ import { is_node } from "tstl/utility/node";
 /**
  * @hidden
  */
-var g: IWorker = is_node()
-	? require("./internal/worker-connector-polyfill")
-	: self;
-
-/**
- * @hidden
- */
 const Compiler: CompilerScope = is_node()
-	? require("./internal/node-compiler")
-	: require("./internal/web-compiler");
+	? require("./internal/node-worker")
+	: require("./internal/web-worker");
 
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
@@ -63,35 +56,56 @@ export class WorkerConnector<Provider extends object = {}>
 	 * 
 	 * @param content JS Source file to be server with compilation.
 	 */
-	public async compile(content: string): Promise<void>
+	public async compile(content: string, ...args: string[]): Promise<void>
 	{
 		if (Compiler.remove)
 		{
 			let path: string = await Compiler.compile(content);
 
-			await this.connect(path);
+			await this.connect(path, ...args);
 			await Compiler.remove(path);
 		}
 		else
-			await this.connect(Compiler.compile(content) as string);
+			await this.connect(<string>Compiler.compile(content), ...args);
 	}
 
 	/**
 	 * Connect to worker server.
 	 * 
 	 * @param jsFile JS File to be worker server.
+	 * @param args Arguments to deliver.
 	 */
-	public connect(jsFile: string): Promise<void>
+	public connect(jsFile: string, ...args: string[]): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
+			//----
+			// INSPECTOR
+			//----
+			if (this.worker_ && this.state !== WorkerConnector.State.CLOSED)
+			{
+				let err: Error;
+				if (this.state_ === WorkerConnector.State.CONNECTING)
+					err = new DomainError("On connecting.");
+				else if (this.state_ === WorkerConnector.State.OPEN)
+					err = new DomainError("Already connected.");
+				else
+					err = new DomainError("Closing.");
+
+				reject(err);
+				return;
+			}
+
+			//----
+			// CONNECTOR
+			//----
 			try
 			{
 				// SET STATE -> CONNECTING
 				this.state_ = WorkerConnector.State.CONNECTING;
 
 				// DO CONNECT
-				this.worker_ = new g.Worker(jsFile);
+				this.worker_ = Compiler.execute(jsFile, ...args);
 				this.worker_.onmessage = this._Handle_message.bind(this);
 
 				// GO RETURN
@@ -113,7 +127,7 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		// VALIDATION
 		if (this.state !== WorkerConnector.State.OPEN)
-			throw new LogicError("Not conneced.");
+			throw new DomainError("Not conneced.");
 
 		//----
 		// CLOSE WITH JOIN
@@ -159,11 +173,11 @@ export class WorkerConnector<Provider extends object = {}>
 		if (this.state_ === WorkerConnector.State.OPEN)
 			return null;
 		else if (this.state_ === WorkerConnector.State.NONE)
-			return new LogicError("Connect first.");
+			return new DomainError("Connect first.");
 		else if (this.state_ === WorkerConnector.State.CONNECTING)
-			return new LogicError("Connecting.");
+			return new DomainError("Connecting.");
 		else if (this.state_ === WorkerConnector.State.CLOSED)
-			return new LogicError("The connection has been closed.");
+			return new RuntimeError("The connection has been closed.");
 	}
 
 	/**
@@ -185,11 +199,11 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_close(): void
+	private async _Handle_close(): Promise<void>
 	{
 		// STATE & PROMISE RETURN
+		await this.destructor();
 		this.state_ = WorkerConnector.State.CLOSED;
-		this.destructor();
 	}
 }
 
@@ -208,19 +222,9 @@ export namespace WorkerConnector
 /**
  * @hidden
  */
-interface IWorker
-{
-	Worker: 
-	{
-		new(jsFile: string): Worker;
-	};
-}
-
-/**
- * @hidden
- */
 interface CompilerScope
 {
 	compile(content: string): string | Promise<string>;
+	execute(jsFile: string, ...args: string[]): Worker;
 	remove?(path: string): Promise<void>;
 }

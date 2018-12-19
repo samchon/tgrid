@@ -1,7 +1,7 @@
 import * as std from "tstl";
 
 import { WebServer, WebConnector } from "../../protocols/web";
-import { Driver } from "../../basic"
+import { Driver } from "../../components"
 
 import { Calculator } from "../internal/Calculator";
 import { ICalculator } from "../internal/ICalculator";
@@ -34,11 +34,16 @@ export async function test_web(): Promise<void>
 		await connector.wait();
 
 		// SET DRIVER AND TEST BY CALCULATOR PROCESS
-		let driver: Driver<ICalculator | IVector> = connector.getDriver();
 		if (path === "calculator")
-			await ICalculator.main(driver as Driver<ICalculator>);
+		{
+			let driver: Driver<ICalculator> = connector.getDriver<ICalculator>();
+			await ICalculator.main(driver);
+		}
 		else
-			await IVector.main(driver as Driver<IVector>);
+		{
+			let driver: Driver<IVector> = connector.getDriver<IVector>();
+			await IVector.main(driver);
+		}
 		
 		await connector.close();
 	}

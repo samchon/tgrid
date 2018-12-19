@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.basic */
+/** @module tgrid.components */
 //================================================================
 import { CommunicatorBase } from "./CommunicatorBase";
 import { Invoke } from "./Invoke";

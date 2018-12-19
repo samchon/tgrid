@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as cp from "child_process";
 
 import { WorkerConnector } from "../../protocols/workers/WorkerConnector";
 import { ICalculator } from "../internal/ICalculator";
@@ -7,15 +8,19 @@ export function test_worker_connect(): Promise<void>
 {
 	return _Test_worker(worker =>
 	{
-		return worker.connect(__dirname + "/browser/worker-server.js");
+		return worker.connect(__dirname + "/../browser/worker-server.js", "first", "second");
 	});
 }
 
-export function test_worker_compile(): Promise<void>
+export async function test_worker_compile(): Promise<void>
 {
-	return _Test_worker(worker =>
+	const PATH = __dirname + "/../../bundle/worker-server.js";
+	if (fs.existsSync(PATH) === false)
+		cp.execSync("npm run bundle");
+
+	await _Test_worker(worker =>
 	{
-		return worker.compile(fs.readFileSync("bundle/worker-server.js", "utf8"));
+		return worker.compile(fs.readFileSync(PATH, "utf8"), "first", "second");
 	});
 }
 
