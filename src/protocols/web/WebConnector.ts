@@ -5,7 +5,7 @@ import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../components/Invoke";
 
-import { LogicError, RuntimeError } from "tstl/exception";
+import { DomainError, RuntimeError } from "tstl/exception";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { is_node } from "tstl/utility/node";
 
@@ -31,7 +31,7 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private cv_: ConditionVariable;
+	private wait_cv_: ConditionVariable;
 
 	/**
 	 * @hidden
@@ -51,7 +51,7 @@ export class WebConnector<Provider extends object = {}>
 		super(provider);
 
 		this.socket_ = null;
-		this.cv_ = new ConditionVariable();
+		this.wait_cv_ = new ConditionVariable();
 		this.server_is_listening_ = false;
 	}
 	
@@ -72,14 +72,14 @@ export class WebConnector<Provider extends object = {}>
 			{
 				let err: Error;
 				if (this.socket_.readyState === WebConnector.State.CONNECTING)
-					err = new LogicError("On connection.");
+					err = new DomainError("On connection.");
 				else if (this.socket_.readyState === WebConnector.State.OPEN)
-					err = new LogicError("Already connected.");
+					err = new DomainError("Already connected.");
 				else
-					err = new LogicError("Closing.");
+					err = new DomainError("Closing.");
 
 				reject(err);
-				return;	
+				return;
 			}
 
 			//----
@@ -124,7 +124,7 @@ export class WebConnector<Provider extends object = {}>
 	{
 		// VALIDATION
 		if (this.state !== WebConnector.State.OPEN)
-			throw new LogicError("Not conneced.");
+			throw new DomainError("Not conneced.");
 		
 		//----
 		// CLOSE WITH JOIN
@@ -186,15 +186,20 @@ export class WebConnector<Provider extends object = {}>
 
 	public async wait(param: number | Date = null): Promise<void|boolean>
 	{
-		if (this.server_is_listening_ === true)
-			return true;
+		// VALIDATION
+		if (this.state !== WebConnector.State.OPEN)
+			throw new DomainError("Not connected.");
 
+		// PREPARE PREDICATOR
+		let predicator = () => this.server_is_listening_;
+
+		// SPECIALZE BETWEEN OVERLOADED FUNCTIONS
 		if (param === null)
-			return await this.cv_.wait();
+			return await this.wait_cv_.wait(predicator);
 		else if (param instanceof Date)
-			return await this.cv_.wait_until(param);
+			return await this.wait_cv_.wait_until(param, predicator);
 		else
-			return await this.cv_.wait_for(param as number);
+			return await this.wait_cv_.wait_for(param, predicator);
 	}
 
 	/* ----------------------------------------------------------------
@@ -213,20 +218,14 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	protected inspector(): Error
 	{
-		if (this.socket_.readyState !== g.WebSocket.OPEN)
-			return new LogicError("Not connected.");
-		else if (this.server_is_listening_ === false)
-			return new RuntimeError("Server is not listening.");
-		else
+		if (this.state === WebConnector.State.OPEN)
 			return null;
-	}
-
-	/**
-	 * @hidden
-	 */
-	protected joinable(): boolean
-	{
-		return this.state !== WebConnector.State.CLOSED;
+		else if (this.state === WebConnector.State.NONE)
+			return new DomainError("Connect first.");
+		else if (this.state === WebConnector.State.CONNECTING)
+			return new DomainError("Connecting.");
+		else if (this.state === WebConnector.State.CLOSED)
+			return new RuntimeError("The connection has been closed.")
 	}
 
 	/**
@@ -236,8 +235,11 @@ export class WebConnector<Provider extends object = {}>
 	{
 		if (evt.data === "PROVIDE")
 		{
-			this.server_is_listening_ = true;
-			this.cv_.notify_all();
+			(async() =>
+			{
+				this.server_is_listening_ = true;
+				await this.wait_cv_.notify_all();
+			})();
 		}
 		else
 			this.replier(JSON.parse(evt.data));
@@ -248,15 +250,17 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	private _Handle_error({}: ErrorEvent): void
 	{
-		// NOT IMPLEMENTED YET
+		// HANDLING ERRORS ON CONNECTION, 
+		// THAT'S NOT IMPLEMENTED YET
 	}
 
 	/**
 	 * @hidden
 	 */
-	private _Handle_close({}: CloseEvent): void
+	private async _Handle_close({}: CloseEvent): Promise<void>
 	{
-		this.destructor();
+		this.server_is_listening_ = false;
+		await this.destructor();
 	}
 }
 

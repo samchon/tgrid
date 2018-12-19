@@ -5,7 +5,7 @@ import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../components/Invoke";
 
-import { LogicError } from "tstl/exception";
+import { DomainError, RuntimeError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -86,11 +86,11 @@ export class WorkerConnector<Provider extends object = {}>
 			{
 				let err: Error;
 				if (this.state_ === WorkerConnector.State.CONNECTING)
-					err = new LogicError("On connecting.");
+					err = new DomainError("On connecting.");
 				else if (this.state_ === WorkerConnector.State.OPEN)
-					err = new LogicError("Already connected.");
+					err = new DomainError("Already connected.");
 				else
-					err = new LogicError("Closing.");
+					err = new DomainError("Closing.");
 
 				reject(err);
 				return;
@@ -127,7 +127,7 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		// VALIDATION
 		if (this.state !== WorkerConnector.State.OPEN)
-			throw new LogicError("Not conneced.");
+			throw new DomainError("Not conneced.");
 
 		//----
 		// CLOSE WITH JOIN
@@ -173,19 +173,11 @@ export class WorkerConnector<Provider extends object = {}>
 		if (this.state_ === WorkerConnector.State.OPEN)
 			return null;
 		else if (this.state_ === WorkerConnector.State.NONE)
-			return new LogicError("Connect first.");
+			return new DomainError("Connect first.");
 		else if (this.state_ === WorkerConnector.State.CONNECTING)
-			return new LogicError("Connecting.");
+			return new DomainError("Connecting.");
 		else if (this.state_ === WorkerConnector.State.CLOSED)
-			return new LogicError("The connection has been closed.");
-	}
-
-	/**
-	 * @hidden
-	 */
-	protected joinable(): boolean
-	{
-		return this.state !== WorkerConnector.State.CLOSED;
+			return new RuntimeError("The connection has been closed.");
 	}
 
 	/**
@@ -207,11 +199,11 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_close(): void
+	private async _Handle_close(): Promise<void>
 	{
 		// STATE & PROMISE RETURN
+		await this.destructor();
 		this.state_ = WorkerConnector.State.CLOSED;
-		this.destructor();
 	}
 }
 

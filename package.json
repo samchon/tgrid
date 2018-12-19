@@ -6,13 +6,13 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.1.0-dev.20181218",
+  "version": "0.1.0-dev.20181219",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "compile": "tsc && npm run bundle",
-    "build": "npm run compile && npm run test",
+    "compile": "tsc",
     "bundle": "node build/bundle",
+    "build": "npm run compile && npm run bundle && npm run test",
     "clean": "node build/clean",
     "test": "npm run test-node && npm run test-browser",
     "test-node": "node test/node",

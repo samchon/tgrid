@@ -1,10 +1,13 @@
+import { IState } from "./IState";
+
 //================================================================ 
 /** @module tgrid.protocols */
 //================================================================
 /**
  * @hidden
  */
-export interface IAcceptor
+export interface IAcceptor<State>
+	extends IState<State>
 {
 	/**
 	 * Start listening.

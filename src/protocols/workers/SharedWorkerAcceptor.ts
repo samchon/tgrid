@@ -4,10 +4,11 @@
 import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../components/Invoke";
+import { DomainError, RuntimeError } from "tstl";
 
 export class SharedWorkerAcceptor 
 	extends CommunicatorBase
-	implements IAcceptor
+	implements IAcceptor<SharedWorkerAcceptor.State>
 {
 	/**
 	 * @hidden
@@ -19,15 +20,15 @@ export class SharedWorkerAcceptor
 	 */
 	private eraser_: ()=>void;
 
+	/** 
+	 * @hidden
+	 */
+	private state_: SharedWorkerAcceptor.State;
+
 	/**
 	 * @hidden
 	 */
 	private listening_: boolean;
-
-	/** 
-	 * 
-	 */
-	private closed_: boolean;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -41,12 +42,11 @@ export class SharedWorkerAcceptor
 
 		// ASSIGN MEMBER
 		this.port_ = port;
-		this.eraser_ = () =>
-		{
-			this.closed_ = true;
-			eraser();
-		};
-		this.closed_ = false;
+		this.eraser_ = eraser;
+
+		// PROPERTIES
+		this.state_ = SharedWorkerAcceptor.State.NONE;
+		this.listening_ = false;
 	}
 
 	/**
@@ -54,13 +54,37 @@ export class SharedWorkerAcceptor
 	 */
 	public async close(): Promise<void>
 	{
+		this.state_ = SharedWorkerAcceptor.State.CLOSING;
+		await this._Close("CLOSE");
+	}
+
+	/**
+	 * @hidden
+	 */
+	private async _Close(message: string): Promise<void>
+	{
 		// CALL HANDLERS
 		this.eraser_();
-		await this.destructor();
+		this.port_.postMessage(message);
 
 		// DO CLOSE
-		this.port_.postMessage("CLOSE");
+		await this.destructor();
 		this.port_.close();
+
+		// WELL, IT MAY HARD TO SEE SUCH PROPERTIES
+		this.state_ = SharedWorkerAcceptor.State.CLOSED;
+		this.listening_ = false;
+	}
+
+	/* ----------------------------------------------------------------
+		ACCESSORS
+	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
+	public get state(): SharedWorkerAcceptor.State
+	{
+		return this.state_;
 	}
 
 	/* ----------------------------------------------------------------
@@ -71,10 +95,16 @@ export class SharedWorkerAcceptor
 	 */
 	public async accept(): Promise<void>
 	{
-		this.port_.onmessage = this._Handle_message.bind(this);
-		this.port_.start();
+		this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
+		{
+			// PREPARE PORT
+			this.port_.onmessage = this._Handle_message.bind(this);
+			this.port_.start();
 
-		this.port_.postMessage("ACCEPT");
+			// INFORM ACCEPTANCE
+			this.port_.postMessage("ACCEPT");
+		}
+		this.state_ = SharedWorkerAcceptor.State.OPEN;
 	}
 
 	/**
@@ -82,10 +112,8 @@ export class SharedWorkerAcceptor
 	 */
 	public async reject(): Promise<void>
 	{
-		this.port_.postMessage("REJECT");
-
-		this.eraser_();
-		this.port_.close();
+		this.state_ = SharedWorkerAcceptor.State.REJECTING;
+		await this._Close("REJECT");
 	}
 
 	/**
@@ -120,15 +148,12 @@ export class SharedWorkerAcceptor
 	 */
 	protected inspector(): Error
 	{
-		return null;
-	}
-
-	/**
-	 * @hidden
-	 */
-	protected joinable(): boolean
-	{
-		return this.closed_ === false;
+		if (this.state_ === SharedWorkerAcceptor.State.OPEN)
+			return null;
+		else if (this.state_ === SharedWorkerAcceptor.State.NONE)
+			return new DomainError("Not accepted yet.");
+		else
+			return new RuntimeError("Closed.");
 	}
 
 	/**
@@ -140,5 +165,18 @@ export class SharedWorkerAcceptor
 			this.close();
 		else
 			this.replier(JSON.parse(evt.data));
+	}
+}
+
+export namespace SharedWorkerAcceptor
+{
+	export const enum State
+	{
+		NONE = -1,
+		ACCEPTING,
+		OPEN,
+		REJECTING,
+		CLOSING,
+		CLOSED
 	}
 }

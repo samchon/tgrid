@@ -7,11 +7,11 @@ import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../components/Invoke";
 
-import { LogicError, RuntimeError } from "tstl/exception";
+import { DomainError } from "tstl/exception";
 
-export class WebAcceptor 
-	extends CommunicatorBase 
-	implements IAcceptor
+export class WebAcceptor
+	extends CommunicatorBase
+	implements IAcceptor<WebAcceptor.State>
 {
 	/**
 	 * @hidden
@@ -26,12 +26,12 @@ export class WebAcceptor
 	/**
 	 * @hidden
 	 */
-	private listening_: boolean;
+	private state_: WebAcceptor.State;
 
 	/**
 	 * @hidden
 	 */
-	private closed_: boolean;
+	private listening_: boolean;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
@@ -45,7 +45,9 @@ export class WebAcceptor
 		
 		this.request_ = request;
 		this.connection_ = null;
-		this.closed_ = false;
+
+		this.state_ = WebAcceptor.State.NONE;
+		this.listening_ = false;
 	}
 
 	/**
@@ -55,19 +57,35 @@ export class WebAcceptor
 	{
 		// VALIDATIONS
 		if (this.connection_ === null)
-			throw new LogicError("Not accepted.");
+			throw new DomainError("Not accepted or rejected.");
 		else if (!this.connection_.connected)
-			throw new RuntimeError("Not connected.");
+			throw new DomainError("Not connected.");
 
 		//----
 		// CLOSE WITH JOIN
 		//----
-		// DO CLOSE
+		// PREPARE LAZY RETURN
 		let ret: Promise<void> = this.join();
-		this.connection_.close();
 
-		// LAZY RETURN
+		// CHANGING STATE
+		this.state_ = WebAcceptor.State.CLOSING;
+		{
+			// DO CLOSE
+			ret = this.join();
+			this.connection_.close();
+		}
+
+		// DO RETURN
 		await ret;
+	}
+
+	/**
+	 * @hidden
+	 */
+	protected async destructor(): Promise<void>
+	{
+		await super.destructor();
+		this.state_ = WebAcceptor.State.CLOSED;
 	}
 
 	/* ----------------------------------------------------------------
@@ -88,6 +106,8 @@ export class WebAcceptor
 	{
 		return new Promise((resolve, reject) =>
 		{
+			this.state_ = WebAcceptor.State.ACCEPTING;
+
 			// PREPARE EVENT LISTENERS
 			this.request_.on("requestAccepted", connection =>
 			{
@@ -95,6 +115,7 @@ export class WebAcceptor
 				this.connection_.on("close", this._Handle_close.bind(this));
 				this.connection_.on("message", this._Handle_message.bind(this));
 
+				this.state_ = WebAcceptor.State.OPEN;
 				resolve();
 			});
 
@@ -105,6 +126,9 @@ export class WebAcceptor
 			}
 			catch (exp)
 			{
+				this.connection_ = null;
+				this.state_ = WebAcceptor.State.CLOSED;
+
 				reject(exp);
 			}
 		});
@@ -121,13 +145,15 @@ export class WebAcceptor
 	{
 		return new Promise(resolve =>
 		{
+			// PREPARE HANDLER
 			this.request_.on("requestRejected", async () =>
 			{
-				this.closed_ = true;
-				await this.join_cv_.notify_all();
-
+				await this.destructor();
 				resolve();
 			});
+
+			// DO REJECT
+			this.state_ = WebAcceptor.State.REJECTING;
 			this.request_.reject(status, reason, extraHeaders);
 		});
 	}
@@ -167,6 +193,11 @@ export class WebAcceptor
 			.toString();
 	}
 
+	public get state(): WebAcceptor.State
+	{
+		return this.state_;
+	}
+
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
@@ -184,19 +215,11 @@ export class WebAcceptor
 	protected inspector(): Error
 	{
 		if (!this.connection_)
-			return new LogicError("Not accepted.");
+			return new DomainError("Not accepted.");
 		else if (!this.connection_.connected)
-			return new RuntimeError("Disconnected.");
+			return new DomainError("Disconnected.");
 		else
 			return null;
-	}
-
-	/**
-	 * @hidden
-	 */
-	protected joinable(): boolean
-	{
-		return !this.closed_;
 	}
 
 	/**
@@ -211,16 +234,24 @@ export class WebAcceptor
 	/**
 	 * @hidden
 	 */
-	private _Handle_close({}: number, {}: string): void
+	private async _Handle_close({}: number, {}: string): Promise<void>
 	{
-		// DESTRUCT UNRETURNED FUNCTIONS
-		this.closed_ = true;
-		this.destructor();
+		await this.destructor();
 	}
 }
 
 export namespace WebAcceptor
 {
+	export const enum State
+	{
+		NONE = -1,
+		ACCEPTING,
+		OPEN,
+		REJECTING,
+		CLOSING,
+		CLOSED
+	}
+
 	export interface ICookie 
 	{
 		name: string;

@@ -60,7 +60,7 @@ export class WorkerServer
 				throw new DomainError("This is not Worker.");	
 		}
 		else if (global.process.send === undefined)
-			throw new DomainError("Server has opened yet.");	
+			throw new DomainError("This is not Child Process.");	
 		else if (this.state_ !== WorkerServer.State.NONE)
 			throw new DomainError("Server has opened yet.");
 
@@ -81,10 +81,10 @@ export class WorkerServer
 		this.state_ = WorkerServer.State.CLOSING;
 		{
 			// HANDLERS
+			g.postMessage("CLOSE");
 			await this.destructor();
 			
 			// DO CLOSE
-			g.postMessage("CLOSE");
 			g.close();
 		}
 		this.state_ = WorkerServer.State.CLOSED;
@@ -136,14 +136,6 @@ export class WorkerServer
 	protected inspector(): Error
 	{
 		return null;
-	}
-
-	/**
-	 * @hidden
-	 */
-	protected joinable(): boolean
-	{
-		return this.state !== WorkerServer.State.CLOSED;
 	}
 
 	/**
