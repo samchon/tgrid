@@ -8,6 +8,7 @@ import { Invoke } from "../../components/Invoke";
 import { DomainError, RuntimeError } from "tstl/exception";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { is_node } from "tstl/utility/node";
+import { WebError } from "./WebError";
 
 //----
 // POLYFILL
@@ -107,9 +108,9 @@ export class WebConnector<Provider extends object = {}>
 				resolve();
 			};
 			this.socket_.onclose = this._Handle_close.bind(this);
-			this.socket_.onerror = (evt: ErrorEvent) =>
+			this.socket_.onerror = () =>
 			{
-				reject(evt.error);
+				reject(new WebError(1006, "Connection refused."));
 			};
 		});
 	}
@@ -260,10 +261,14 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private async _Handle_close({}: CloseEvent): Promise<void>
+	private async _Handle_close(event: CloseEvent): Promise<void>
 	{
+		let error: WebError = (!event.code || event.code !== 1000)
+			? new WebError(event.code, event.reason)
+			: undefined;
+		
 		this.server_is_listening_ = false;
-		await this.destructor();
+		await this.destructor(error);
 	}
 }
 
