@@ -4,7 +4,6 @@
 import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../components/Invoke";
-import { DomainError, RuntimeError } from "tstl";
 
 export class SharedWorkerAcceptor 
 	extends CommunicatorBase
@@ -148,12 +147,7 @@ export class SharedWorkerAcceptor
 	 */
 	protected inspector(): Error
 	{
-		if (this.state_ === SharedWorkerAcceptor.State.OPEN)
-			return null;
-		else if (this.state_ === SharedWorkerAcceptor.State.NONE)
-			return new DomainError("Not accepted yet.");
-		else
-			return new RuntimeError("Closed.");
+		return IAcceptor.inspect(this.state_);
 	}
 
 	/**
@@ -170,13 +164,5 @@ export class SharedWorkerAcceptor
 
 export namespace SharedWorkerAcceptor
 {
-	export const enum State
-	{
-		NONE = -1,
-		ACCEPTING,
-		OPEN,
-		REJECTING,
-		CLOSING,
-		CLOSED
-	}
+	export import State = IAcceptor.State;
 }

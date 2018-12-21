@@ -5,7 +5,7 @@ import { CommunicatorBase } from "../../components/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../components/Invoke";
 
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
 //----
@@ -170,14 +170,7 @@ export class WorkerConnector<Provider extends object = {}>
 	 */
 	protected inspector(): Error
 	{
-		if (this.state_ === WorkerConnector.State.OPEN)
-			return null;
-		else if (this.state_ === WorkerConnector.State.NONE)
-			return new DomainError("Connect first.");
-		else if (this.state_ === WorkerConnector.State.CONNECTING)
-			return new DomainError("Connecting.");
-		else if (this.state_ === WorkerConnector.State.CLOSED)
-			return new RuntimeError("The connection has been closed.");
+		return IConnector.inspect(this.state_);
 	}
 
 	/**
@@ -209,14 +202,7 @@ export class WorkerConnector<Provider extends object = {}>
 
 export namespace WorkerConnector
 {
-	export const enum State
-	{
-		NONE,
-		CONNECTING,
-		OPEN,
-		CLOSING,
-		CLOSED
-	}
+	export import State = IConnector.State;
 }
 
 /**

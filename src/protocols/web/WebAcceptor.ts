@@ -222,12 +222,7 @@ export class WebAcceptor
 	 */
 	protected inspector(): Error
 	{
-		if (!this.connection_)
-			return new DomainError("Not accepted.");
-		else if (!this.connection_.connected)
-			return new DomainError("Disconnected.");
-		else
-			return null;
+		return IAcceptor.inspect(this.state_);
 	}
 
 	/**
@@ -254,15 +249,7 @@ export class WebAcceptor
 
 export namespace WebAcceptor
 {
-	export const enum State
-	{
-		NONE = -1,
-		ACCEPTING,
-		OPEN,
-		REJECTING,
-		CLOSING,
-		CLOSED
-	}
+	export import State = IAcceptor.State;
 
 	export interface ICookie 
 	{

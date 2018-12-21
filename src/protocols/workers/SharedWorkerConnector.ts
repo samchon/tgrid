@@ -187,10 +187,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	protected inspector(): Error
 	{
-		if (this.state_ !== SharedWorkerConnector.State.OPEN)
-			return new DomainError("Not connected.");
-		else
-			return null;
+		return IConnector.inspect(this.state_);
 	}
 
 	/**
@@ -253,14 +250,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 
 export namespace SharedWorkerConnector
 {
-	export const enum State
-	{
-		NONE,
-		CONNECTING,
-		OPEN,
-		CLOSING,
-		CLOSED
-	}
+	export import State = IConnector.State;
 	
 	export function compile(content: string): string
 	{

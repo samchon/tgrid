@@ -49,15 +49,20 @@ export class SharedWorkerServer
 		// DO OPEN
 		this.state_ = SharedWorkerServer.State.OPENING;
 		{
-			self.addEventListener("connect", (evt: OpenEvent) =>
+			self.addEventListener("connect", (evt: Event) =>
 			{
-				let port: MessagePort = evt.ports[evt.ports.length - 1];
+				// GET PORT
+				let portList = (evt as OpenEvent).ports;
+				let port: MessagePort =portList[portList.length - 1];
+
+				// CREATE ACCEPTOR
 				let acceptor = new AcceptorFactory(port, () =>
 				{
 					this.acceptors_.erase(acceptor);
 				});
-				
 				this.acceptors_.insert(acceptor);
+
+				// SHIFT TO THE CALLBACK
 				cb(acceptor);
 			});
 		}
