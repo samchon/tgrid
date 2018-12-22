@@ -3,11 +3,12 @@
 //================================================================
 import * as ws from "websocket";
 
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { DomainError } from "tstl/exception";
+import { WebError } from "./WebError";
 
 export class WebAcceptor
 	extends CommunicatorBase
@@ -52,8 +53,11 @@ export class WebAcceptor
 
 	/**
 	 * Close connection.
+	 * 
+	 * @param code Closing code.
+	 * @param reason Reason why.
 	 */
-	public async close(): Promise<void>
+	public async close(code: number = 1000, reason?: string): Promise<void>
 	{
 		// VALIDATIONS
 		if (this.connection_ === null)
@@ -67,25 +71,23 @@ export class WebAcceptor
 		// PREPARE LAZY RETURN
 		let ret: Promise<void> = this.join();
 
-		// CHANGING STATE
+		// DO CLOSE
 		this.state_ = WebAcceptor.State.CLOSING;
-		{
-			// DO CLOSE
-			ret = this.join();
+		if (code === 1000)
 			this.connection_.close();
-		}
+		else
+			this.connection_.sendCloseFrame(code, reason, true);
+		
 		// state would be closed in destructor() via _Handle_close()
-
-		// DO RETURN
 		await ret;
 	}
 
 	/**
 	 * @hidden
 	 */
-	protected async destructor(): Promise<void>
+	protected async destructor(error?: Error): Promise<void>
 	{
-		await super.destructor();
+		await super.destructor(error);
 		this.state_ = WebAcceptor.State.CLOSED;
 	}
 
@@ -220,12 +222,7 @@ export class WebAcceptor
 	 */
 	protected inspector(): Error
 	{
-		if (!this.connection_)
-			return new DomainError("Not accepted.");
-		else if (!this.connection_.connected)
-			return new DomainError("Disconnected.");
-		else
-			return null;
+		return IAcceptor.inspect(this.state_);
 	}
 
 	/**
@@ -240,23 +237,19 @@ export class WebAcceptor
 	/**
 	 * @hidden
 	 */
-	private async _Handle_close({}: number, {}: string): Promise<void>
+	private async _Handle_close(code: number, reason: string): Promise<void>
 	{
-		await this.destructor();
+		let error: WebError = (code !== 100)
+			? new WebError(code, reason)
+			: undefined;
+		
+		await this.destructor(error);
 	}
 }
 
 export namespace WebAcceptor
 {
-	export const enum State
-	{
-		NONE = -1,
-		ACCEPTING,
-		OPEN,
-		REJECTING,
-		CLOSING,
-		CLOSED
-	}
+	export import State = IAcceptor.State;
 
 	export interface ICookie 
 	{

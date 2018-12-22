@@ -6,6 +6,7 @@ import {
 	connection as Connection,
 	IMessage
 } from "websocket";
+import { WebError } from "../WebError";
 
 /**
  * @hidden
@@ -35,7 +36,13 @@ export class WebSocket
 		// PREPARE SOCKET
 		this.client_ = new Client();
 		this.client_.on("connect", this._Handle_connect.bind(this));
-		this.client_.on("connectFailed", this._Handle_error.bind(this));
+		this.client_.on("connectFailed", () =>
+		{
+			let err = new WebError(1006, "Connection refused.");
+
+			this._Handle_error(err);
+			this._Handle_close(1006, err.message);
+		});
 
 		if (typeof protocols === "string")
 			protocols = [protocols];
@@ -48,7 +55,7 @@ export class WebSocket
 	{
 		this.state_ = WebSocket.CLOSING;
 		if (code === undefined)
-			this.connection_.sendCloseFrame();
+			this.connection_.close();
 		else
 			this.connection_.sendCloseFrame(code, reason, true);
 	}

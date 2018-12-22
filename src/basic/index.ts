@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.components */
+/** @module tgrid.basic */
 //================================================================
 export * from "./Invoke";
 export * from "./CommunicatorBase";

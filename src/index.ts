@@ -4,7 +4,7 @@
 /**
  * Basic components.
  */
-export import components = require("./components");
+export import basic = require("./basic");
 
 /**
  * Provided protocols.

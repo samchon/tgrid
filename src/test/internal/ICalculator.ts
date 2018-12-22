@@ -1,6 +1,6 @@
 import * as std from "tstl";
 
-import { Driver } from "../../components/Driver";
+import { Driver } from "../../basic/Driver";
 import { Calculator } from "./Calculator";
 
 export type ICalculator = Driver<Calculator>;

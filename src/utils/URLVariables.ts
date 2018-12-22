@@ -113,7 +113,7 @@ export namespace URLVariables
 				continue;
 			}
 
-			if (entry.second == "")
+			if (entry.second.length === 0)
 				ret[entry.first] = true;
 			else if (entry.second == "true" || entry.second == "false")
 				ret[entry.first] = (entry.second == "true");

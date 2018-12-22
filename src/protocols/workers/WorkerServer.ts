@@ -1,13 +1,13 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IState } from "../internal/IState";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";
-import { DomainError } from "tstl/exception";
+import { DomainError, RuntimeError } from "tstl/exception";
 
 //----
 // CAPSULIZATION
@@ -136,7 +136,23 @@ export class WorkerServer
 	 */
 	protected inspector(): Error
 	{
-		return null;
+		// NO ERROR
+		if (this.state_ === WorkerServer.State.OPEN)
+			return null;
+
+		// ERROR, ONE OF THEM
+		else if (this.state_ === WorkerServer.State.NONE)
+			return new DomainError("Server is not opened yet.");
+		else if (this.state_ === WorkerServer.State.OPENING)
+			return new DomainError("Server is on opening; wait for a sec.");
+		else if (this.state_ === WorkerServer.State.CLOSING)
+			return new RuntimeError("Server is on closing.");
+
+		// MAY NOT BE OCCURED
+		else if (this.state_ === WorkerServer.State.CLOSED)
+			return new RuntimeError("The server has been closed.");
+		else
+			return new RuntimeError("Unknown error, but not connected.");
 	}
 
 	/**

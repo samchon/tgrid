@@ -1,13 +1,14 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError } from "tstl/exception";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { is_node } from "tstl/utility/node";
+import { WebError } from "./WebError";
 
 //----
 // POLYFILL
@@ -107,9 +108,9 @@ export class WebConnector<Provider extends object = {}>
 				resolve();
 			};
 			this.socket_.onclose = this._Handle_close.bind(this);
-			this.socket_.onerror = (evt: ErrorEvent) =>
+			this.socket_.onerror = () =>
 			{
-				reject(evt.error);
+				reject(new WebError(1006, "Connection refused."));
 			};
 		});
 	}
@@ -218,14 +219,7 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	protected inspector(): Error
 	{
-		if (this.state === WebConnector.State.OPEN)
-			return null;
-		else if (this.state === WebConnector.State.NONE)
-			return new DomainError("Connect first.");
-		else if (this.state === WebConnector.State.CONNECTING)
-			return new DomainError("Connecting.");
-		else if (this.state === WebConnector.State.CLOSED)
-			return new RuntimeError("The connection has been closed.")
+		return IConnector.inspect(this.state);
 	}
 
 	/**
@@ -251,7 +245,7 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_error({}: ErrorEvent): void
+	private _Handle_error({}: Event): void
 	{
 		// HANDLING ERRORS ON CONNECTION, 
 		// THAT'S NOT IMPLEMENTED YET
@@ -260,23 +254,20 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private async _Handle_close({}: CloseEvent): Promise<void>
+	private async _Handle_close(event: CloseEvent): Promise<void>
 	{
+		let error: WebError = (!event.code || event.code !== 1000)
+			? new WebError(event.code, event.reason)
+			: undefined;
+		
 		this.server_is_listening_ = false;
-		await this.destructor();
+		await this.destructor(error);
 	}
 }
 
 export namespace WebConnector
 {
-	export const enum State
-	{
-		NONE = -1,
-		CONNECTING,
-		OPEN,
-		CLOSING,
-		CLOSED
-	}
+	export import State = IConnector.State;
 }
 
 /**
