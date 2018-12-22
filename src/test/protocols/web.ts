@@ -1,7 +1,7 @@
 import * as std from "tstl";
 
 import { WebServer, WebConnector } from "../../protocols/web";
-import { Driver } from "../../components"
+import { Driver } from "../../basic"
 
 import { Calculator } from "../internal/Calculator";
 import { ICalculator } from "../internal/ICalculator";

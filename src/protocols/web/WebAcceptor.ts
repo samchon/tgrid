@@ -3,9 +3,9 @@
 //================================================================
 import * as ws from "websocket";
 
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { DomainError } from "tstl/exception";
 import { WebError } from "./WebError";

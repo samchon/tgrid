@@ -63,12 +63,12 @@ async function main(): Promise<void>
     // wait server to provide the Vector
     await connector.wait();
 
-    // get Driver<Controller>
-    let v = connector.getDriver<Vector<number>>();
-
     //----
     // CALL FUNCTIONS IN THE REMOTE SYSTEM
     //----
+    // get Driver<Controller>
+    let v = connector.getDriver<Vector<number>>();
+
     // insert elements
     for (let i: number = 0; i < 5; ++i)
         await v.push_back(i);

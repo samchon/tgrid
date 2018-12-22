@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IState } from "../internal/IState";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";

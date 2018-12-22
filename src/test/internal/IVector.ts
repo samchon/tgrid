@@ -1,5 +1,5 @@
 import * as std from "tstl";
-import { Driver } from "../../components/Driver";
+import { Driver } from "../../basic/Driver";
 
 export type IVector = Driver<std.Vector<number>>;
 export namespace IVector

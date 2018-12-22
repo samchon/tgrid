@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 import { DomainError } from "tstl/exception";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";

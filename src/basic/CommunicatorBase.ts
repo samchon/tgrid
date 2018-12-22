@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.components */
+/** @module tgrid.basic */
 //================================================================
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";

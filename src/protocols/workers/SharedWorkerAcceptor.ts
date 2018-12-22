@@ -1,9 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../components/CommunicatorBase";
+import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../components/Invoke";
+import { Invoke } from "../../basic/Invoke";
 
 export class SharedWorkerAcceptor 
 	extends CommunicatorBase
