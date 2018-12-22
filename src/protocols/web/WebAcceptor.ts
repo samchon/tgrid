@@ -59,12 +59,11 @@ export class WebAcceptor
 	 */
 	public async close(code: number = 1000, reason?: string): Promise<void>
 	{
-		// VALIDATIONS
-		if (this.connection_ === null)
-			throw new DomainError("Not accepted or rejected.");
-		else if (!this.connection_.connected)
-			throw new DomainError("Not connected.");
-
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
+		
 		//----
 		// CLOSE WITH JOIN
 		//----
@@ -109,9 +108,15 @@ export class WebAcceptor
 	{
 		return new Promise((resolve, reject) =>
 		{
-			this.state_ = WebAcceptor.State.ACCEPTING;
+			// TEST CONDITION
+			if (this.state_ !== WebAcceptor.State.NONE)
+			{
+				reject(new DomainError("You've already accepted (or rejected) the connectino."));
+				return;
+			}
 
 			// PREPARE EVENT LISTENERS
+			this.state_ = WebAcceptor.State.ACCEPTING;
 			this.request_.on("requestAccepted", connection =>
 			{
 				this.connection_ = connection;
@@ -146,8 +151,15 @@ export class WebAcceptor
 	 */
 	public reject(status?: number, reason?: string, extraHeaders?: object): Promise<void>
 	{
-		return new Promise(resolve =>
+		return new Promise((resolve, reject) =>
 		{
+			// TEST CONDITION
+			if (this.state_ !== WebAcceptor.State.NONE)
+			{
+				reject(new DomainError("You've already accepted (or rejected) the connection."));
+				return;
+			}
+
 			// PREPARE HANDLER
 			this.request_.on("requestRejected", async () =>
 			{
@@ -167,6 +179,11 @@ export class WebAcceptor
 	public async listen<Provider extends object>
 		(provider: Provider): Promise<void>
 	{
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
+
 		// SET PROVIDER
 		this.provider_ = provider;
 		if (this.listening_ === true)

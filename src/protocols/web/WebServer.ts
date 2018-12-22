@@ -6,7 +6,7 @@ import * as http from "http";
 import * as https from "https";
 
 import { WebAcceptor } from "./WebAcceptor";
-import { DomainError } from "tstl/exception";
+import { DomainError, RuntimeError } from "tstl/exception";
 
 export class WebServer
 {
@@ -67,22 +67,42 @@ export class WebServer
 	{
 		return new Promise((resolve, reject) =>
 		{
+			//----
+			// TEST CONDITION
+			//----
+			// POSSIBLE TO OPEN?
+			if (!(this.state_ === WebServer.State.NONE || this.state_ === WebServer.State.CLOSED))
+			{
+				let exp: Error;
+				if (this.state_ === WebServer.State.OPEN)
+					exp = new DomainError("Server has already opened.");
+				else if (this.state_ === WebServer.State.OPENING)
+					exp = new DomainError("Server is on openeing; wait for a sec.");
+				else if (this.state_ === WebServer.State.CLOSING)
+					exp = new RuntimeError("Server is on closing.");
+
+				reject(exp);
+				return;
+			}
+
+			//----
+			// OPEN SERVER
+			//----
 			// PROTOCOL - ADAPTOR & ACCEPTOR
-			if (this.protocol_ === null)
 			try
+			{
+				this.protocol_ = new ws.server({ httpServer: this.server_ });
+				this.protocol_.on("request", request =>
 				{
-					this.protocol_ = new ws.server({ httpServer: this.server_ });
-					this.protocol_.on("request", request =>
-					{
-						let acceptor: WebAcceptor = new AcceptorFactory(request);
-						cb(acceptor);
-					});
-				}
-				catch (exp)
-				{
-					reject(exp);
-					return;	
-				}
+					let acceptor: WebAcceptor = new AcceptorFactory(request);
+					cb(acceptor);
+				});
+			}
+			catch (exp)
+			{
+				reject(exp);
+				return;	
+			}
 
 			// PREPARE RETURNS
 			this.server_.on("listening", () =>

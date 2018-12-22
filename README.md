@@ -49,7 +49,13 @@ main();
 #### `example/vector/client.ts`
 ```typescript
 import { WebConnector } from "tgrid/protocols/web";
-import { Vector } from "tstl/container";
+
+interface IVector<T>
+{
+    size(): number;
+    at(index: number): T;
+    push_back(val: T): void;
+}
 
 async function main(): Promise<void>
 {
@@ -67,7 +73,7 @@ async function main(): Promise<void>
     // CALL FUNCTIONS IN THE REMOTE SYSTEM
     //----
     // get Driver<Controller>
-    let v = connector.getDriver<Vector<number>>();
+    let v = connector.getDriver<IVector<number>>();
 
     // insert elements
     for (let i: number = 0; i < 5; ++i)

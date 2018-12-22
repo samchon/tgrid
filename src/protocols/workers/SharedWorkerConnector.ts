@@ -60,9 +60,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	{
 		return new Promise((resolve, reject) => 
 		{
-			//----
-			// INSPECTOR
-			//----
+			// TEST CONDITION
 			if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
 			{
 				let err: Error;
@@ -109,9 +107,10 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	public async close(): Promise<void>
 	{
-		// VALIDATION
-		if (this.state_ !== SharedWorkerConnector.State.OPEN)
-			throw new DomainError("Not conneced.");
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
 
 		//----
 		// CLOSE WITH JOIN
@@ -155,10 +154,14 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 
 	public async wait(param?: number | Date): Promise<void|boolean>
 	{
-		// VALIDATION
-		if (this.state_ !== SharedWorkerConnector.State.OPEN)
-			throw new DomainError("Not connected yet.");
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
 
+		//----
+		// WAIT SERVER
+		//----
 		// PREPARE PREDICATOR
 		let predicator = () => this.server_is_listening_;
 

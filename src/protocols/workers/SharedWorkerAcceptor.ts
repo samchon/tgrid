@@ -4,6 +4,7 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../basic/Invoke";
+import { DomainError } from "tstl";
 
 export class SharedWorkerAcceptor 
 	extends CommunicatorBase
@@ -53,6 +54,12 @@ export class SharedWorkerAcceptor
 	 */
 	public async close(): Promise<void>
 	{
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
+
+		// CLOSE CONNECTION
 		this.state_ = SharedWorkerAcceptor.State.CLOSING;
 		await this._Close("CLOSE");
 	}
@@ -94,6 +101,13 @@ export class SharedWorkerAcceptor
 	 */
 	public async accept(): Promise<void>
 	{
+		// TEST CONDITION
+		if (this.state_ !== SharedWorkerAcceptor.State.NONE)
+			throw new DomainError("You've already accepted (or rejected) the connection.");
+
+		//----
+		// ACCEPT CONNECTION
+		//----
 		this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
 		{
 			// PREPARE PORT
@@ -111,6 +125,13 @@ export class SharedWorkerAcceptor
 	 */
 	public async reject(): Promise<void>
 	{
+		// TEST CONDITION
+		if (this.state_ !== SharedWorkerAcceptor.State.NONE)
+			throw new DomainError("You've already accepted (or rejected) the connection.");
+
+		//----
+		// REJECT CONNECTION (CLOSE)
+		//----
 		this.state_ = SharedWorkerAcceptor.State.REJECTING;
 		await this._Close("REJECT");
 	}
@@ -121,6 +142,14 @@ export class SharedWorkerAcceptor
 	public async listen<Provider extends object>
 		(provider: Provider): Promise<void>
 	{
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
+
+		//----
+		// START LISTENING
+		//----
 		// ASSIGN LISTENER
 		this.provider_ = provider;
 		if (this.listening_ === true)

@@ -66,9 +66,7 @@ export class WebConnector<Provider extends object = {}>
 	{
 		return new Promise((resolve, reject) =>
 		{
-			//----
-			// INSPECTOR
-			//----
+			// TEST CONDITION
 			if (this.socket_ && this.state !== WebConnector.State.CLOSED)
 			{
 				let err: Error;
@@ -123,9 +121,10 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	public async close(code?: number, reason?: string): Promise<void>
 	{
-		// VALIDATION
-		if (this.state !== WebConnector.State.OPEN)
-			throw new DomainError("Not conneced.");
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
 		
 		//----
 		// CLOSE WITH JOIN
@@ -187,10 +186,14 @@ export class WebConnector<Provider extends object = {}>
 
 	public async wait(param: number | Date = null): Promise<void|boolean>
 	{
-		// VALIDATION
-		if (this.state !== WebConnector.State.OPEN)
-			throw new DomainError("Not connected.");
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
 
+		//----
+		// WAIT SERVER
+		//----
 		// PREPARE PREDICATOR
 		let predicator = () => this.server_is_listening_;
 

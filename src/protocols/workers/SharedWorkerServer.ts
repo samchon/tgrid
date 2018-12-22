@@ -40,13 +40,17 @@ export class SharedWorkerServer
 	 */
 	public async open(cb: (acceptor: SharedWorkerAcceptor) => any): Promise<void>
 	{
-		// INSPECTOR
+		// TEST CONDITION
 		if (is_node() === true)
 			throw new DomainError("SharedWorker is not supported in the NodeJS.");
 		else if (self.document !== undefined)
 			throw new DomainError("This is not SharedWorker.");
+		else if (this.state_ !== SharedWorkerServer.State.NONE)
+			throw new DomainError("Server has opened yet.");
 
-		// DO OPEN
+		//----
+		// OPE SHARED-WORKER
+		//----
 		this.state_ = SharedWorkerServer.State.OPENING;
 		{
 			self.addEventListener("connect", (evt: Event) =>
@@ -74,6 +78,11 @@ export class SharedWorkerServer
 	 */
 	public async close(): Promise<void>
 	{
+		// TEST VALIDATION
+		if (this.state_ !== SharedWorkerServer.State.OPEN)
+			throw new DomainError("Server is not opened.");
+		
+		// CLOSE ALL CONNECTIONS
 		for (let acceptor of this.acceptors_)
 			await acceptor.close();
 	}
