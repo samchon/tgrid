@@ -54,7 +54,7 @@ export class WorkerServer
 	 */
 	public async open<Provider extends object>(provider: Provider = null): Promise<void>
 	{
-		// INSPECTOR
+		// TEST CONDITION
 		if (is_node() === false)
 		{
 			if (self.document !== undefined)
@@ -64,8 +64,8 @@ export class WorkerServer
 			throw new DomainError("This is not Child Process.");	
 		else if (this.state_ !== WorkerServer.State.NONE)
 			throw new DomainError("Server has opened yet.");
-
-		// DO OPEN
+		
+		// OPEN WORKER
 		this.state_ = WorkerServer.State.OPENING;
 		{
 			this.provider_ = provider;
@@ -79,6 +79,14 @@ export class WorkerServer
 	 */
 	public async close(): Promise<void>
 	{
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
+
+		//----
+		// CLOSE WORKER
+		//----
 		this.state_ = WorkerServer.State.CLOSING;
 		{
 			// HANDLERS

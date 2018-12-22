@@ -79,9 +79,7 @@ export class WorkerConnector<Provider extends object = {}>
 	{
 		return new Promise((resolve, reject) =>
 		{
-			//----
-			// INSPECTOR
-			//----
+			// TEST CONDITION
 			if (this.worker_ && this.state !== WorkerConnector.State.CLOSED)
 			{
 				let err: Error;
@@ -125,9 +123,10 @@ export class WorkerConnector<Provider extends object = {}>
 	 */
 	public async close(): Promise<void>
 	{
-		// VALIDATION
-		if (this.state !== WorkerConnector.State.OPEN)
-			throw new DomainError("Not conneced.");
+		// TEST CONDITION
+		let error: Error = this.inspector();
+		if (error)
+			throw error;
 
 		//----
 		// CLOSE WITH JOIN
