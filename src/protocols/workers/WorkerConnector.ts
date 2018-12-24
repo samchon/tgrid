@@ -52,21 +52,41 @@ export class WorkerConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Connec to worker server with compilation.
+	 * Connect to worker server with compilation.
 	 * 
 	 * @param content JS Source file to be server with compilation.
 	 */
 	public async compile(content: string, ...args: string[]): Promise<void>
 	{
-		if (Compiler.remove)
-		{
-			let path: string = await Compiler.compile(content);
+		//----
+		// PRELIMINIARIES
+		//----
+		// TEST CONDITION
+		this._Test_connection();
 
-			await this.connect(path, ...args);
-			await Compiler.remove(path);
+		// COMPILATION
+		let path: string = await Compiler.compile(content);
+		let error: Error = null; // FOR LAZY-THROWING
+
+		//----
+		// CONNECT
+		//----
+		// TRY CONNECTION
+		try
+		{
+			await this._Connect(path, ...args);
 		}
-		else
-			await this.connect(<string>Compiler.compile(content), ...args);
+		catch (exp)
+		{
+			error = exp;
+		}
+
+		// REMOVE THE TEMPORARY FILE
+		await Compiler.remove(path);
+
+		// LAZY THROWING
+		if (error)
+			throw error;
 	}
 
 	/**
@@ -75,28 +95,38 @@ export class WorkerConnector<Provider extends object = {}>
 	 * @param jsFile JS File to be worker server.
 	 * @param args Arguments to deliver.
 	 */
-	public connect(jsFile: string, ...args: string[]): Promise<void>
+	public async connect(jsFile: string, ...args: string[]): Promise<void>
 	{
-		return new Promise((resolve, reject) =>
+		// TEST CONDITION
+		this._Test_connection();
+
+		// DO CONNECT
+		await this._Connect(jsFile, ...args);
+	}
+
+	/**
+	 * @hidden
+	 */
+	private _Test_connection(): void
+	{
+		if (this.worker_ && this.state !== WorkerConnector.State.CLOSED)
 		{
-			// TEST CONDITION
-			if (this.worker_ && this.state !== WorkerConnector.State.CLOSED)
-			{
-				let err: Error;
-				if (this.state_ === WorkerConnector.State.CONNECTING)
-					err = new DomainError("On connecting.");
-				else if (this.state_ === WorkerConnector.State.OPEN)
-					err = new DomainError("Already connected.");
-				else
-					err = new DomainError("Closing.");
+			if (this.state_ === WorkerConnector.State.CONNECTING)
+				throw new DomainError("On connecting.");
+			else if (this.state_ === WorkerConnector.State.OPEN)
+				throw new DomainError("Already connected.");
+			else
+				throw new DomainError("Closing.");
+		}
+	}
 
-				reject(err);
-				return;
-			}
-
-			//----
-			// CONNECTOR
-			//----
+	/**
+	 * @hidden
+	 */
+	private _Connect(jsFile: string, ...args: string[]): Promise<void>
+	{
+		return new Promise<void>((resolve, reject) =>
+		{
 			try
 			{
 				// SET STATE -> CONNECTING
@@ -210,6 +240,6 @@ export namespace WorkerConnector
 interface CompilerScope
 {
 	compile(content: string): string | Promise<string>;
+	remove(path: string): void | Promise<void>;
 	execute(jsFile: string, ...args: string[]): Worker;
-	remove?(path: string): Promise<void>;
 }

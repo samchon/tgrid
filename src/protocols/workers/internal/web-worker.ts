@@ -12,6 +12,17 @@ export function compile(content: string): string
 	return URL.createObjectURL(blob);
 }
 
+/**
+ * @hidden
+ */
+export function remove(url: string): void
+{
+	return URL.revokeObjectURL(url);
+}
+
+/**
+ * @hidden
+ */
 export function execute(jsFile: string, ...args: string[]): Worker
 {
 	if (args.length)
