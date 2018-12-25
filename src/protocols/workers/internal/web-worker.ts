@@ -17,7 +17,12 @@ export function compile(content: string): string
  */
 export function remove(url: string): void
 {
-	return URL.revokeObjectURL(url);
+	// THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
+	try
+	{
+		URL.revokeObjectURL(url);
+	}
+	catch {}
 }
 
 /**
