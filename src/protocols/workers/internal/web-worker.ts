@@ -12,6 +12,22 @@ export function compile(content: string): string
 	return URL.createObjectURL(blob);
 }
 
+/**
+ * @hidden
+ */
+export function remove(url: string): void
+{
+	// THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
+	try
+	{
+		URL.revokeObjectURL(url);
+	}
+	catch {}
+}
+
+/**
+ * @hidden
+ */
 export function execute(jsFile: string, ...args: string[]): Worker
 {
 	if (args.length)

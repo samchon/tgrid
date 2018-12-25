@@ -9,7 +9,7 @@ import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError, RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
-import { compile as _Compile } from "./internal/web-worker";
+import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
 
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>
@@ -258,5 +258,10 @@ export namespace SharedWorkerConnector
 	export function compile(content: string): string
 	{
 		return _Compile(content);
+	}
+
+	export function remove(url: string): void
+	{
+		_Remove(url);
 	}
 }
