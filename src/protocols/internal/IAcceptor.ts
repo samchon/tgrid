@@ -1,9 +1,9 @@
-import { IState } from "./IState";
-import { DomainError, RuntimeError } from "tstl/exception";
-
 //================================================================ 
 /** @module tgrid.protocols */
 //================================================================
+import { IState } from "./IState";
+import { DomainError, RuntimeError } from "tstl/exception";
+
 /**
  * @hidden
  */

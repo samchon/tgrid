@@ -1,3 +1,6 @@
+//================================================================ 
+/** @module tgrid.protocols.web */
+//================================================================
 import { SystemError } from "tstl/exception/SystemError";
 
 import { ErrorCategory } from "tstl/exception/ErrorCategory";
