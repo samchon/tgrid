@@ -7,7 +7,7 @@
 export interface IState<State>
 {
 	/**
-	 * Current stage.
+	 * Current state.
 	 */
 	readonly state: State;
 }

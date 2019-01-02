@@ -146,14 +146,14 @@ export class SharedWorkerAcceptor
 		let error: Error = this.inspector();
 		if (error)
 			throw error;
+		else if (this.listening_ === true)
+			throw new DomainError("Already listening.");
 
 		//----
 		// START LISTENING
 		//----
 		// ASSIGN LISTENER
 		this.provider_ = provider;
-		if (this.listening_ === true)
-			return;
 		
 		// INFORM READY TO CLIENT
 		this.listening_ = true;

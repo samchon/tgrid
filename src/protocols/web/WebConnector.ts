@@ -10,16 +10,12 @@ import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { is_node } from "tstl/utility/node";
 import { WebError } from "./WebError";
 
-//----
-// POLYFILL
-//----
 /**
- * @hidden
+ * Web Socket Connector.
+ * 
+ * @see {@link WebServer}, {@link WebConnector}
+ * @author Jeongho Nam <http://samchon.org>
  */
-var g: IFeature = is_node()
-	? require("./internal/websocket-polyfill")
-	: <any>self;
-
 export class WebConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
 	implements IConnector<WebConnector.State>
@@ -272,6 +268,16 @@ export namespace WebConnector
 {
 	export import State = IConnector.State;
 }
+
+//----
+// POLYFILL
+//----
+/**
+ * @hidden
+ */
+const g: IFeature = is_node()
+	? require("./internal/websocket-polyfill")
+	: <any>self;
 
 /**
  * @hidden

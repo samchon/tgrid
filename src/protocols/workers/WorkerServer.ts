@@ -9,16 +9,6 @@ import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";
 import { DomainError, RuntimeError } from "tstl/exception";
 
-//----
-// CAPSULIZATION
-//----
-/**
- * @hidden
- */
-var g: IFeature = is_node()
-	? require("./internal/worker-server-polyfill")
-	: self;
-
 export class WorkerServer 
 	extends CommunicatorBase
 	implements IState<WorkerServer.State>
@@ -188,6 +178,16 @@ export namespace WorkerServer
 		CLOSED = 3
 	}
 }
+
+//----
+// POLYFILL
+//----
+/**
+ * @hidden
+ */
+const g: IFeature = is_node()
+	? require("./internal/worker-server-polyfill")
+	: self;
 
 /**
  * @hidden

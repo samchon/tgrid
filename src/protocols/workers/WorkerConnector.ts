@@ -8,16 +8,6 @@ import { Invoke } from "../../basic/Invoke";
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
-//----
-// CAPSULIZATION
-//----
-/**
- * @hidden
- */
-const Compiler: CompilerScope = is_node()
-	? require("./internal/node-worker")
-	: require("./internal/web-worker");
-
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
 	implements Pick<IConnector<WorkerConnector.State>, "state">
@@ -233,6 +223,16 @@ export namespace WorkerConnector
 {
 	export import State = IConnector.State;
 }
+
+//----
+// CAPSULIZATION
+//----
+/**
+ * @hidden
+ */
+const Compiler: CompilerScope = is_node()
+	? require("./internal/node-worker")
+	: require("./internal/web-worker");
 
 /**
  * @hidden

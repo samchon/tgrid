@@ -4,6 +4,28 @@
 import { CommunicatorBase } from "./CommunicatorBase";
 import { Invoke } from "./Invoke";
 
+/**
+ * The basic cmmunicator (FP version).
+ * 
+ * The `Communicator` is a basic class taking full charge of network communication like 
+ * `CommunicatorBase`, for someone who prefer FP (Functional Programming) rather than OOP 
+ * (Object Oriented Programming) using inheritance.
+ * 
+ * You want to make your own communicator using special protocol, then creates the 
+ * `Communicator` instance. Key features of RFC (Remote Function Call) are already 
+ * implemented in the `Communicator`. Thus, only you've to do is specializing your 
+ * protocol using those methods and assigning proper functions.
+ * 
+ *   - Use them:
+ *     - {@link replyData}
+ *     - {@link destroy}
+ *   - Assign them:
+ *     - {@link sendData}
+ *     - {@link inspectReady}
+ *     - {@link provider}
+ * 
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class Communicator<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
 {
@@ -14,8 +36,8 @@ export class Communicator<Provider extends object = {}>
 	 * Initializer Constructor.
 	 * 
 	 * @param sender A function sending data to the remote system.
-	 * @param readyInspector A predicator function inspects whether the *network communication* is ready. It must return null, if ready, otherwise *Error* object explaining why.
-	 * @param provider A provider for the remote system.
+	 * @param readyInspector A predicator function inspects whether the *network communication* is on ready. It must return null, if ready, otherwise *Error* object explaining why.
+	 * @param provider An object would be provided for the remote system.
 	 */
 	public constructor(sender: Sender, readyInspector: ReadyInspector, provider: Provider = null)
 	{
@@ -28,7 +50,7 @@ export class Communicator<Provider extends object = {}>
 	/**
 	 * Destory the communicator.
 	 * 
-	 * A destory function should be called when the network communication has been closed. It would destroy all function calls in the remote system (via {@link `Driver<Controller>` getDriver}), which are not returned yet.
+	 * A destory function must be called when the network communication has been closed. It would destroy all function calls in the remote system (via {@link `Driver<Controller>` getDriver}), which are not returned yet.
 	 * 
 	 * The *error* instance would be thrown to those function calls. If the disconnection is abnormal, then write the detailed reason why into the *error* instance.
 	 * 
@@ -61,7 +83,7 @@ export class Communicator<Provider extends object = {}>
 	public sendData: Sender;
 
 	/**
-	 * A predicator inspects whether the *network communication* is ready.
+	 * A predicator inspects whether the *network communication* is on ready.
 	 */
 	public inspectReady: ReadyInspector;
 

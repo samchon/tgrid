@@ -7,7 +7,7 @@ import { ErrorCategory } from "tstl/exception/ErrorCategory";
 import { TreeMap } from "tstl/container/TreeMap";
 
 /**
- * Web Error.
+ * Web Socket Error.
  * 
  * @reference https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
  * @author Jeongho Nam <samchon@samchon.org>

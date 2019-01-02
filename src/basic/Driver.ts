@@ -33,22 +33,3 @@ export type Promisify<Instance extends object> =
 			? Promisify<Instance[P]>
 			: never;
 	};
-
-// export type Promisify2<Instance extends object> = 
-// 	Instance extends (...args: any[]) => any
-// 		? PromisifyFunction<Instance>
-// 		: PromisifyObject<Instance>;
-
-// type PromisifyObject<Instance extends object> = 
-// {
-// 	[P in keyof Instance]: Instance[P] extends object
-// 		? Promisify<Instance[P]>
-// 		: never;
-// };
-
-// type PromisifyFunction<Instance extends (...args: any[]) => any> =
-// 	Instance extends (...args: infer Params) => infer Ret
-// 		? Ret extends Promise<any>
-// 			? (...args: Params) => Ret
-// 			: (...args: Params) => Promise<Ret>
-// 		: never;

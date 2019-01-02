@@ -8,6 +8,12 @@ import * as https from "https";
 import { WebAcceptor } from "./WebAcceptor";
 import { DomainError, RuntimeError } from "tstl/exception";
 
+/**
+ * Web Socket Server.
+ * 
+ * @see {@link WebAcceptor}, {@link WebConnector}
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class WebServer
 {
 	/**
@@ -61,9 +67,9 @@ export class WebServer
 	 * Open server.
 	 * 
 	 * @param port Port number to listen.
-	 * @param cb Callback function whenever client connects.
+	 * @param handler Callback function whenever client connects.
 	 */
-	public open(port: number, cb: (acceptor: WebAcceptor) => void | Promise<void>): Promise<void>
+	public open(port: number, handler: (acceptor: WebAcceptor) => any): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -95,7 +101,7 @@ export class WebServer
 				this.protocol_.on("request", request =>
 				{
 					let acceptor: WebAcceptor = new AcceptorFactory(request);
-					cb(acceptor);
+					handler(acceptor);
 				});
 			}
 			catch (exp)

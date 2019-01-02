@@ -9,6 +9,31 @@ import { RuntimeError } from "tstl/exception";
 import { Invoke, IFunction, IReturn } from "./Invoke";
 import { Driver } from "./Driver";
 
+/**
+ * The basic communicator.
+ * 
+ * The `CommunicatorBase` is an abstract class taking full charge of network communication. 
+ * Protocolized communicators like `WebConnector` are realized by extending the 
+ * `CommunicatorBase` class.
+ * 
+ * You want to make your own communicator using special protocol, then extends this 
+ * `CommunicatorBase` class. Key features of RFC (Remote Function Call) are already 
+ * implemented in the `CommunicatorBase`. Thus, only you've to is specializing your 
+ * protocol using those methods with overridings:
+ * 
+ *   - Assign it
+ *     - `provider_`: An object would be provided for the remote system.
+ *   - Use them
+ *     - `replier`: When you got a message from the remote system, then convert the message to `Invoke` and deliver to here.
+ *     - `destructor`: You must call this method after the connection has been closed.
+ *   - Override them
+ *     - `insepctor`: A predicator function inspect whether the connection is on ready. If ready, returns `null`, otherwise an `Error` object explaning the reason why.
+ *     - `sender`: A function sending data (`Invoke`) to the remote system.
+ * 
+ * @tparam Provider Type of provider.
+ * @see {@link Communicator}: You prefer FP (Functional Programming), use it instead.
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export abstract class CommunicatorBase<Provider extends object = {}>
 {
 	/**

@@ -10,6 +10,25 @@ import { Invoke } from "../../basic/Invoke";
 import { DomainError } from "tstl/exception";
 import { WebError } from "./WebError";
 
+/**
+ * Web Socket Acceptor.
+ * 
+ * The `WebAcceptor` is a communicator class interacting with the remote (web socket) 
+ * client. The `WebAcceptor` object is always created by the {@link WebServer} class 
+ * whenever a remote client connects to its server.
+ * 
+ * If you want to accept & start interaction with the remote client, call methods following 
+ * such sequence:
+ * 
+ *   1. Call {@link accept accept()} method to accept the connection.
+ *   2. Call {@link listen listen()} method to specify the `Provider`.
+ *     - If you don't want to provide anything to the remote client, then do not need to 
+ * call this method. In that case, you (server) may possible to call the remote functions 
+ * provided from the client, however, the client is not.
+ * 
+ * @see {@link WebServer}, {@link WebConnector}
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class WebAcceptor
 	extends CommunicatorBase
 	implements IAcceptor<WebAcceptor.State>
@@ -145,6 +164,8 @@ export class WebAcceptor
 	/**
 	 * Reject connection.
 	 * 
+	 * Reject; connection without acceptance, any interaction.
+	 * 
 	 * @param status Status code.
 	 * @param reason Detailed reason to reject.
 	 * @param extraHeaders Extra headers if required.
@@ -183,11 +204,11 @@ export class WebAcceptor
 		let error: Error = this.inspector();
 		if (error)
 			throw error;
+		else if (this.listening_ === true)
+			throw new DomainError("Already listening.");
 
 		// SET PROVIDER
 		this.provider_ = provider;
-		if (this.listening_ === true)
-			return;
 		
 		// INFORM TO CLIENT
 		this.listening_ = true;

@@ -3,6 +3,8 @@
 //================================================================
 /**
  * Message for RFC (Remote Function Call).
+ * 
+ * @author Jeongho Nam <http://samchon.org>
  */
 export type Invoke = IFunction | IReturn;
 
