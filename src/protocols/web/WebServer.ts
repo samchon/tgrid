@@ -14,7 +14,7 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @see {@link WebAcceptor}, {@link WebConnector}
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebServer
+export class WebServer<Provider extends object = {}>
 {
 	/**
 	 * @hidden
@@ -67,9 +67,9 @@ export class WebServer
 	 * Open server.
 	 * 
 	 * @param port Port number to listen.
-	 * @param handler Callback function whenever client connects.
+	 * @param handler Handler function for client connection.
 	 */
-	public open(port: number, handler: (acceptor: WebAcceptor) => any): Promise<void>
+	public open(port: number, handler: (acceptor: WebAcceptor<Provider>) => any): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -100,7 +100,7 @@ export class WebServer
 				this.protocol_ = new ws.server({ httpServer: this.server_ });
 				this.protocol_.on("request", request =>
 				{
-					let acceptor: WebAcceptor = new AcceptorFactory(request);
+					let acceptor: WebAcceptor<Provider> = new AcceptorFactory(request);
 					handler(acceptor);
 				});
 			}
@@ -156,11 +156,6 @@ export class WebServer
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
-	/**
-	 * Get state.
-	 * 
-	 * @return Current state.
-	 */
 	public get state(): WebServer.State
 	{
 		return this.state_;
@@ -169,7 +164,7 @@ export class WebServer
 
 export namespace WebServer
 {
-	export const enum State
+	export enum State
 	{
 		NONE = -1,
 		OPENING = 0,
@@ -184,5 +179,5 @@ export namespace WebServer
  */
 const AcceptorFactory:
 {
-	new(request: ws.request): WebAcceptor;
+	new<Provider extends object>(request: ws.request): WebAcceptor<Provider>;
 } = <any>WebAcceptor;

@@ -2,9 +2,19 @@
 /** @module tgrid.basic */
 //================================================================
 /**
- * Driver for remote controller.
+ * Driver RFC (Remote Function Call).
  * 
- * @tparam Controller A controller defining features provided from the remote system.
+ * The `Controller` is an interface who defines provided functions from the remote system. 
+ * The `Driver` is an object who makes to call remote functions, defined in the 
+ * `Controller` and provided by `Provider` in the remote system, possible.
+ * 
+ * In other words, calling a functions in the `Driver<Controller>`, it means to call a 
+ * matched function in the remote system's `Provider` object.
+ * 
+ *   - `Controller`: Definition only
+ *   - `Driver`: Remote Function Call
+ * 
+ * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
  */
 export type Driver<Controller extends object> = Promisify<Controller>;
 export var Driver = Proxy;
@@ -17,7 +27,7 @@ export var Driver = Proxy;
  *   - object: promisifies recursively (`O` -> `Promisify<O>`).
  *   - atomic value: be ignored (be `never` type).
  * 
- * @tparam Instance An object type to be promisied.
+ * @typeParam Instance An object type to be promisied.
  */
 export type Promisify<Instance extends object> = 
 	// IS FUNCTION?

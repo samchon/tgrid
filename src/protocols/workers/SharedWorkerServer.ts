@@ -5,11 +5,9 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
-import { DomainError } from "tstl";
-import { IState } from "../internal/IState";
+import { DomainError } from "tstl/exception";
 
-export class SharedWorkerServer 
-	implements IState<SharedWorkerServer.State>
+export class SharedWorkerServer<Provider extends object = {}>
 {
 	/**
 	 * @hidden
@@ -36,9 +34,9 @@ export class SharedWorkerServer
 	/**
 	 * Open server.
 	 * 
-	 * @param cb Callback function called whenever client connects.
+	 * @param handler Callback function called whenever client connects.
 	 */
-	public async open(cb: (acceptor: SharedWorkerAcceptor) => any): Promise<void>
+	public async open(handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): Promise<void>
 	{
 		// TEST CONDITION
 		if (is_node() === true)
@@ -60,14 +58,14 @@ export class SharedWorkerServer
 				let port: MessagePort =portList[portList.length - 1];
 
 				// CREATE ACCEPTOR
-				let acceptor = new AcceptorFactory(port, () =>
+				let acceptor = new AcceptorFactory<Provider>(port, () =>
 				{
 					this.acceptors_.erase(acceptor);
 				});
 				this.acceptors_.insert(acceptor);
 
 				// SHIFT TO THE CALLBACK
-				cb(acceptor);
+				handler(acceptor);
 			});
 		}
 		this.state_ = SharedWorkerServer.State.OPEN;
@@ -121,5 +119,5 @@ type OpenEvent = Event & {ports: MessagePort[]};
  */
 const AcceptorFactory:
 {
-	new(port: MessagePort, eraser: ()=>void): SharedWorkerAcceptor;
+	new<Provider extends object>(port: MessagePort, eraser: ()=>void): SharedWorkerAcceptor<Provider>;
 } = <any>SharedWorkerAcceptor;

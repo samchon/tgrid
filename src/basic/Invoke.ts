@@ -6,49 +6,52 @@
  * 
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Invoke = IFunction | IReturn;
+export type Invoke = Invoke.IFunction | Invoke.IReturn;
 
-/**
- * Message for Requesting RFC.
- */
-export interface IFunction<Params extends any[] = any[]>
-	extends IBase
+export namespace Invoke
 {
 	/**
-	 * Target function (sometimes calsuled in objects) to call.
+	 * Message for Requesting RFC.
 	 */
-	listener: string;
+	export interface IFunction<Params extends any[] = any[]>
+		extends IBase
+	{
+		/**
+		 * Target function (sometimes calsuled in objects) to call.
+		 */
+		listener: string;
+
+		/**
+		 * Parameters for the function call.
+		 */
+		parameters: Params;
+	}
 
 	/**
-	 * Parameters for the function call.
+	 * Message for Returning RFC.
 	 */
-	parameters: Params;
-}
+	export interface IReturn<T = any>
+		extends IBase
+	{
+		/**
+		 * `true` -> return, `false` -> exception.
+		 */
+		success: boolean;
 
-/**
- * Message for Returning RFC.
- */
-export interface IReturn<T = any>
-	extends IBase
-{
-	/**
-	 * `true` -> return, `false` -> exception.
-	 */
-	success: boolean;
+		/**
+		 * Returned value or thrown exception.
+		 */
+		value: T;
+	}
 
 	/**
-	 * Returned value or thrown exception.
+	 * @hiden
 	 */
-	value: T;
-}
-
-/**
- * @hiden
- */
-interface IBase
-{
-	/**
-	 * Unique identifier.
-	 */
-	uid: number;
+	interface IBase
+	{
+		/**
+		 * Unique identifier.
+		 */
+		uid: number;
+	}
 }

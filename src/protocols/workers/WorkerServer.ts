@@ -2,16 +2,37 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
-import { IState } from "../internal/IState";
 import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";
 import { DomainError, RuntimeError } from "tstl/exception";
 
-export class WorkerServer 
-	extends CommunicatorBase
-	implements IState<WorkerServer.State>
+/**
+ * Worker Server.
+ * 
+ * The `WorkerServer` is a communicator class, used in worker environment, to interacting 
+ * with the remote client (browser or parent worker, anyway `WorkerConnector`) using RFC 
+ * (Remote Function Call). 
+ * 
+ * > `Worker` is designed to support thread in browser, however, the `Worker` cannot share
+ * > memory variable at all. The only way to interact with `Worker` and its parent is 
+ * > using communication channel with inter-promised message (IPC).
+ * >
+ * > It seems like network communication, right? That's the reason why TGrid considers 
+ * > `Worker` as a remote system and supports RFC (Remote Function Call) in such worker
+ * > environments.
+ * 
+ * You wanna interacting with the remote client, then call the {@link open open()} method. 
+ * After the interaction, don't forget terminating this worker using {@link close close()} 
+ * (or {@link WorkerConnector.close WorkerConnector.close()}). If you don't terminate it, 
+ * then vulnerable memory and communication channel leak would be happened.
+ * 
+ * @see {@link WorkerConnector}
+ * @author Jeongho Nam <http://samchon.org>
+ */
+export class WorkerServer<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
 {
 	/**
 	 * @hidden
@@ -38,11 +59,18 @@ export class WorkerServer
 	}
 
 	/**
-	 * Open server.
+	 * Open server with `Provider`.
 	 * 
-	 * @param provider A provider for the remote client.
+	 * Open worker server and start interaction with the remote system (browser or parent 
+	 * worker). 
+	 * 
+	 * Note that, after the interaction, you should terminate this worker to prevent waste 
+	 * of memory leak. Close this worker by yourself ({@link close close()}) or let remote 
+	 * client to close this worker ({@link WorkerConnector.close WorkerConnector.close()}).
+	 * 
+	 * @param provider An object providing featrues for the remote system.
 	 */
-	public async open<Provider extends object>(provider: Provider = null): Promise<void>
+	public async open(provider: Provider = null): Promise<void>
 	{
 		// TEST CONDITION
 		if (is_node() === false)

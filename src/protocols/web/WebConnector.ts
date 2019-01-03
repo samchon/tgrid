@@ -2,13 +2,14 @@
 /** @module tgrid.protocols.web */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
 
+import { Invoke } from "../../basic/Invoke";
+import { WebError } from "./WebError";
 import { DomainError } from "tstl/exception";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { is_node } from "tstl/utility/node";
-import { WebError } from "./WebError";
 
 /**
  * Web Socket Connector.
@@ -18,7 +19,7 @@ import { WebError } from "./WebError";
  */
 export class WebConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements IConnector<WebConnector.State>
+	implements IWebCommunicator, IConnector<WebConnector.State>
 {
 	/**
 	 * @hidden
@@ -53,7 +54,16 @@ export class WebConnector<Provider extends object = {}>
 	}
 	
 	/**
-	 * Connect to remote web socket server.
+	 * Connect to remote websocket server.
+	 * 
+	 * Try connection to the remote websocket server with its address and waiting for the
+	 * server to accept the trial. If the server rejects your connection, then exception 
+	 * would be thrown (in *Promise.catch*, as `WebError`).
+	 * 
+	 * Note that, acceptance of the connection doesn't mean that server provides features 
+	 * (`Provider`) directly. The `Provider` would be provided when the server calls the 
+	 * {@link WebAcceptor.listen WebAcceptor.listen()} method. If you want to ensure the 
+	 * server to provide the `Provider`, then call the {@link wait wait()} method.
 	 * 
 	 * @param url URL address to connect.
 	 * @param protocols Protocols to use.
@@ -110,10 +120,7 @@ export class WebConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Close connection.
-	 * 
-	 * @param code Closing code.
-	 * @param reason Reason why.
+	 * @inheritDoc
 	 */
 	public async close(code?: number, reason?: string): Promise<void>
 	{

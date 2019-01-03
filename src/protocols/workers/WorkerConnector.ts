@@ -8,6 +8,29 @@ import { Invoke } from "../../basic/Invoke";
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
+/**
+ * Worker Connector.
+ * 
+ * The `WorkerConnector` is a communicator class, who can create `Worker` and interact 
+ * with the `Worker` using RFC (Remote Function Call), considering the `Worker` as a 
+ * remote system (@link WorkerServer).
+ * 
+ * > `Worker` is designed to support thread in browser, however, the `Worker` cannot share
+ * > memory variable at all. The only way to interact with `Worker` and its parent is 
+ * > using communication channel with inter-promised message (IPC).
+ * >
+ * > It seems like network communication, right? That's the reason why TGrid considers 
+ * > `Worker` as a remote system and supports RFC (Remote Function Call) in such worker
+ * > environments.
+ * 
+ * Note that, after the connection and interaction, don't forget terminating the worker
+ * using {@link close close()} (or {@link WorkeerServer.close WorkerServer.close()}). If 
+ * you don't terminate it, then vulnerable memory and communication channel leak would be 
+ * happened.
+ * 
+ * @see {@link WorkerServer}
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
 	implements Pick<IConnector<WorkerConnector.State>, "state">
@@ -30,6 +53,11 @@ export class WorkerConnector<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
+	/**
+	 * Initializer Constructor.
+	 * 
+	 * @param provider A provider for server.
+	 */
 	public constructor(provider: Provider = null)
 	{
 		super(provider);

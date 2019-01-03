@@ -6,9 +6,9 @@ import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../basic/Invoke";
 import { DomainError } from "tstl";
 
-export class SharedWorkerAcceptor 
-	extends CommunicatorBase
-	implements IAcceptor<SharedWorkerAcceptor.State>
+export class SharedWorkerAcceptor<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
+	implements IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
 	/**
 	 * @hidden
@@ -139,8 +139,7 @@ export class SharedWorkerAcceptor
 	/**
 	 * @inheritDoc
 	 */
-	public async listen<Provider extends object>
-		(provider: Provider): Promise<void>
+	public async listen(provider: Provider): Promise<void>
 	{
 		// TEST CONDITION
 		let error: Error = this.inspector();

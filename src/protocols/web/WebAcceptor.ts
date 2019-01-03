@@ -4,11 +4,12 @@
 import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../basic/Invoke";
 
-import { DomainError } from "tstl/exception";
+import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
+import { DomainError } from "tstl/exception";
 
 /**
  * Web Socket Acceptor.
@@ -29,9 +30,9 @@ import { WebError } from "./WebError";
  * @see {@link WebServer}, {@link WebConnector}
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebAcceptor
-	extends CommunicatorBase
-	implements IAcceptor<WebAcceptor.State>
+export class WebAcceptor<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
+	implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
 	/**
 	 * @hidden
@@ -71,10 +72,7 @@ export class WebAcceptor
 	}
 
 	/**
-	 * Close connection.
-	 * 
-	 * @param code Closing code.
-	 * @param reason Reason why.
+	 * @inheritDoc
 	 */
 	public async close(code: number = 1000, reason?: string): Promise<void>
 	{
@@ -113,12 +111,14 @@ export class WebAcceptor
 		HANDSHAKES
 	---------------------------------------------------------------- */
 	/**
-	 * Accept connection.
-	 * 
-	 * @param protocol 
-	 * @param allowOrigin 
-	 * @param cookies 
-	 */
+     * Accept connection.
+     *
+     * Accept, permit the client's, connection to this server.
+     *
+     * @param protocol Sub-protocol to be chosen.
+     * @param allowOrigin Origin to be allowed.
+     * @param cookies Cookies let client to store.
+     */
 	public accept(
 			protocol?: string, 
 			allowOrigin?: string, 
@@ -162,14 +162,14 @@ export class WebAcceptor
 	}
 
 	/**
-	 * Reject connection.
-	 * 
-	 * Reject; connection without acceptance, any interaction.
-	 * 
-	 * @param status Status code.
-	 * @param reason Detailed reason to reject.
-	 * @param extraHeaders Extra headers if required.
-	 */
+     * Reject connection.
+     *
+     * Reject without acceptance, any interaction. The connection would be closed immediately.
+     *
+     * @param status Status code.
+     * @param reason Detailed reason to reject.
+     * @param extraHeaders Extra headers if required.
+     */
 	public reject(status?: number, reason?: string, extraHeaders?: object): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
@@ -195,10 +195,9 @@ export class WebAcceptor
 	}
 
 	/**
-	 * @inheritDoc
+	 * @inheritdoc
 	 */
-	public async listen<Provider extends object>
-		(provider: Provider): Promise<void>
+	public async listen(provider: Provider): Promise<void>
 	{
 		// TEST CONDITION
 		let error: Error = this.inspector();

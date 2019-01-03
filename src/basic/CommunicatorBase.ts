@@ -6,7 +6,7 @@ import { Pair } from "tstl/utility/Pair";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { RuntimeError } from "tstl/exception";
 
-import { Invoke, IFunction, IReturn } from "./Invoke";
+import { Invoke } from "./Invoke";
 import { Driver } from "./Driver";
 
 /**
@@ -22,7 +22,7 @@ import { Driver } from "./Driver";
  * protocol using those methods with overridings:
  * 
  *   - Assign it
- *     - `provider_`: An object would be provided for the remote system.
+ *     - `provider_`: An object providing features (functions and objects) for the remote system.
  *   - Use them
  *     - `replier`: When you got a message from the remote system, then convert the message to `Invoke` and deliver to here.
  *     - `destructor`: You must call this method after the connection has been closed.
@@ -30,7 +30,7 @@ import { Driver } from "./Driver";
  *     - `insepctor`: A predicator function inspect whether the connection is on ready. If ready, returns `null`, otherwise an `Error` object explaning the reason why.
  *     - `sender`: A function sending data (`Invoke`) to the remote system.
  * 
- * @tparam Provider Type of provider.
+ * @typeParam Provider Type of provider, definition of features (functions and objects) to be provided for the remote system.
  * @see {@link Communicator}: You prefer FP (Functional Programming), use it instead.
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -93,8 +93,37 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		await this.join_cv_.notify_all();
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected abstract inspector(): Error;
+
+	/**
+	 * @hidden
+	 */
+	protected abstract sender(invoke: Invoke): void;
+
+	/* ================================================================
+		ACCESSORS
+			- PROVIDER
+			- DRIVER
+			- JOINERS
+	===================================================================
+		PROVIDER
+	---------------------------------------------------------------- */
+	/**
+	 * Current `Provider`.
+	 * 
+	 * An object providing features (functions & objects) for remote system. The remote 
+	 * system would call the features (`Provider`) by using its `Driver<Controller>`.
+	 */
+	public get provider(): Provider
+	{
+		return this.provider_;
+	}
+
 	/* ----------------------------------------------------------------
-		EVENT HANDLERS
+		JOINERS
 	---------------------------------------------------------------- */
 	/**
 	 * Join connection.
@@ -137,9 +166,20 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		DRIVER
 	---------------------------------------------------------------- */
 	/**
-	 * Get driver for remote controller.
+	 * Get Driver for RFC (Remote Function Call).
 	 * 
-	 * @return A Driver for the remote Controller.
+	 * The `Controller` is an interface who defines provided functions from the remote 
+	 * system. The `Driver` is an object who makes to call remote functions, defined in 
+	 * the `Controller` and provided by `Provider` in the remote system, possible.
+	 * 
+	 * In other words, calling a functions in the `Driver<Controller>`, it means to call 
+	 * a matched function in the remote system's `Provider` object.
+	 * 
+	 *   - `Controller`: Definition only
+	 *   - `Driver`: Remote Function Call
+	 * 
+	 * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
+	 * @return A Driver for the RFC.
 	 */
 	public getDriver<Controller extends object>(): Driver<Controller>
 	{
@@ -185,7 +225,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			}
 
 			// CONSTRUCT INVOKE MESSAGE
-			let invoke: IFunction =
+			let invoke: Invoke.IFunction =
 			{
 				uid: ++CommunicatorBase.SEQUENCE,
 				listener: name,
@@ -198,34 +238,28 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected abstract inspector(): Error;
-
-	/* ----------------------------------------------------------------
+	/* ================================================================
 		COMMUNICATORS
+			- REPLIER
+			- SENDER
+	===================================================================
+		REPLIER
 	---------------------------------------------------------------- */
-	/**
-	 * @hidden
-	 */
-	protected abstract sender(invoke: Invoke): void;
-
 	/**
 	 * @hidden
 	 */
 	protected replier(invoke: Invoke): void
 	{
-		if ((invoke as IFunction).listener)
-			this._Handle_function(invoke as IFunction);
+		if ((invoke as Invoke.IFunction).listener)
+			this._Handle_function(invoke as Invoke.IFunction);
 		else
-			this._Handle_return(invoke as IReturn);
+			this._Handle_return(invoke as Invoke.IReturn);
 	}
 
 	/**
 	 * @hidden
 	 */
-	private _Handle_function(invoke: IFunction): void
+	private _Handle_function(invoke: Invoke.IFunction): void
 	{
 		let uid: number = invoke.uid;
 
@@ -270,7 +304,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_return(invoke: IReturn): void
+	private _Handle_return(invoke: Invoke.IReturn): void
 	{
 		// GET THE PROMISE OBJECT
 		let it = this.promises_.find(invoke.uid);
@@ -286,6 +320,9 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		func(invoke.value); 
 	}
 
+	/* ----------------------------------------------------------------
+		SENDER
+	---------------------------------------------------------------- */
 	/**
 	 * @hidden
 	 */
@@ -302,7 +339,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		}
 
 		// RETURNS
-		let ret: IReturn = {uid: uid, success: flag, value: val};
+		let ret: Invoke.IReturn = {uid: uid, success: flag, value: val};
 		this.sender(ret);
 	}
 }
