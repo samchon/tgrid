@@ -6,9 +6,35 @@ import { Pair } from "tstl/utility/Pair";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { RuntimeError } from "tstl/exception";
 
-import { Invoke, IFunction, IReturn } from "./Invoke";
+import { Invoke } from "./Invoke";
 import { Driver } from "./Driver";
 
+/**
+ * The basic communicator.
+ * 
+ * The `CommunicatorBase` is an abstract class taking full charge of network communication. 
+ * Protocolized communicators like `WebConnector` are realized by extending the 
+ * `CommunicatorBase` class.
+ * 
+ * You want to make your own communicator using special protocol, then extends this 
+ * `CommunicatorBase` class. Key features of RFC (Remote Function Call) are already 
+ * implemented in the `CommunicatorBase`. Thus, only you've to is specializing your 
+ * protocol using those methods with overridings:
+ * 
+ *   - Assign it
+ *     - `provider_`: See {@link provider}
+ *   - Use them
+ *     - `replier`: Reference {@link Communicator.replyData}
+ *     - `destructor`: Reference {@link Communicator.destructor}
+ *   - Override them
+ *     - `insepctor`: Reference {@link Communicator.inspectReady}
+ *     - `sender`: Reference {@link Communicator.sendData}
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @see {@link Communicator}: You prefer FP (Functional Programming), use it instead.
+ * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export abstract class CommunicatorBase<Provider extends object = {}>
 {
 	/**
@@ -68,8 +94,37 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		await this.join_cv_.notify_all();
 	}
 
+	/**
+	 * @hidden
+	 */
+	protected abstract inspector(): Error;
+
+	/**
+	 * @hidden
+	 */
+	protected abstract sender(invoke: Invoke): void;
+
+	/* ================================================================
+		ACCESSORS
+			- PROVIDER
+			- DRIVER
+			- JOINERS
+	===================================================================
+		PROVIDER
+	---------------------------------------------------------------- */
+	/**
+	 * Current `Provider`.
+	 * 
+	 * An object providing features (functions & objects) for remote system. The remote 
+	 * system would call the features (`Provider`) by using its `Driver<Controller>`.
+	 */
+	public get provider(): Provider
+	{
+		return this.provider_;
+	}
+
 	/* ----------------------------------------------------------------
-		EVENT HANDLERS
+		JOINERS
 	---------------------------------------------------------------- */
 	/**
 	 * Join connection.
@@ -112,9 +167,20 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		DRIVER
 	---------------------------------------------------------------- */
 	/**
-	 * Get driver for remote controller.
+	 * Get Driver for RFC (Remote Function Call).
 	 * 
-	 * @return A Driver for the remote Controller.
+	 * The `Controller` is an interface who defines provided functions from the remote 
+	 * system. The `Driver` is an object who makes to call remote functions, defined in 
+	 * the `Controller` and provided by `Provider` in the remote system, possible.
+	 * 
+	 * In other words, calling a functions in the `Driver<Controller>`, it means to call 
+	 * a matched function in the remote system's `Provider` object.
+	 * 
+	 *   - `Controller`: Definition only
+	 *   - `Driver`: Remote Function Call
+	 * 
+	 * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
+	 * @return A Driver for the RFC.
 	 */
 	public getDriver<Controller extends object>(): Driver<Controller>
 	{
@@ -160,7 +226,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			}
 
 			// CONSTRUCT INVOKE MESSAGE
-			let invoke: IFunction =
+			let invoke: Invoke.IFunction =
 			{
 				uid: ++CommunicatorBase.SEQUENCE,
 				listener: name,
@@ -173,34 +239,28 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		});
 	}
 
-	/**
-	 * @hidden
-	 */
-	protected abstract inspector(): Error;
-
-	/* ----------------------------------------------------------------
+	/* ================================================================
 		COMMUNICATORS
+			- REPLIER
+			- SENDER
+	===================================================================
+		REPLIER
 	---------------------------------------------------------------- */
-	/**
-	 * @hidden
-	 */
-	protected abstract sender(invoke: Invoke): void;
-
 	/**
 	 * @hidden
 	 */
 	protected replier(invoke: Invoke): void
 	{
-		if ((invoke as IFunction).listener)
-			this._Handle_function(invoke as IFunction);
+		if ((invoke as Invoke.IFunction).listener)
+			this._Handle_function(invoke as Invoke.IFunction);
 		else
-			this._Handle_return(invoke as IReturn);
+			this._Handle_return(invoke as Invoke.IReturn);
 	}
 
 	/**
 	 * @hidden
 	 */
-	private _Handle_function(invoke: IFunction): void
+	private _Handle_function(invoke: Invoke.IFunction): void
 	{
 		let uid: number = invoke.uid;
 
@@ -245,7 +305,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_return(invoke: IReturn): void
+	private _Handle_return(invoke: Invoke.IReturn): void
 	{
 		// GET THE PROMISE OBJECT
 		let it = this.promises_.find(invoke.uid);
@@ -261,6 +321,9 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		func(invoke.value); 
 	}
 
+	/* ----------------------------------------------------------------
+		SENDER
+	---------------------------------------------------------------- */
 	/**
 	 * @hidden
 	 */
@@ -277,7 +340,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		}
 
 		// RETURNS
-		let ret: IReturn = {uid: uid, success: flag, value: val};
+		let ret: Invoke.IReturn = {uid: uid, success: flag, value: val};
 		this.sender(ret);
 	}
 }

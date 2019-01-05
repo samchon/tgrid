@@ -8,7 +8,22 @@ import * as https from "https";
 import { WebAcceptor } from "./WebAcceptor";
 import { DomainError, RuntimeError } from "tstl/exception";
 
-export class WebServer
+/**
+ * Web Socket Server.
+ *  - available only in NodeJS.
+ * 
+ * The `WebServer` is a class who can open an websocket server. Clients connecting to the 
+ * `WebServer` would communicate with this server through {@link WebAcceptor} objects using 
+ * RFC (Remote Function Call).
+ * 
+ * To open the server, call the {@link open}() method with a callback function which would be
+ * called whenever a client has been connected.
+ * 
+ * @typeParam Provider Type of features provided for remote systems.
+ * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
+ * @author Jeongho Nam <http://samchon.org>
+ */
+export class WebServer<Provider extends object = {}>
 {
 	/**
 	 * @hidden
@@ -58,12 +73,12 @@ export class WebServer
 	}
 
 	/**
-	 * Open server.
+	 * Open websocket server.
 	 * 
 	 * @param port Port number to listen.
-	 * @param cb Callback function whenever client connects.
+	 * @param handler Callback function for client connection.
 	 */
-	public open(port: number, cb: (acceptor: WebAcceptor) => void | Promise<void>): Promise<void>
+	public open(port: number, handler: (acceptor: WebAcceptor<Provider>) => any): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -94,8 +109,8 @@ export class WebServer
 				this.protocol_ = new ws.server({ httpServer: this.server_ });
 				this.protocol_.on("request", request =>
 				{
-					let acceptor: WebAcceptor = new AcceptorFactory(request);
-					cb(acceptor);
+					let acceptor: WebAcceptor<Provider> = new AcceptorFactory(request);
+					handler(acceptor);
 				});
 			}
 			catch (exp)
@@ -123,6 +138,12 @@ export class WebServer
 
 	/**
 	 * Close server.
+	 * 
+	 * Close all connections between its remote clients ({@link WebConnector}s). 
+	 * 
+	 * It destories all RFCs (remote function calls) between this server and remote clients 
+	 * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+	 * causes all incompleted RFCs to throw exceptions.
 	 */
 	public close(): Promise<void>
 	{
@@ -151,9 +172,7 @@ export class WebServer
 		ACCESSORS
 	---------------------------------------------------------------- */
 	/**
-	 * Get state.
-	 * 
-	 * @return Current state.
+	 * @inheritDoc
 	 */
 	public get state(): WebServer.State
 	{
@@ -163,7 +182,7 @@ export class WebServer
 
 export namespace WebServer
 {
-	export const enum State
+	export enum State
 	{
 		NONE = -1,
 		OPENING = 0,
@@ -178,5 +197,5 @@ export namespace WebServer
  */
 const AcceptorFactory:
 {
-	new(request: ws.request): WebAcceptor;
+	new<Provider extends object>(request: ws.request): WebAcceptor<Provider>;
 } = <any>WebAcceptor;

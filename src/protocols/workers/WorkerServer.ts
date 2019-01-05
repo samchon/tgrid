@@ -2,26 +2,37 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
-import { IState } from "../internal/IState";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
 import { URLVariables } from "../../utils/URLVariables";
 import { DomainError, RuntimeError } from "tstl/exception";
 
-//----
-// CAPSULIZATION
-//----
 /**
- * @hidden
+ * Worker Server.
+ * 
+ * The `WorkerServer` is a class representing a `Worker` server who can communicate with 
+ * remote client, parent and creator of the `Worker` (anyway {@link WorkerConnector}), using 
+ * RFC (Remote Function Call).
+ * 
+ * Unlike other servers, `WorkerServer` can accept only a client ({@link WorkerConnector})
+ * because the worker is dependent on its parent instance (web page, node or parent worker).
+ * Thus, `WorkerServer` does not have any acceptor and communicates with client (its parent)
+ * by itself.
+ * 
+ * To start communication with the remote client, call the {@link open}() method with special
+ * `Provider`. After your business, don't forget terminating this worker using {@link close}() 
+ * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
+ * memory and communication channel would be kept and it may cause the memory leak.
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
  */
-var g: IFeature = is_node()
-	? require("./internal/worker-server-polyfill")
-	: self;
-
-export class WorkerServer 
-	extends CommunicatorBase
-	implements IState<WorkerServer.State>
+export class WorkerServer<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
+	implements IWorkerSystem
 {
 	/**
 	 * @hidden
@@ -48,11 +59,18 @@ export class WorkerServer
 	}
 
 	/**
-	 * Open server.
+	 * Open server with `Provider`.
 	 * 
-	 * @param provider A provider for the remote client.
+	 * Open worker server and start communication with the remote system 
+	 * ({@link WorkerConnector}). 
+	 * 
+	 * Note that, after your business, you should terminate this worker to prevent waste 
+	 * of memory leak. Close this worker by yourself ({@link close}) or let remote client to 
+	 * close this worker ({@link WorkerConnector.close}).
+	 * 
+	 * @param provider An object providing featrues for the remote system.
 	 */
-	public async open<Provider extends object>(provider: Provider = null): Promise<void>
+	public async open(provider: Provider = null): Promise<void>
 	{
 		// TEST CONDITION
 		if (is_node() === false)
@@ -75,7 +93,7 @@ export class WorkerServer
 	}
 
 	/**
-	 * Close server.
+	 * @inheritDoc
 	 */
 	public async close(): Promise<void>
 	{
@@ -103,6 +121,14 @@ export class WorkerServer
 		ACCESSORS
 	---------------------------------------------------------------- */
 	/**
+	 * @inheritDoc
+	 */
+	public get state(): WorkerServer.State
+	{
+		return this.state_;
+	}
+
+	/**
 	 * Arguments delivered from the connector.
 	 */
 	public get arguments(): string[]
@@ -118,14 +144,6 @@ export class WorkerServer
 					: [];
 			}
 		return this.args_;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public get state(): WorkerServer.State
-	{
-		return this.state_;
 	}
 
 	/* ----------------------------------------------------------------
@@ -188,6 +206,16 @@ export namespace WorkerServer
 		CLOSED = 3
 	}
 }
+
+//----
+// POLYFILL
+//----
+/**
+ * @hidden
+ */
+const g: IFeature = is_node()
+	? require("./internal/worker-server-polyfill")
+	: self;
 
 /**
  * @hidden

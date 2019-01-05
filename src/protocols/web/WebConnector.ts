@@ -2,42 +2,40 @@
 /** @module tgrid.protocols.web */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector } from "../internal/IConnector";
+
 import { Invoke } from "../../basic/Invoke";
-
-import { DomainError } from "tstl/exception";
-import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { is_node } from "tstl/utility/node";
 import { WebError } from "./WebError";
+import { DomainError } from "tstl/exception";
+import { is_node } from "tstl/utility/node";
 
-//----
-// POLYFILL
-//----
 /**
- * @hidden
+ * Web Socket Connector.
+ * 
+ * The `WebConnector` is a communicator class who can connect to websocket server and 
+ * interact with it using RFC (Remote Function Call).
+ * 
+ * You can connect to the websocket server using {@link connect}() method. The interaction 
+ * would be started if the server is opened by {@link WebServer.open}() and the server 
+ * accepts your connection by {@link WebAcceptor.accept}().
+ * 
+ * Note that, after you business has been completed, please close the connection using 
+ * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
+ * close the connection in time, it may waste vulnerable resources of the server.
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
+ * @author Jeongho Nam <http://samchon.org>
  */
-var g: IFeature = is_node()
-	? require("./internal/websocket-polyfill")
-	: <any>self;
-
 export class WebConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements IConnector<WebConnector.State>
+	implements IWebCommunicator, IConnector<WebConnector.State>
 {
 	/**
 	 * @hidden
 	 */
 	private socket_: WebSocket;
-
-	/**
-	 * @hidden
-	 */
-	private wait_cv_: ConditionVariable;
-
-	/**
-	 * @hidden
-	 */
-	private server_is_listening_: boolean;
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -45,19 +43,24 @@ export class WebConnector<Provider extends object = {}>
 	/**
 	 * Initializer Constructor.
 	 * 
-	 * @param provider A provider for server.
+	 * @param provider An object providing features for remote system.
 	 */
 	public constructor(provider: Provider = null)
 	{
 		super(provider);
 
 		this.socket_ = null;
-		this.wait_cv_ = new ConditionVariable();
-		this.server_is_listening_ = false;
 	}
 	
 	/**
-	 * Connect to remote web socket server.
+	 * Connect to remote websocket server.
+	 * 
+	 * Try connection to the remote websocket server with its address and waiting for the
+	 * server to accept the trial. If the server rejects your connection, then exception 
+	 * would be thrown (in *Promise.catch*, as `WebError`).
+	 * 
+	 * After the connection and your business has been completed, don't forget to closing the 
+	 * connection in time to prevent waste of the server resource.
 	 * 
 	 * @param url URL address to connect.
 	 * @param protocols Protocols to use.
@@ -114,10 +117,7 @@ export class WebConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Close connection.
-	 * 
-	 * @param code Closing code.
-	 * @param reason Reason why.
+	 * @inheritDoc
 	 */
 	public async close(code?: number, reason?: string): Promise<void>
 	{
@@ -167,46 +167,6 @@ export class WebConnector<Provider extends object = {}>
 	}
 
 	/* ----------------------------------------------------------------
-		EVENT HANDLERS
-	---------------------------------------------------------------- */
-	/**
-	 * @inheritDoc
-	 */
-	public wait(): Promise<void>;
-
-	/**
-	 * @inheritDoc
-	 */
-	public wait(ms: number): Promise<boolean>;
-
-	/**
-	 * @inheritDoc
-	 */
-	public wait(at: Date): Promise<boolean>;
-
-	public async wait(param: number | Date = null): Promise<void|boolean>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-
-		//----
-		// WAIT SERVER
-		//----
-		// PREPARE PREDICATOR
-		let predicator = () => this.server_is_listening_;
-
-		// SPECIALZE BETWEEN OVERLOADED FUNCTIONS
-		if (param === null)
-			return await this.wait_cv_.wait(predicator);
-		else if (param instanceof Date)
-			return await this.wait_cv_.wait_until(param, predicator);
-		else
-			return await this.wait_cv_.wait_for(param, predicator);
-	}
-
-	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
@@ -230,19 +190,7 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	private _Handle_message(evt: MessageEvent): void
 	{
-		if (evt.data === "PROVIDE")
-			this._Handle_provide();
-		else
-			this.replier(JSON.parse(evt.data));
-	}
-
-	/**
-	 * @hidden
-	 */
-	private async _Handle_provide(): Promise<void>
-	{
-		this.server_is_listening_ = true;
-		await this.wait_cv_.notify_all();
+		this.replier(JSON.parse(evt.data));
 	}
 
 	/**
@@ -263,7 +211,6 @@ export class WebConnector<Provider extends object = {}>
 			? new WebError(event.code, event.reason)
 			: undefined;
 		
-		this.server_is_listening_ = false;
 		await this.destructor(error);
 	}
 }
@@ -272,6 +219,16 @@ export namespace WebConnector
 {
 	export import State = IConnector.State;
 }
+
+//----
+// POLYFILL
+//----
+/**
+ * @hidden
+ */
+const g: IFeature = is_node()
+	? require("./internal/websocket-polyfill")
+	: <any>self;
 
 /**
  * @hidden

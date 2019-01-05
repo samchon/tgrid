@@ -2,13 +2,32 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../basic/Invoke";
+
 import { DomainError } from "tstl";
 
-export class SharedWorkerAcceptor 
-	extends CommunicatorBase
-	implements IAcceptor<SharedWorkerAcceptor.State>
+/**
+ * SharedWorker acceptor for client.
+ *  - available only in Web Browser.
+ * 
+ * The `SharedWorkerAcceptor` is a communicator class communicating with the remote client 
+ * ({@link SharedWorkerConnector}) using RFC (Remote Function Call). The `SharedAcceptor` 
+ * objects are always created by the {@link SharedWorkerServer} class whenever a remote client
+ * connects to its server.
+ * 
+ * To accept connection and start interaction with the remote client, call the {@link accept}() 
+ * method with special `Provider`. Also, don't forget to closing the connection after your 
+ * business has been completed.
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
+ */
+export class SharedWorkerAcceptor<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
+	implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
 	/**
 	 * @hidden
@@ -28,7 +47,7 @@ export class SharedWorkerAcceptor
 	/**
 	 * @hidden
 	 */
-	private listening_: boolean;
+	private arguments_: string[];
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -36,21 +55,21 @@ export class SharedWorkerAcceptor
 	/**
 	 * @hidden
 	 */
-	private constructor(port: MessagePort, eraser: ()=>void)
+	private constructor(port: MessagePort, args: string[], eraser: ()=>void)
 	{
 		super();
 
 		// ASSIGN MEMBER
 		this.port_ = port;
 		this.eraser_ = eraser;
+		this.arguments_ = args;
 
 		// PROPERTIES
 		this.state_ = SharedWorkerAcceptor.State.NONE;
-		this.listening_ = false;
 	}
 
 	/**
-	 * Close connection.
+	 * @inheritDoc
 	 */
 	public async close(): Promise<void>
 	{
@@ -79,7 +98,6 @@ export class SharedWorkerAcceptor
 
 		// WELL, IT MAY HARD TO SEE SUCH PROPERTIES
 		this.state_ = SharedWorkerAcceptor.State.CLOSED;
-		this.listening_ = false;
 	}
 
 	/* ----------------------------------------------------------------
@@ -93,13 +111,25 @@ export class SharedWorkerAcceptor
 		return this.state_;
 	}
 
+	/**
+	 * Arguments delivered from the connector.
+	 */
+	public get arguments(): string[]
+	{
+		return this.arguments_;
+	}
+
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
 	/**
 	 * Accept connection.
+	 * 
+	 * Accept, permit the client's, connection to this server and start interaction.
+	 * 
+	 * @param provider An object providing features for remote system.
 	 */
-	public async accept(): Promise<void>
+	public async accept(provider: Provider): Promise<void>
 	{
 		// TEST CONDITION
 		if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -110,6 +140,9 @@ export class SharedWorkerAcceptor
 		//----
 		this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
 		{
+			// SET PROVIDER
+			this.provider_ = provider;
+
 			// PREPARE PORT
 			this.port_.onmessage = this._Handle_message.bind(this);
 			this.port_.start();
@@ -122,6 +155,8 @@ export class SharedWorkerAcceptor
 
 	/**
 	 * Reject connection.
+	 * 
+	 * Reject without acceptance, any interaction. The connection would be closed immediately.
 	 */
 	public async reject(): Promise<void>
 	{
@@ -134,30 +169,6 @@ export class SharedWorkerAcceptor
 		//----
 		this.state_ = SharedWorkerAcceptor.State.REJECTING;
 		await this._Close("REJECT");
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public async listen<Provider extends object>
-		(provider: Provider): Promise<void>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-
-		//----
-		// START LISTENING
-		//----
-		// ASSIGN LISTENER
-		this.provider_ = provider;
-		if (this.listening_ === true)
-			return;
-		
-		// INFORM READY TO CLIENT
-		this.listening_ = true;
-		this.port_.postMessage("PROVIDE");
 	}
 
 	/* ----------------------------------------------------------------

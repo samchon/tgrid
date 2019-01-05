@@ -2,25 +2,35 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../basic/Invoke";
 
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
-//----
-// CAPSULIZATION
-//----
 /**
- * @hidden
+ * Worker Connector.
+ * 
+ * The `WorkerConnector` is a communicator class, who can create an `Worker` instance and
+ * communicate with it using RFC (Remote Function Call), considering the `Worker` as a 
+ * remote system ({@link WorkerServer}).
+ * 
+ * You can create an `Worker` instance with {@link compile}() or {@link connect}() method.
+ * Anyway, after creation of the `Worker` instance, the `Worker` program must open a server
+ * using the {@link WorkerServer.open}() method.
+ * 
+ * Note that, after your business, don't forget terminating the worker using {@link close}() 
+ * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and 
+ * communication channel would not be destroyed and it may cause the memory leak.
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
  */
-const Compiler: CompilerScope = is_node()
-	? require("./internal/node-worker")
-	: require("./internal/web-worker");
-
 export class WorkerConnector<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements Pick<IConnector<WorkerConnector.State>, "state">
+	implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
 {
 	/**
 	 * @hidden
@@ -40,6 +50,11 @@ export class WorkerConnector<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
+	/**
+	 * Initializer Constructor.
+	 * 
+	 * @param provider An object providing features for remote system.
+	 */
 	public constructor(provider: Provider = null)
 	{
 		super(provider);
@@ -52,9 +67,20 @@ export class WorkerConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Connect to worker server with compilation.
+	 * Compile server and connect to there.
 	 * 
-	 * @param content JS Source file to be server with compilation.
+	 * The {@link compile} method tries compile JS source code, creates `Worker` instance 
+	 * with that code connects to the `Worker`. To complete the compilation and connection, 
+	 * the `Worker` program must open that server using the {@link WorkerServer.open}() 
+	 * method.
+	 * 
+	 * Note that, after your business has been completed, you've to close the `Worker` using 
+	 * {@link close}() or {@link WorkerServer.close}(). If you don't close that, vulnerable 
+	 * memory usage and communication channel would not be destroyed and it may cause the 
+	 * memory leak.
+	 * 
+	 * @param content JS Source code to compile.
+	 * @param args Arguments to deliver.
 	 */
 	public async compile(content: string, ...args: string[]): Promise<void>
 	{
@@ -90,9 +116,18 @@ export class WorkerConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Connect to worker server.
+	 * Connect to server.
 	 * 
-	 * @param jsFile JS File to be worker server.
+	 * The {@link connect}() method tries to create an `Worker` instance and connect to the 
+	 * `Worker`. To complete the connection, the `Worker` program must open that server using 
+	 * the {@link WorkerServer.open}() method.
+	 * 
+	 * Note that, after your business has been completed, you've to close the `Worker` using 
+	 * {@link close}() or {@link WorkerServer.close}(). If you don't close that, vulnerable 
+	 * memory usage and communication channel would not be destroyed and it may cause the 
+	 * memory leak.
+	 * 
+	 * @param jsFile JS File to be {@link WorkerServer}.
 	 * @param args Arguments to deliver.
 	 */
 	public async connect(jsFile: string, ...args: string[]): Promise<void>
@@ -149,7 +184,7 @@ export class WorkerConnector<Provider extends object = {}>
 	}
 
 	/**
-	 * Close connection.
+	 * @inheritDoc
 	 */
 	public async close(): Promise<void>
 	{
@@ -233,6 +268,16 @@ export namespace WorkerConnector
 {
 	export import State = IConnector.State;
 }
+
+//----
+// CAPSULIZATION
+//----
+/**
+ * @hidden
+ */
+const Compiler: CompilerScope = is_node()
+	? require("./internal/node-worker")
+	: require("./internal/web-worker");
 
 /**
  * @hidden

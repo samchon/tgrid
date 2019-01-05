@@ -2,9 +2,21 @@
 /** @module tgrid.basic */
 //================================================================
 /**
- * Driver for remote controller.
+ * Driver RFC (Remote Function Call).
  * 
- * @tparam Controller A controller defining features provided from the remote system.
+ * The `Controller` is an interface who defines provided functions from the remote system. 
+ * The `Driver` is an object who makes to call remote functions, defined in the 
+ * `Controller` and provided by `Provider` in the remote system, possible.
+ * 
+ * In other words, calling a functions in the `Driver<Controller>`, it means to call a 
+ * matched function in the remote system's `Provider` object.
+ * 
+ *   - `Controller`: Definition only
+ *   - `Driver`: Remote Function Call
+ * 
+ * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
  */
 export type Driver<Controller extends object> = Promisify<Controller>;
 export var Driver = Proxy;
@@ -17,7 +29,9 @@ export var Driver = Proxy;
  *   - object: promisifies recursively (`O` -> `Promisify<O>`).
  *   - atomic value: be ignored (be `never` type).
  * 
- * @tparam Instance An object type to be promisied.
+ * @typeParam Instance An object type to be promisied.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
  */
 export type Promisify<Instance extends object> = 
 	// IS FUNCTION?
@@ -33,22 +47,3 @@ export type Promisify<Instance extends object> =
 			? Promisify<Instance[P]>
 			: never;
 	};
-
-// export type Promisify2<Instance extends object> = 
-// 	Instance extends (...args: any[]) => any
-// 		? PromisifyFunction<Instance>
-// 		: PromisifyObject<Instance>;
-
-// type PromisifyObject<Instance extends object> = 
-// {
-// 	[P in keyof Instance]: Instance[P] extends object
-// 		? Promisify<Instance[P]>
-// 		: never;
-// };
-
-// type PromisifyFunction<Instance extends (...args: any[]) => any> =
-// 	Instance extends (...args: infer Params) => infer Ret
-// 		? Ret extends Promise<any>
-// 			? (...args: Params) => Ret
-// 			: (...args: Params) => Promise<Ret>
-// 		: never;

@@ -17,10 +17,13 @@ export async function test_web(): Promise<void>
 	let server: WebServer = new WebServer();
 	await server.open(PORT, async acceptor =>
 	{
-		await acceptor.accept(); // ALLOW CONNECTION
-		await acceptor.listen(/calculator/.test(acceptor.path)
+		// SPEICFY PROVIDER
+		let provider = /calculator/.test(acceptor.path)
 			? new Calculator()
-			: new std.Vector<number>()); // SET LISTENER
+			: new std.Vector<number>();
+
+		// ALLOW CONNECTION
+		await acceptor.accept(provider);
 	});
 
 	//----
@@ -31,7 +34,6 @@ export async function test_web(): Promise<void>
 		// DO CONNECT
 		let connector: WebConnector = new WebConnector();
 		await connector.connect(`ws://127.0.0.1:${PORT}/${path}`);
-		await connector.wait();
 
 		// SET DRIVER AND TEST BY CALCULATOR PROCESS
 		if (path === "calculator")

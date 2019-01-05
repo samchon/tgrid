@@ -1,21 +1,33 @@
+//================================================================ 
+/** @module tgrid.protocols.web */
+//================================================================
 import { SystemError } from "tstl/exception/SystemError";
 
 import { ErrorCategory } from "tstl/exception/ErrorCategory";
 import { TreeMap } from "tstl/container/TreeMap";
 
 /**
- * Web Error.
+ * Web Socket Error.
  * 
  * @reference https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
  * @author Jeongho Nam <samchon@samchon.org>
  */
 export class WebError extends SystemError
 {
+	/**
+	 * Initializer Constructor.
+	 * 
+	 * @param code Closing code.
+	 * @param reason Reason why.
+	 */
 	public constructor(code: number, reason: string)
 	{
 		super(code, new WebError.Category(), reason);
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public get name(): string
 	{
 		return "web_error";
@@ -24,13 +36,22 @@ export class WebError extends SystemError
 
 export namespace WebError
 {
+	/**
+	 * Category of Web Socket Error.
+	 */
 	export class Category extends ErrorCategory
 	{
+		/**
+		 * @inheritDoc
+		 */
 		public name(): string
 		{
 			return "web";
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		public message(val: number): string
 		{
 			let it = DESCRIPTIONS.upper_bound(val).prev();

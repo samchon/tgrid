@@ -39,8 +39,7 @@ async function main(): Promise<void>
     await server.open(10101, async acceptor =>
     {
         // accept connection & provide Vector
-        await acceptor.accept();
-        await acceptor.listen(new Vector<number>());
+        await acceptor.accept(new Vector<number>());
     });
 }
 main();
@@ -59,15 +58,9 @@ interface IVector<T>
 
 async function main(): Promise<void>
 {
-    //----
-    // PREPARE
-    //----
     // do connect
     let connector = new WebConnector();
     await connector.connect("ws://127.0.0.1:10101");
-
-    // wait server to provide the Vector
-    await connector.wait();
 
     //----
     // CALL FUNCTIONS IN THE REMOTE SYSTEM

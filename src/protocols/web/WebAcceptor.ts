@@ -4,15 +4,32 @@
 import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor } from "../internal/IAcceptor";
+
 import { Invoke } from "../../basic/Invoke";
-
-import { DomainError } from "tstl/exception";
 import { WebError } from "./WebError";
+import { DomainError } from "tstl/exception";
 
-export class WebAcceptor
-	extends CommunicatorBase
-	implements IAcceptor<WebAcceptor.State>
+/**
+ * Web Socket Acceptor.
+ *  - available only in NodeJS.
+ * 
+ * The `WebAcceptor` is a communicator class interacting with the remote (web socket) client
+ * using RFC (Remote Function Call). The `WebAcceptor` objects are always created by the 
+ * {@link WebServer} class whenever a remote client connects to its server.
+ * 
+ * To accept connection and start interaction with the remote client, call the {@link accept}() 
+ * method with special `Provider`. Also, don't forget to closing the connection after your 
+ * busines has been completed.
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
+ * @author Jeongho Nam <http://samchon.org>
+ */
+export class WebAcceptor<Provider extends object = {}>
+	extends CommunicatorBase<Provider>
+	implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
 	/**
 	 * @hidden
@@ -29,11 +46,6 @@ export class WebAcceptor
 	 */
 	private state_: WebAcceptor.State;
 
-	/**
-	 * @hidden
-	 */
-	private listening_: boolean;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
@@ -48,14 +60,10 @@ export class WebAcceptor
 		this.connection_ = null;
 
 		this.state_ = WebAcceptor.State.NONE;
-		this.listening_ = false;
 	}
 
 	/**
-	 * Close connection.
-	 * 
-	 * @param code Closing code.
-	 * @param reason Reason why.
+	 * @inheritDoc
 	 */
 	public async close(code: number = 1000, reason?: string): Promise<void>
 	{
@@ -94,17 +102,13 @@ export class WebAcceptor
 		HANDSHAKES
 	---------------------------------------------------------------- */
 	/**
-	 * Accept connection.
+     * Accept connection.
+     *
+     * Accept, permit the client's, connection to this server and start interaction.
 	 * 
-	 * @param protocol 
-	 * @param allowOrigin 
-	 * @param cookies 
-	 */
-	public accept(
-			protocol?: string, 
-			allowOrigin?: string, 
-			cookies?: WebAcceptor.ICookie[]
-		): Promise<void>
+	 * @param provider An object providing features to remote system.
+     */
+	public accept(provider: Provider = null): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -130,10 +134,12 @@ export class WebAcceptor
 			// DO ACCEPT
 			try
 			{
-				this.request_.accept(protocol, allowOrigin, cookies);
+				this.provider_ = provider;
+				this.request_.accept();
 			}
 			catch (exp)
 			{
+				this.provider_ = null;
 				this.connection_ = null;
 				this.state_ = WebAcceptor.State.CLOSED;
 
@@ -143,12 +149,14 @@ export class WebAcceptor
 	}
 
 	/**
-	 * Reject connection.
-	 * 
-	 * @param status Status code.
-	 * @param reason Detailed reason to reject.
-	 * @param extraHeaders Extra headers if required.
-	 */
+     * Reject connection.
+     *
+     * Reject without acceptance, any interaction. The connection would be closed immediately.
+     *
+     * @param status Status code.
+     * @param reason Detailed reason to reject.
+     * @param extraHeaders Extra headers if required.
+     */
 	public reject(status?: number, reason?: string, extraHeaders?: object): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
@@ -171,27 +179,6 @@ export class WebAcceptor
 			this.state_ = WebAcceptor.State.REJECTING;
 			this.request_.reject(status, reason, extraHeaders);
 		});
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public async listen<Provider extends object>
-		(provider: Provider): Promise<void>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-
-		// SET PROVIDER
-		this.provider_ = provider;
-		if (this.listening_ === true)
-			return;
-		
-		// INFORM TO CLIENT
-		this.listening_ = true;
-		this.connection_.sendUTF("PROVIDE");
 	}
 
 	/* ----------------------------------------------------------------
@@ -267,16 +254,4 @@ export class WebAcceptor
 export namespace WebAcceptor
 {
 	export import State = IAcceptor.State;
-
-	export interface ICookie 
-	{
-		name: string;
-		value: string;
-		path?: string;
-		domain?: string;
-		expires?: Date;
-		maxage?: number;
-		secure?: boolean;
-		httponly?: boolean;
-	}
 }

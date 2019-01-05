@@ -5,11 +5,30 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
-import { DomainError } from "tstl";
-import { IState } from "../internal/IState";
+import { DomainError } from "tstl/exception";
 
-export class SharedWorkerServer 
-	implements IState<SharedWorkerServer.State>
+/**
+ * SharedWorker server.
+ *  - available only in Web Browser.
+ * 
+ * The `SharedWorkerServer` is a class representing a server server in a `SharedWorker` 
+ * environment. Clients connecting to the `SharedWorkerServer` would communicate with this 
+ * server through {@link SharedWorkerAcceptor} objects using RFC (Remote Function Call).
+ * 
+ * To open the server, use the {@link open}() method with a callback function which would be 
+ * called whenever a client has been connected. After your business, don't forget to closing
+ * the connection using one of them below. If you don't close that, vulnerable memory usage 
+ * and communication channel would not be destroyed and it may cause the memory leak.
+ * 
+ *  - {@link close}()
+ *  - {@link SharedWorkerAcceptor.close}()
+ *  - {@link SharedWorkerConnector.close}()
+ * 
+ * @typeParam Provider Type of features provided for remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
+ */
+export class SharedWorkerServer<Provider extends object = {}>
 {
 	/**
 	 * @hidden
@@ -36,9 +55,9 @@ export class SharedWorkerServer
 	/**
 	 * Open server.
 	 * 
-	 * @param cb Callback function called whenever client connects.
+	 * @param handler Callback function called whenever client connects.
 	 */
-	public async open(cb: (acceptor: SharedWorkerAcceptor) => any): Promise<void>
+	public async open(handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): Promise<void>
 	{
 		// TEST CONDITION
 		if (is_node() === true)
@@ -57,17 +76,23 @@ export class SharedWorkerServer
 			{
 				// GET PORT
 				let portList = (evt as OpenEvent).ports;
-				let port: MessagePort =portList[portList.length - 1];
+				let port: MessagePort = portList[portList.length - 1];
 
-				// CREATE ACCEPTOR
-				let acceptor = new AcceptorFactory(port, () =>
+				// WAIT THE FIRST MESSAGE
+				port.onmessage = (evt: MessageEvent) =>
 				{
-					this.acceptors_.erase(acceptor);
-				});
-				this.acceptors_.insert(acceptor);
+					let args: string[] = evt.data;
 
-				// SHIFT TO THE CALLBACK
-				cb(acceptor);
+					// CREATE ACCEPTOR
+					let acceptor = new AcceptorFactory<Provider>(port, args, () =>
+					{
+						this.acceptors_.erase(acceptor);
+					});
+					this.acceptors_.insert(acceptor);
+
+					// SHIFT TO THE CALLBACK
+					handler(acceptor);
+				};
 			});
 		}
 		this.state_ = SharedWorkerServer.State.OPEN;
@@ -75,6 +100,12 @@ export class SharedWorkerServer
 
 	/**
 	 * Close server.
+	 * 
+	 * Close all connections between its remote clients ({@link SharedWorkerConnector}s). 
+	 * 
+	 * It destories all RFCs (remote function calls) between this server and remote clients 
+	 * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+	 * causes all incompleted RFCs to throw exceptions.
 	 */
 	public async close(): Promise<void>
 	{
@@ -121,5 +152,10 @@ type OpenEvent = Event & {ports: MessagePort[]};
  */
 const AcceptorFactory:
 {
-	new(port: MessagePort, eraser: ()=>void): SharedWorkerAcceptor;
+	new<Provider extends object>
+	(
+		port: MessagePort, 
+		args: string[],
+		eraser: ()=>void
+	): SharedWorkerAcceptor<Provider>;
 } = <any>SharedWorkerAcceptor;
