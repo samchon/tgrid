@@ -6,7 +6,6 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../basic/Invoke";
 
-import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError, RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
@@ -26,12 +25,6 @@ import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
  * using the {@link SharedWorkerServer.open}() method. Your connection would be linked with 
  * a {@link SharedWorkerAcceptor} object in the server.
  * 
- * Note that, although you called the {@link connect}() method and the connection has been 
- * succeded, it means only server {@link SharedWorkerAcceptor.accept accepted} your connection
- * request. The acceptance does not mean that server is ready to start communication directly. 
- * The server would be ready when it calls the {@link SharedWorkerAcceptor.listen}() method. 
- * If you want to ensure the server to be ready, call the {@link wait}() method.
- * 
  * After your business has been completed, you've to close the `SharedWorker` using one of 
  * them below. If you don't close that, vulnerable memory usage and communication channel 
  * would not be destroyed and it may cause the memory leak:
@@ -40,6 +33,7 @@ import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerServer.close}()
  * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -56,16 +50,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 * @hidden
 	 */
 	private state_: SharedWorkerConnector.State;
-
-	/**
-	 * @hidden
-	 */
-	private wait_cv_: ConditionVariable;
-
-	/**
-	 * @hidden
-	 */
-	private server_is_listening_: boolean;
 	
 	/**
 	 * @hidden
@@ -84,13 +68,8 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	{
 		super(provider);
 
-		// ASSIGN MEMBERS
 		this.port_ = null;
 		this.state_ = SharedWorkerConnector.State.NONE;
-		this.server_is_listening_ = false;
-
-		// HANDLERS
-		this.wait_cv_ = new ConditionVariable();
 	}
 
 	/**
@@ -101,12 +80,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 * created. After the creation, the `SharedWorker` program must open that server using 
 	 * the {@link SharedWorkerServer.open}() method.
 	 * 
-	 * Note that, although the connection has been succeded, it means only server accepted 
-	 * your connection request; {@link SharedWorkerAcceptor.accept}(). The acceptance does not 
-	 * mean that server is ready to start communication directly. The server would be ready 
-	 * when it calls the {@link SharedWorkerAcceptor.listen}() method. If you want to ensure 
-	 * the server to be ready, call the {@link wait}() method.
-	 * 
 	 * After you business has been completed, you've to close the `SharedWorker` using one of 
 	 * them below. If you don't close that, vulnerable memory usage and communication channel 
 	 * would not be destroyed and it may cause the memory leak:
@@ -116,8 +89,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 *  - {@link SharedWorkerServer.close}()
 	 * 
 	 * @param jsFile JS File to be {@link SharedWorkerServer}.
+	 * @param args Arguments to deliver.
 	 */
-	public connect(jsFile: string): Promise<void>
+	public connect(jsFile: string, ...args: string[]): Promise<void>
 	{
 		return new Promise((resolve, reject) => 
 		{
@@ -141,19 +115,19 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			//----
 			try
 			{
-				// SET STATE -> CONNECTING
+				// SET STATE & PROMISE RETURN
 				this.state_ = SharedWorkerConnector.State.CONNECTING;
-				this.server_is_listening_ = false;
+				this.connector_ = new Pair(resolve, reject);
 
 				// DO CONNECT
 				let worker = new SharedWorker(jsFile);
-
+				
 				this.port_ = worker.port;
 				this.port_.onmessage = this._Handle_message.bind(this);
 				this.port_.start();
 
-				// GO RETURN
-				this.connector_ = new Pair(resolve, reject);
+				// DELIVER ARGUMENTS
+				this.port_.postMessage(args);
 			}
 			catch (exp)
 			{
@@ -198,51 +172,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		return this.state_;
 	}
 
-	/**
-	 * Wait server to be ready.
-	 * 
-	 * Wait the server to call the {@link SharedWorkerAcceptor.listen}() method.
-	 */
-	public wait(): Promise<void>;
-
-	/**
-	 * Wait server to be ready or timeout.
-	 * 
-	 * @param ms The maximum milliseconds for waiting.
-	 * @return Whether awaken by completion or timeout.
-	 */
-	public wait(ms: number): Promise<boolean>;
-
-	/**
-	 * Wait server to be ready or time expiration.
-	 * 
-	 * @param at The maximum time point to wait.
-	 * @return Whether awaken by completion or time expiration.
-	 */
-	public wait(at: Date): Promise<boolean>;
-
-	public async wait(param?: number | Date): Promise<void|boolean>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-
-		//----
-		// WAIT SERVER
-		//----
-		// PREPARE PREDICATOR
-		let predicator = () => this.server_is_listening_;
-
-		// SPECIALZE BETWEEN OVERLOADED FUNCTIONS
-		if (param === undefined)
-			return await this.wait_cv_.wait(predicator);
-		else if (param instanceof Date)
-			return await this.wait_cv_.wait_until(param, predicator);
-		else
-			return await this.wait_cv_.wait_for(param, predicator);
-	}
-
 	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
@@ -272,10 +201,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			this.state_ = SharedWorkerConnector.State.OPEN;
 			this.connector_.first();
 		}
-		else if (evt.data === "PROVIDE")
-		{
-			this._Handle_provide();
-		}
 		else if (evt.data === "REJECT")
 		{
 			this._Handle_reject();
@@ -286,15 +211,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		}
 		else
 			this.replier(JSON.parse(evt.data));
-	}
-
-	/**
-	 * @hidden
-	 */
-	private async _Handle_provide(): Promise<void>
-	{
-		this.server_is_listening_ = true;
-		await this.wait_cv_.notify_all();
 	}
 
 	/**
@@ -313,9 +229,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	private async _Handle_close(): Promise<void>
 	{
-		this.server_is_listening_ = false;
 		await this.destructor();
-
 		this.state_ = SharedWorkerConnector.State.CLOSED;
 	}
 }

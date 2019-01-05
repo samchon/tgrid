@@ -24,6 +24,7 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and 
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -52,7 +53,7 @@ export class WorkerConnector<Provider extends object = {}>
 	/**
 	 * Initializer Constructor.
 	 * 
-	 * @param provider An object providing features (functions & objects) for remote system.
+	 * @param provider An object providing features for remote system.
 	 */
 	public constructor(provider: Provider = null)
 	{

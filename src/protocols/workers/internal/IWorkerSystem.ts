@@ -16,6 +16,8 @@
  * It seems like network communication, isn't it? That's the reason why TGrid considers 
  * `Worker` as a remote system and supports RFC (Remote Function Call) in such worker 
  * environments.
+ * 
+ * @author Jeongho Nam <http://samchon.org>
  */
 export interface IWorkerSystem
 {

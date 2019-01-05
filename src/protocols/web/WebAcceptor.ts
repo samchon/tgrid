@@ -15,16 +15,15 @@ import { DomainError } from "tstl/exception";
  * Web Socket Acceptor.
  *  - available only in NodeJS.
  * 
- * The `WebAcceptor` is a communicator class communicating with the remote (web socket) 
- * client using RFC (Remote Function Call). The `WebAcceptor` object is always created by the 
+ * The `WebAcceptor` is a communicator class interacting with the remote (web socket) client
+ * using RFC (Remote Function Call). The `WebAcceptor` objects are always created by the 
  * {@link WebServer} class whenever a remote client connects to its server.
  * 
- * You want to accept connection and start communication with the remote client, call methods
- * following such sequence:
+ * To accept connection and start interaction with the remote client, call the {@link accept}() 
+ * method with special `Provider`. Also, don't forget to closing the connection after your 
+ * busines has been completed.
  * 
- *   1. Call {@link accept}() to accept the connection request.
- *   2. Call {@link listen}() with special `Provider` to start communication.
- * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -47,11 +46,6 @@ export class WebAcceptor<Provider extends object = {}>
 	 */
 	private state_: WebAcceptor.State;
 
-	/**
-	 * @hidden
-	 */
-	private listening_: boolean;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTORS
 	---------------------------------------------------------------- */
@@ -66,7 +60,6 @@ export class WebAcceptor<Provider extends object = {}>
 		this.connection_ = null;
 
 		this.state_ = WebAcceptor.State.NONE;
-		this.listening_ = false;
 	}
 
 	/**
@@ -111,17 +104,11 @@ export class WebAcceptor<Provider extends object = {}>
 	/**
      * Accept connection.
      *
-     * Accept, permit the client's, connection to this server.
-     *
-     * @param protocol Sub-protocol to be chosen.
-     * @param allowOrigin Origin to be allowed.
-     * @param cookies Cookies let client to store.
+     * Accept, permit the client's, connection to this server and start interaction.
+	 * 
+	 * @param provider An object providing features to remote system.
      */
-	public accept(
-			protocol?: string, 
-			allowOrigin?: string, 
-			cookies?: WebAcceptor.ICookie[]
-		): Promise<void>
+	public accept(provider: Provider = null): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -147,10 +134,12 @@ export class WebAcceptor<Provider extends object = {}>
 			// DO ACCEPT
 			try
 			{
-				this.request_.accept(protocol, allowOrigin, cookies);
+				this.provider_ = provider;
+				this.request_.accept();
 			}
 			catch (exp)
 			{
+				this.provider_ = null;
 				this.connection_ = null;
 				this.state_ = WebAcceptor.State.CLOSED;
 
@@ -190,30 +179,6 @@ export class WebAcceptor<Provider extends object = {}>
 			this.state_ = WebAcceptor.State.REJECTING;
 			this.request_.reject(status, reason, extraHeaders);
 		});
-	}
-
-	/**
-	 * Start listening.
-	 * 
-	 * Start communication with the remote client by listening socket data.
-	 * 
-	 * @param provider An object providing features to the remote client.
-	 */
-	public async listen(provider: Provider): Promise<void>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-		else if (this.listening_ === true)
-			throw new DomainError("Already listening.");
-
-		// SET PROVIDER
-		this.provider_ = provider;
-		
-		// INFORM TO CLIENT
-		this.listening_ = true;
-		this.connection_.sendUTF("PROVIDE");
 	}
 
 	/* ----------------------------------------------------------------
@@ -289,16 +254,4 @@ export class WebAcceptor<Provider extends object = {}>
 export namespace WebAcceptor
 {
 	export import State = IAcceptor.State;
-
-	export interface ICookie 
-	{
-		name: string;
-		value: string;
-		path?: string;
-		domain?: string;
-		expires?: Date;
-		maxage?: number;
-		secure?: boolean;
-		httponly?: boolean;
-	}
 }

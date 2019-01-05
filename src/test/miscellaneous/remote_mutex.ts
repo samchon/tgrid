@@ -23,8 +23,7 @@ export async function test_remote_mutex(): Promise<void>
 
 	await server.open(PORT, async acceptor =>
 	{
-		await acceptor.accept();
-		await acceptor.listen(provider);
+		await acceptor.accept(provider);
 	});
 
 	// PREPARE LATCH & TIME RECORDER
@@ -57,7 +56,6 @@ async function _Test_client(latch: std.experimental.Latch, index: number): Promi
 {
 	let connector = new WebConnector();
 	await connector.connect(`ws://127.0.0.1:${PORT}`);
-	await connector.wait();
 
 	let driver = connector.getDriver<Provider>();
 	await driver.mutex.lock();

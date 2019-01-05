@@ -8,25 +8,23 @@ import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
 import { DomainError } from "tstl/exception";
-import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { is_node } from "tstl/utility/node";
 
 /**
  * Web Socket Connector.
  * 
  * The `WebConnector` is a communicator class who can connect to websocket server and 
- * communicate with it using RFC (Remote Function Call).
+ * interact with it using RFC (Remote Function Call).
  * 
- * You can connect to the websocket server using {@link connect}() method, and enjoy the 
- * RFC (Remote Function Call), if the server is opened through the {@link WebServer.open}()
- * and the server is ready for you by calling the {@link WebAcceptor.listen}() method.
+ * You can connect to the websocket server using {@link connect}() method. The interaction 
+ * would be started if the server is opened by {@link WebServer.open}() and the server 
+ * accepts your connection by {@link WebAcceptor.accept}().
  * 
- * Note that, although you called the {@link connect}() method and the connection has been 
- * succeded, it means only server {@link WebAcceptor.accept accepted} your connection request. 
- * The acceptance does not mean that server is ready to start communication directly. The 
- * server would be ready when it calls the {@link WEbAcceptor.listen}() method. If you want to 
- * ensure the server to be ready, call the {@link wait}() method.
+ * Note that, after you business has been completed, please close the connection using 
+ * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
+ * close the connection in time, it may waste vulnerable resources of the server.
  * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -39,31 +37,19 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	private socket_: WebSocket;
 
-	/**
-	 * @hidden
-	 */
-	private wait_cv_: ConditionVariable;
-
-	/**
-	 * @hidden
-	 */
-	private server_is_listening_: boolean;
-
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
 	/**
 	 * Initializer Constructor.
 	 * 
-	 * @param provider A provider for server.
+	 * @param provider An object providing features for remote system.
 	 */
 	public constructor(provider: Provider = null)
 	{
 		super(provider);
 
 		this.socket_ = null;
-		this.wait_cv_ = new ConditionVariable();
-		this.server_is_listening_ = false;
 	}
 	
 	/**
@@ -73,11 +59,8 @@ export class WebConnector<Provider extends object = {}>
 	 * server to accept the trial. If the server rejects your connection, then exception 
 	 * would be thrown (in *Promise.catch*, as `WebError`).
 	 * 
-	 * Note that, although the connection has been succeded, it means only server accepted 
-	 * your connection request; {@link WebAcceptor.accept}(). The acceptance does not mean 
-	 * that server is ready to start communication directly. The server would be ready when 
-	 * it calls the {@link WebAcceptor.listen}() method. If you want to ensure the server to 
-	 * be ready, call the {@link wait}() method.
+	 * After the connection and your business has been completed, don't forget to closing the 
+	 * connection in time to prevent waste of the server resource.
 	 * 
 	 * @param url URL address to connect.
 	 * @param protocols Protocols to use.
@@ -184,54 +167,6 @@ export class WebConnector<Provider extends object = {}>
 	}
 
 	/* ----------------------------------------------------------------
-		EVENT HANDLERS
-	---------------------------------------------------------------- */
-	/**
-	 * Wait server to be ready.
-	 * 
-	 * Wait the server to call the {@link WebAcceptor.listen}() method.
-	 */
-	public wait(): Promise<void>;
-
-	/**
-	 * Wait server to be ready or timeout.
-	 * 
-	 * @param ms The maximum milliseconds for waiting.
-	 * @return Whether awaken by completion or timeout.
-	 */
-	public wait(ms: number): Promise<boolean>;
-
-	/**
-	 * Wait server to be ready or time expiration.
-	 * 
-	 * @param at The maximum time point to wait.
-	 * @return Whether awaken by completion or time expiration.
-	 */
-	public wait(at: Date): Promise<boolean>;
-
-	public async wait(param: number | Date = null): Promise<void|boolean>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-
-		//----
-		// WAIT SERVER
-		//----
-		// PREPARE PREDICATOR
-		let predicator = () => this.server_is_listening_;
-
-		// SPECIALZE BETWEEN OVERLOADED FUNCTIONS
-		if (param === null)
-			return await this.wait_cv_.wait(predicator);
-		else if (param instanceof Date)
-			return await this.wait_cv_.wait_until(param, predicator);
-		else
-			return await this.wait_cv_.wait_for(param, predicator);
-	}
-
-	/* ----------------------------------------------------------------
 		COMMUNICATOR
 	---------------------------------------------------------------- */
 	/**
@@ -255,19 +190,7 @@ export class WebConnector<Provider extends object = {}>
 	 */
 	private _Handle_message(evt: MessageEvent): void
 	{
-		if (evt.data === "PROVIDE")
-			this._Handle_provide();
-		else
-			this.replier(JSON.parse(evt.data));
-	}
-
-	/**
-	 * @hidden
-	 */
-	private async _Handle_provide(): Promise<void>
-	{
-		this.server_is_listening_ = true;
-		await this.wait_cv_.notify_all();
+		this.replier(JSON.parse(evt.data));
 	}
 
 	/**
@@ -288,7 +211,6 @@ export class WebConnector<Provider extends object = {}>
 			? new WebError(event.code, event.reason)
 			: undefined;
 		
-		this.server_is_listening_ = false;
 		await this.destructor(error);
 	}
 }

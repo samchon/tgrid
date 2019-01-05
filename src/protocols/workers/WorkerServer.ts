@@ -26,19 +26,7 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
- * > #### Why workers be network systems?
- * > `Worker` is designed to support thread in JavaScript. However, the `Worker` cannot share 
- * > memory variable at all. The only way to interact with `Worker` and its parent is using 
- * > the `MessagePort` with inter-promised message (IPC, inter-process communication).
- * > 
- * >  - *Worker*, it's a type of *thread* in physical level.
- * >  - *Worker*, it's a type of *process* in logical level.
- * >  - **Worker**, it's same with **network system** in conceptual level.
- * > 
- * > It seems like network communication, isn't it? That's the reason why TGrid considers 
- * > `Worker` as a remote system and supports RFC (Remote Function Call) in such worker 
- * > environments.
- * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -133,6 +121,14 @@ export class WorkerServer<Provider extends object = {}>
 		ACCESSORS
 	---------------------------------------------------------------- */
 	/**
+	 * @inheritDoc
+	 */
+	public get state(): WorkerServer.State
+	{
+		return this.state_;
+	}
+
+	/**
 	 * Arguments delivered from the connector.
 	 */
 	public get arguments(): string[]
@@ -148,14 +144,6 @@ export class WorkerServer<Provider extends object = {}>
 					: [];
 			}
 		return this.args_;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public get state(): WorkerServer.State
-	{
-		return this.state_;
 	}
 
 	/* ----------------------------------------------------------------

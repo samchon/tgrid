@@ -16,9 +16,10 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * `WebServer` would communicate with this server through {@link WebAcceptor} objects using 
  * RFC (Remote Function Call).
  * 
- * To open the server, use the {@link open}() method with a callback function which would be
+ * To open the server, call the {@link open}() method with a callback function which would be
  * called whenever a client has been connected.
  * 
+ * @typeParam Provider Type of features provided for remote systems.
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -72,7 +73,7 @@ export class WebServer<Provider extends object = {}>
 	}
 
 	/**
-	 * Open server.
+	 * Open websocket server.
 	 * 
 	 * @param port Port number to listen.
 	 * @param handler Callback function for client connection.

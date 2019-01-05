@@ -24,6 +24,7 @@ import { DomainError } from "tstl/exception";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerConnector.close}()
  * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -75,17 +76,23 @@ export class SharedWorkerServer<Provider extends object = {}>
 			{
 				// GET PORT
 				let portList = (evt as OpenEvent).ports;
-				let port: MessagePort =portList[portList.length - 1];
+				let port: MessagePort = portList[portList.length - 1];
 
-				// CREATE ACCEPTOR
-				let acceptor = new AcceptorFactory<Provider>(port, () =>
+				// WAIT THE FIRST MESSAGE
+				port.onmessage = (evt: MessageEvent) =>
 				{
-					this.acceptors_.erase(acceptor);
-				});
-				this.acceptors_.insert(acceptor);
+					let args: string[] = evt.data;
 
-				// SHIFT TO THE CALLBACK
-				handler(acceptor);
+					// CREATE ACCEPTOR
+					let acceptor = new AcceptorFactory<Provider>(port, args, () =>
+					{
+						this.acceptors_.erase(acceptor);
+					});
+					this.acceptors_.insert(acceptor);
+
+					// SHIFT TO THE CALLBACK
+					handler(acceptor);
+				};
 			});
 		}
 		this.state_ = SharedWorkerServer.State.OPEN;
@@ -145,5 +152,10 @@ type OpenEvent = Event & {ports: MessagePort[]};
  */
 const AcceptorFactory:
 {
-	new<Provider extends object>(port: MessagePort, eraser: ()=>void): SharedWorkerAcceptor<Provider>;
+	new<Provider extends object>
+	(
+		port: MessagePort, 
+		args: string[],
+		eraser: ()=>void
+	): SharedWorkerAcceptor<Provider>;
 } = <any>SharedWorkerAcceptor;

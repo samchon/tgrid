@@ -9,7 +9,8 @@ import { DomainError, RuntimeError } from "tstl/exception";
 export interface IAcceptor<State extends IAcceptor.State, Provider extends object>
 {
 	readonly state: State;
-	listen(provider: Provider): Promise<void>;
+
+	accept(provider: Provider): Promise<void>;
 }
 
 export namespace IAcceptor

@@ -30,7 +30,7 @@ import { Driver } from "./Driver";
  *     - `insepctor`: Reference {@link Communicator.inspectReady}
  *     - `sender`: Reference {@link Communicator.sendData}
  * 
- * @typeParam Provider Type of provider, definition of features (functions and objects) to be provided for the remote system.
+ * @typeParam Provider Type of features provided for remote system.
  * @see {@link Communicator}: You prefer FP (Functional Programming), use it instead.
  * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>

@@ -17,20 +17,11 @@ import { DomainError } from "tstl";
  * objects are always created by the {@link SharedWorkerServer} class whenever a remote client
  * connects to its server.
  * 
- * You want to accept connection and start communication with the remote client, call methods
- * following such sequence:
+ * To accept connection and start interaction with the remote client, call the {@link accept}() 
+ * method with special `Provider`. Also, don't forget to closing the connection after your 
+ * business has been completed.
  * 
- *   1. Call {@link accept}() to accept the connection request.
- *   2. Call {@link listen}() with special `Provider` to start communication.
- * 
- * After your business has been completed, you've to close the `SharedWorker` using one of 
- * them below. If you don't close that, vulnerable memory usage and communication channel 
- * would not be destroyed and it may cause the memory leak:
- * 
- *  - {@link close}()
- *  - {@link SharedWorkerServer.close}()
- *  - {@link SharedWorkerConnector.close}()
- * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
@@ -56,7 +47,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private listening_: boolean;
+	private arguments_: string[];
 
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
@@ -64,17 +55,17 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private constructor(port: MessagePort, eraser: ()=>void)
+	private constructor(port: MessagePort, args: string[], eraser: ()=>void)
 	{
 		super();
 
 		// ASSIGN MEMBER
 		this.port_ = port;
 		this.eraser_ = eraser;
+		this.arguments_ = args;
 
 		// PROPERTIES
 		this.state_ = SharedWorkerAcceptor.State.NONE;
-		this.listening_ = false;
 	}
 
 	/**
@@ -107,7 +98,6 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 
 		// WELL, IT MAY HARD TO SEE SUCH PROPERTIES
 		this.state_ = SharedWorkerAcceptor.State.CLOSED;
-		this.listening_ = false;
 	}
 
 	/* ----------------------------------------------------------------
@@ -121,15 +111,25 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 		return this.state_;
 	}
 
+	/**
+	 * Arguments delivered from the connector.
+	 */
+	public get arguments(): string[]
+	{
+		return this.arguments_;
+	}
+
 	/* ----------------------------------------------------------------
 		HANDSHAKES
 	---------------------------------------------------------------- */
 	/**
 	 * Accept connection.
 	 * 
-	 * Accept, permit the client's, connection to this server.
+	 * Accept, permit the client's, connection to this server and start interaction.
+	 * 
+	 * @param provider An object providing features for remote system.
 	 */
-	public async accept(): Promise<void>
+	public async accept(provider: Provider): Promise<void>
 	{
 		// TEST CONDITION
 		if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -140,6 +140,9 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 		//----
 		this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
 		{
+			// SET PROVIDER
+			this.provider_ = provider;
+
 			// PREPARE PORT
 			this.port_.onmessage = this._Handle_message.bind(this);
 			this.port_.start();
@@ -166,33 +169,6 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 		//----
 		this.state_ = SharedWorkerAcceptor.State.REJECTING;
 		await this._Close("REJECT");
-	}
-
-	/**
-	 * Start listening.
-	 * 
-	 * Start communication with the remote client by listening socket data.
-	 * 
-	 * @param provider An object providing features to the remote client.
-	 */
-	public async listen(provider: Provider): Promise<void>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
-		else if (this.listening_ === true)
-			throw new DomainError("Already listening.");
-
-		//----
-		// START LISTENING
-		//----
-		// ASSIGN LISTENER
-		this.provider_ = provider;
-		
-		// INFORM READY TO CLIENT
-		this.listening_ = true;
-		this.port_.postMessage("PROVIDE");
 	}
 
 	/* ----------------------------------------------------------------
