@@ -2,13 +2,41 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../basic/Invoke";
+
 import { DomainError } from "tstl";
 
+/**
+ * SharedWorker acceptor for client.
+ *  - available only in Web Browser.
+ * 
+ * The `SharedWorkerAcceptor` is a communicator class communicating with the remote client 
+ * ({@link SharedWorkerConnector}) using RFC (Remote Function Call). The `SharedAcceptor` 
+ * objects are always created by the {@link SharedWorkerServer} class whenever a remote client
+ * connects to its server.
+ * 
+ * You want to accept connection and start communication with the remote client, call methods
+ * following such sequence:
+ * 
+ *   1. Call {@link accept}() to accept the connection request.
+ *   2. Call {@link listen}() with special `Provider` to start communication.
+ * 
+ * After your business has been completed, you've to close the `SharedWorker` using one of 
+ * them below. If you don't close that, vulnerable memory usage and communication channel 
+ * would not be destroyed and it may cause the memory leak:
+ * 
+ *  - {@link close}()
+ *  - {@link SharedWorkerServer.close}()
+ *  - {@link SharedWorkerConnector.close}()
+ * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class SharedWorkerAcceptor<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
-	implements IAcceptor<SharedWorkerAcceptor.State, Provider>
+	implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
 	/**
 	 * @hidden
@@ -50,7 +78,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 	}
 
 	/**
-	 * Close connection.
+	 * @inheritDoc
 	 */
 	public async close(): Promise<void>
 	{
@@ -98,6 +126,8 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 	---------------------------------------------------------------- */
 	/**
 	 * Accept connection.
+	 * 
+	 * Accept, permit the client's, connection to this server.
 	 */
 	public async accept(): Promise<void>
 	{
@@ -122,6 +152,8 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 
 	/**
 	 * Reject connection.
+	 * 
+	 * Reject without acceptance, any interaction. The connection would be closed immediately.
 	 */
 	public async reject(): Promise<void>
 	{
@@ -137,7 +169,11 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 	}
 
 	/**
-	 * @inheritDoc
+	 * Start listening.
+	 * 
+	 * Start communication with the remote client by listening socket data.
+	 * 
+	 * @param provider An object providing features to the remote client.
 	 */
 	public async listen(provider: Provider): Promise<void>
 	{

@@ -15,6 +15,8 @@
  *   - `Driver`: Remote Function Call
  * 
  * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
  */
 export type Driver<Controller extends object> = Promisify<Controller>;
 export var Driver = Proxy;
@@ -28,6 +30,8 @@ export var Driver = Proxy;
  *   - atomic value: be ignored (be `never` type).
  * 
  * @typeParam Instance An object type to be promisied.
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
  */
 export type Promisify<Instance extends object> = 
 	// IS FUNCTION?

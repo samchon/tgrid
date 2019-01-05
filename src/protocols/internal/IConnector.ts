@@ -3,6 +3,9 @@
 //================================================================
 import { DomainError, RuntimeError } from "tstl/exception";
 
+/**
+ * @hidden
+ */
 export interface IConnector<State extends IConnector.State>
 {
 	readonly state: State;

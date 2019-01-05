@@ -2,6 +2,7 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector } from "../internal/IConnector";
 import { Invoke } from "../../basic/Invoke";
 
@@ -11,9 +12,40 @@ import { Pair } from "tstl/utility/Pair";
 
 import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
 
+/**
+ * SharedWorker Connector
+ *  - available only in Web Browser.
+ * 
+ * The `SharedWorkerConnector` is a communicator class, who can connect to an `SharedWorker` 
+ * instance and communicate with it using RFC (Remote Function Call), considering the 
+ * `SharedWorker` as a remote system ({@link WorkerServer}).
+ * 
+ * You can connect to an `SharedWorker` instance with {@link connect}() method. If the 
+ * `SharedWorker` instance does not exist yet, a new `SharedWorker` instance would be newly
+ * created. After the creation, you have to let the `SharedWorker` program to open a sever
+ * using the {@link SharedWorkerServer.open}() method. Your connection would be linked with 
+ * a {@link SharedWorkerAcceptor} object in the server.
+ * 
+ * Note that, although you called the {@link connect}() method and the connection has been 
+ * succeded, it means only server {@link SharedWorkerAcceptor.accept accepted} your connection
+ * request. The acceptance does not mean that server is ready to start communication directly. 
+ * The server would be ready when it calls the {@link SharedWorkerAcceptor.listen}() method. 
+ * If you want to ensure the server to be ready, call the {@link wait}() method.
+ * 
+ * After your business has been completed, you've to close the `SharedWorker` using one of 
+ * them below. If you don't close that, vulnerable memory usage and communication channel 
+ * would not be destroyed and it may cause the memory leak:
+ * 
+ *  - {@link close}()
+ *  - {@link SharedWorkerAcceptor.close}()
+ *  - {@link SharedWorkerServer.close}()
+ * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class SharedWorkerConnector<Provider extends Object = {}>
 	extends CommunicatorBase<Provider>
-	implements IConnector<SharedWorkerConnector.State>
+	implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
 {
 	/**
 	 * @hidden
@@ -43,6 +75,11 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	/* ----------------------------------------------------------------
 		CONSTRUCTOR
 	---------------------------------------------------------------- */
+	/**
+	 * Initializer Constructor.
+	 * 
+	 * @param provider An object providing features (functions & objects) for remote system.
+	 */
 	public constructor(provider: Provider = null)
 	{
 		super(provider);
@@ -56,6 +93,30 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 		this.wait_cv_ = new ConditionVariable();
 	}
 
+	/**
+	 * Connect to remote server.
+	 * 
+	 * The {@link connect}() method tries to connect an `SharedWorker` instance. If the 
+	 * `SharedWorker` instance is not created yet, the `SharedWorker` instance would be newly
+	 * created. After the creation, the `SharedWorker` program must open that server using 
+	 * the {@link SharedWorkerServer.open}() method.
+	 * 
+	 * Note that, although the connection has been succeded, it means only server accepted 
+	 * your connection request; {@link SharedWorkerAcceptor.accept}(). The acceptance does not 
+	 * mean that server is ready to start communication directly. The server would be ready 
+	 * when it calls the {@link SharedWorkerAcceptor.listen}() method. If you want to ensure 
+	 * the server to be ready, call the {@link wait}() method.
+	 * 
+	 * After you business has been completed, you've to close the `SharedWorker` using one of 
+	 * them below. If you don't close that, vulnerable memory usage and communication channel 
+	 * would not be destroyed and it may cause the memory leak:
+	 * 
+	 *  - {@link close}()
+	 *  - {@link ShareDWorkerAcceptor.close}()
+	 *  - {@link SharedWorkerServer.close}()
+	 * 
+	 * @param jsFile JS File to be {@link SharedWorkerServer}.
+	 */
 	public connect(jsFile: string): Promise<void>
 	{
 		return new Promise((resolve, reject) => 
@@ -103,7 +164,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	}
 
 	/**
-	 * Close connection.
+	 * @inheritDoc
 	 */
 	public async close(): Promise<void>
 	{
@@ -138,17 +199,25 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	}
 
 	/**
-	 * @inheritDoc
+	 * Wait server to be ready.
+	 * 
+	 * Wait the server to call the {@link SharedWorkerAcceptor.listen}() method.
 	 */
 	public wait(): Promise<void>;
 
 	/**
-	 * @inheritDoc
+	 * Wait server to be ready or timeout.
+	 * 
+	 * @param ms The maximum milliseconds for waiting.
+	 * @return Whether awaken by completion or timeout.
 	 */
 	public wait(ms: number): Promise<boolean>;
 
 	/**
-	 * @inheritDoc
+	 * Wait server to be ready or time expiration.
+	 * 
+	 * @param at The maximum time point to wait.
+	 * @return Whether awaken by completion or time expiration.
 	 */
 	public wait(at: Date): Promise<boolean>;
 
@@ -255,11 +324,22 @@ export namespace SharedWorkerConnector
 {
 	export import State = IConnector.State;
 	
+	/**
+	 * Compile JS source code.
+	 * 
+	 * @param content Source code
+	 * @return Temporary URL.
+	 */
 	export function compile(content: string): string
 	{
 		return _Compile(content);
 	}
 
+	/**
+	 * Remove compiled JS file.
+	 * 
+	 * @param url Temporary URL.
+	 */
 	export function remove(url: string): void
 	{
 		_Remove(url);

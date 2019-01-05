@@ -2,6 +2,7 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { Invoke } from "../../basic/Invoke";
 
 import { is_node } from "tstl/utility/node";
@@ -11,28 +12,39 @@ import { DomainError, RuntimeError } from "tstl/exception";
 /**
  * Worker Server.
  * 
- * The `WorkerServer` is a communicator class, used in worker environment, to interacting 
- * with the remote client (browser or parent worker, anyway `WorkerConnector`) using RFC 
- * (Remote Function Call). 
+ * The `WorkerServer` is a class representing a `Worker` server who can communicate with 
+ * remote client, parent and creator of the `Worker` (anyway {@link WorkerConnector}), using 
+ * RFC (Remote Function Call).
  * 
- * > `Worker` is designed to support thread in browser, however, the `Worker` cannot share
- * > memory variable at all. The only way to interact with `Worker` and its parent is 
- * > using communication channel with inter-promised message (IPC).
- * >
- * > It seems like network communication, right? That's the reason why TGrid considers 
- * > `Worker` as a remote system and supports RFC (Remote Function Call) in such worker
+ * Unlike other servers, `WorkerServer` can accept only a client ({@link WorkerConnector})
+ * because the worker is dependent on its parent instance (web page, node or parent worker).
+ * Thus, `WorkerServer` does not have any acceptor and communicates with client (its parent)
+ * by itself.
+ * 
+ * To start communication with the remote client, call the {@link open}() method with special
+ * `Provider`. After your business, don't forget terminating this worker using {@link close}() 
+ * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
+ * memory and communication channel would be kept and it may cause the memory leak.
+ * 
+ * > #### Why workers be network systems?
+ * > `Worker` is designed to support thread in JavaScript. However, the `Worker` cannot share 
+ * > memory variable at all. The only way to interact with `Worker` and its parent is using 
+ * > the `MessagePort` with inter-promised message (IPC, inter-process communication).
+ * > 
+ * >  - *Worker*, it's a type of *thread* in physical level.
+ * >  - *Worker*, it's a type of *process* in logical level.
+ * >  - **Worker**, it's same with **network system** in conceptual level.
+ * > 
+ * > It seems like network communication, isn't it? That's the reason why TGrid considers 
+ * > `Worker` as a remote system and supports RFC (Remote Function Call) in such worker 
  * > environments.
  * 
- * You wanna interacting with the remote client, then call the {@link open open()} method. 
- * After the interaction, don't forget terminating this worker using {@link close close()} 
- * (or {@link WorkerConnector.close WorkerConnector.close()}). If you don't terminate it, 
- * then vulnerable memory and communication channel leak would be happened.
- * 
- * @see {@link WorkerConnector}
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WorkerServer<Provider extends object = {}>
 	extends CommunicatorBase<Provider>
+	implements IWorkerSystem
 {
 	/**
 	 * @hidden
@@ -61,12 +73,12 @@ export class WorkerServer<Provider extends object = {}>
 	/**
 	 * Open server with `Provider`.
 	 * 
-	 * Open worker server and start interaction with the remote system (browser or parent 
-	 * worker). 
+	 * Open worker server and start communication with the remote system 
+	 * ({@link WorkerConnector}). 
 	 * 
-	 * Note that, after the interaction, you should terminate this worker to prevent waste 
-	 * of memory leak. Close this worker by yourself ({@link close close()}) or let remote 
-	 * client to close this worker ({@link WorkerConnector.close WorkerConnector.close()}).
+	 * Note that, after your business, you should terminate this worker to prevent waste 
+	 * of memory leak. Close this worker by yourself ({@link close}) or let remote client to 
+	 * close this worker ({@link WorkerConnector.close}).
 	 * 
 	 * @param provider An object providing featrues for the remote system.
 	 */
@@ -93,7 +105,7 @@ export class WorkerServer<Provider extends object = {}>
 	}
 
 	/**
-	 * Close server.
+	 * @inheritDoc
 	 */
 	public async close(): Promise<void>
 	{

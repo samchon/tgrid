@@ -10,8 +10,16 @@ import { DomainError, RuntimeError } from "tstl/exception";
 
 /**
  * Web Socket Server.
+ *  - available only in NodeJS.
  * 
- * @see {@link WebAcceptor}, {@link WebConnector}
+ * The `WebServer` is a class who can open an websocket server. Clients connecting to the 
+ * `WebServer` would communicate with this server through {@link WebAcceptor} objects using 
+ * RFC (Remote Function Call).
+ * 
+ * To open the server, use the {@link open}() method with a callback function which would be
+ * called whenever a client has been connected.
+ * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebServer<Provider extends object = {}>
@@ -67,7 +75,7 @@ export class WebServer<Provider extends object = {}>
 	 * Open server.
 	 * 
 	 * @param port Port number to listen.
-	 * @param handler Handler function for client connection.
+	 * @param handler Callback function for client connection.
 	 */
 	public open(port: number, handler: (acceptor: WebAcceptor<Provider>) => any): Promise<void>
 	{
@@ -129,6 +137,12 @@ export class WebServer<Provider extends object = {}>
 
 	/**
 	 * Close server.
+	 * 
+	 * Close all connections between its remote clients ({@link WebConnector}s). 
+	 * 
+	 * It destories all RFCs (remote function calls) between this server and remote clients 
+	 * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+	 * causes all incompleted RFCs to throw exceptions.
 	 */
 	public close(): Promise<void>
 	{
@@ -156,6 +170,9 @@ export class WebServer<Provider extends object = {}>
 	/* ----------------------------------------------------------------
 		ACCESSORS
 	---------------------------------------------------------------- */
+	/**
+	 * @inheritDoc
+	 */
 	public get state(): WebServer.State
 	{
 		return this.state_;

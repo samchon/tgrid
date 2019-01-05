@@ -2,8 +2,9 @@
 /** @module tgrid.basic */
 //================================================================
 /**
- * Message for RFC (Remote Function Call).
+ * Message structure for RFC (Remote Function Call).
  * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
 export type Invoke = Invoke.IFunction | Invoke.IReturn;

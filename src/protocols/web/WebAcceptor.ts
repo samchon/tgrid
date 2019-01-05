@@ -13,21 +13,19 @@ import { DomainError } from "tstl/exception";
 
 /**
  * Web Socket Acceptor.
+ *  - available only in NodeJS.
  * 
- * The `WebAcceptor` is a communicator class interacting with the remote (web socket) 
- * client. The `WebAcceptor` object is always created by the {@link WebServer} class 
- * whenever a remote client connects to its server.
+ * The `WebAcceptor` is a communicator class communicating with the remote (web socket) 
+ * client using RFC (Remote Function Call). The `WebAcceptor` object is always created by the 
+ * {@link WebServer} class whenever a remote client connects to its server.
  * 
- * If you want to accept & start interaction with the remote client, call methods following 
- * such sequence:
+ * You want to accept connection and start communication with the remote client, call methods
+ * following such sequence:
  * 
- *   1. Call {@link accept accept()} method to accept the connection.
- *   2. Call {@link listen listen()} method to specify the `Provider`.
- *     - If you don't want to provide anything to the remote client, then do not need to 
- * call this method. In that case, you (server) may possible to call the remote functions 
- * provided from the client, however, the client is not.
+ *   1. Call {@link accept}() to accept the connection request.
+ *   2. Call {@link listen}() with special `Provider` to start communication.
  * 
- * @see {@link WebServer}, {@link WebConnector}
+ * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebAcceptor<Provider extends object = {}>
@@ -195,7 +193,11 @@ export class WebAcceptor<Provider extends object = {}>
 	}
 
 	/**
-	 * @inheritdoc
+	 * Start listening.
+	 * 
+	 * Start communication with the remote client by listening socket data.
+	 * 
+	 * @param provider An object providing features to the remote client.
 	 */
 	public async listen(provider: Provider): Promise<void>
 	{

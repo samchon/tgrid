@@ -7,6 +7,26 @@ import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
 import { DomainError } from "tstl/exception";
 
+/**
+ * SharedWorker server.
+ *  - available only in Web Browser.
+ * 
+ * The `SharedWorkerServer` is a class representing a server server in a `SharedWorker` 
+ * environment. Clients connecting to the `SharedWorkerServer` would communicate with this 
+ * server through {@link SharedWorkerAcceptor} objects using RFC (Remote Function Call).
+ * 
+ * To open the server, use the {@link open}() method with a callback function which would be 
+ * called whenever a client has been connected. After your business, don't forget to closing
+ * the connection using one of them below. If you don't close that, vulnerable memory usage 
+ * and communication channel would not be destroyed and it may cause the memory leak.
+ * 
+ *  - {@link close}()
+ *  - {@link SharedWorkerAcceptor.close}()
+ *  - {@link SharedWorkerConnector.close}()
+ * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Workers
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export class SharedWorkerServer<Provider extends object = {}>
 {
 	/**
@@ -73,6 +93,12 @@ export class SharedWorkerServer<Provider extends object = {}>
 
 	/**
 	 * Close server.
+	 * 
+	 * Close all connections between its remote clients ({@link SharedWorkerConnector}s). 
+	 * 
+	 * It destories all RFCs (remote function calls) between this server and remote clients 
+	 * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+	 * causes all incompleted RFCs to throw exceptions.
 	 */
 	public async close(): Promise<void>
 	{

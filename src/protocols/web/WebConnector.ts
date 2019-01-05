@@ -14,7 +14,20 @@ import { is_node } from "tstl/utility/node";
 /**
  * Web Socket Connector.
  * 
- * @see {@link WebServer}, {@link WebConnector}
+ * The `WebConnector` is a communicator class who can connect to websocket server and 
+ * communicate with it using RFC (Remote Function Call).
+ * 
+ * You can connect to the websocket server using {@link connect}() method, and enjoy the 
+ * RFC (Remote Function Call), if the server is opened through the {@link WebServer.open}()
+ * and the server is ready for you by calling the {@link WebAcceptor.listen}() method.
+ * 
+ * Note that, although you called the {@link connect}() method and the connection has been 
+ * succeded, it means only server {@link WebAcceptor.accept accepted} your connection request. 
+ * The acceptance does not mean that server is ready to start communication directly. The 
+ * server would be ready when it calls the {@link WEbAcceptor.listen}() method. If you want to 
+ * ensure the server to be ready, call the {@link wait}() method.
+ * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebConnector<Provider extends object = {}>
@@ -60,10 +73,11 @@ export class WebConnector<Provider extends object = {}>
 	 * server to accept the trial. If the server rejects your connection, then exception 
 	 * would be thrown (in *Promise.catch*, as `WebError`).
 	 * 
-	 * Note that, acceptance of the connection doesn't mean that server provides features 
-	 * (`Provider`) directly. The `Provider` would be provided when the server calls the 
-	 * {@link WebAcceptor.listen WebAcceptor.listen()} method. If you want to ensure the 
-	 * server to provide the `Provider`, then call the {@link wait wait()} method.
+	 * Note that, although the connection has been succeded, it means only server accepted 
+	 * your connection request; {@link WebAcceptor.accept}(). The acceptance does not mean 
+	 * that server is ready to start communication directly. The server would be ready when 
+	 * it calls the {@link WebAcceptor.listen}() method. If you want to ensure the server to 
+	 * be ready, call the {@link wait}() method.
 	 * 
 	 * @param url URL address to connect.
 	 * @param protocols Protocols to use.
@@ -173,17 +187,25 @@ export class WebConnector<Provider extends object = {}>
 		EVENT HANDLERS
 	---------------------------------------------------------------- */
 	/**
-	 * @inheritDoc
+	 * Wait server to be ready.
+	 * 
+	 * Wait the server to call the {@link WebAcceptor.listen}() method.
 	 */
 	public wait(): Promise<void>;
 
 	/**
-	 * @inheritDoc
+	 * Wait server to be ready or timeout.
+	 * 
+	 * @param ms The maximum milliseconds for waiting.
+	 * @return Whether awaken by completion or timeout.
 	 */
 	public wait(ms: number): Promise<boolean>;
 
 	/**
-	 * @inheritDoc
+	 * Wait server to be ready or time expiration.
+	 * 
+	 * @param at The maximum time point to wait.
+	 * @return Whether awaken by completion or time expiration.
 	 */
 	public wait(at: Date): Promise<boolean>;
 

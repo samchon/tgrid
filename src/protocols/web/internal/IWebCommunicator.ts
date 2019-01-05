@@ -9,13 +9,14 @@ export interface IWebCommunicator
 	/**
 	 * Close connection.
 	 * 
-	 * Close connection with the remote websocket server and destroy all remote function
-	 * calls those are not returned (finished) yet. It would also destroy all the remote 
-	 * function calls in the remote system (by `Driver<Controller`>), too.
+	 * Close connection with the remote websocket system.
 	 * 
-	 * If parameters *code* and *reason* are specified, it means the disconnection is 
-	 * abnormal and it would throw exceptions (`WebError`) to the unreturned remote 
-	 * function calls.
+	 * It destories all RFCs (remote function calls) between this and remote websocket system 
+	 * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+	 * causes all incompleted RFCs to throw exceptions.
+	 * 
+	 * If parametric *code* and *reason* are specified, it means the disconnection is 
+	 * abnormal and it would throw special exceptions (`WebError`) to the incompleted RFCs.
 	 * 
 	 * @param code Closing code.
 	 * @param reason Reason why.

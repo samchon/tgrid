@@ -22,16 +22,17 @@ import { Driver } from "./Driver";
  * protocol using those methods with overridings:
  * 
  *   - Assign it
- *     - `provider_`: An object providing features (functions and objects) for the remote system.
+ *     - `provider_`: See {@link provider}
  *   - Use them
- *     - `replier`: When you got a message from the remote system, then convert the message to `Invoke` and deliver to here.
- *     - `destructor`: You must call this method after the connection has been closed.
+ *     - `replier`: Reference {@link Communicator.replyData}
+ *     - `destructor`: Reference {@link Communicator.destructor}
  *   - Override them
- *     - `insepctor`: A predicator function inspect whether the connection is on ready. If ready, returns `null`, otherwise an `Error` object explaning the reason why.
- *     - `sender`: A function sending data (`Invoke`) to the remote system.
+ *     - `insepctor`: Reference {@link Communicator.inspectReady}
+ *     - `sender`: Reference {@link Communicator.sendData}
  * 
  * @typeParam Provider Type of provider, definition of features (functions and objects) to be provided for the remote system.
  * @see {@link Communicator}: You prefer FP (Functional Programming), use it instead.
+ * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
  */
 export abstract class CommunicatorBase<Provider extends object = {}>

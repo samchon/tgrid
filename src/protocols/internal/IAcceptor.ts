@@ -3,17 +3,12 @@
 //================================================================
 import { DomainError, RuntimeError } from "tstl/exception";
 
+/**
+ * @hidden
+ */
 export interface IAcceptor<State extends IAcceptor.State, Provider extends object>
 {
 	readonly state: State;
-
-	/**
-	 * Start listening.
-	 * 
-	 * Start listening data from the remote client. 
-	 * 
-	 * @param provider A provider for the remote client.
-	 */
 	listen(provider: Provider): Promise<void>;
 }
 

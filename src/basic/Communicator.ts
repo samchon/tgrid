@@ -17,13 +17,14 @@ import { Invoke } from "./Invoke";
  * protocol using those methods and assigning proper functions.
  * 
  *   - Use them:
- *     - {@link replyData}
- *     - {@link destroy}
+ *     - {@link replyData}()
+ *     - {@link destroy}()
  *   - Assign them:
- *     - {@link sendData}
- *     - {@link inspectReady}
- *     - {@link provider}
+ *     - {@link sendData}()
+ *     - {@link inspectReady}()
+ *     - {@link provider}()
  * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
  */
 export class Communicator<Provider extends object = {}>
@@ -83,12 +84,12 @@ export class Communicator<Provider extends object = {}>
 	/**
 	 * A function sending data to the remote system.
 	 */
-	public sendData: Sender;
+	public readonly sendData: Sender;
 
 	/**
 	 * A predicator inspects whether the *network communication* is on ready.
 	 */
-	public inspectReady: ReadyInspector;
+	public readonly inspectReady: ReadyInspector;
 
 	/* ----------------------------------------------------------------
 		COMMUNICATIONS
