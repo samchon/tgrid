@@ -74,25 +74,8 @@ export class SharedWorkerServer<Provider extends object = {}>
 		{
 			self.addEventListener("connect", (evt: Event) =>
 			{
-				// GET PORT
-				let portList = (evt as OpenEvent).ports;
-				let port: MessagePort = portList[portList.length - 1];
-
-				// WAIT THE FIRST MESSAGE
-				port.onmessage = (evt: MessageEvent) =>
-				{
-					let args: string[] = evt.data;
-
-					// CREATE ACCEPTOR
-					let acceptor = new AcceptorFactory<Provider>(port, args, () =>
-					{
-						this.acceptors_.erase(acceptor);
-					});
-					this.acceptors_.insert(acceptor);
-
-					// SHIFT TO THE CALLBACK
-					handler(acceptor);
-				};
+				for (let port of (evt as OpenEvent).ports)
+					this._Handle_connect(port, handler);
 			});
 		}
 		this.state_ = SharedWorkerServer.State.OPEN;
@@ -116,6 +99,28 @@ export class SharedWorkerServer<Provider extends object = {}>
 		// CLOSE ALL CONNECTIONS
 		for (let acceptor of this.acceptors_)
 			await acceptor.close();
+	}
+
+	/**
+	 * @hidden
+	 */
+	private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): void
+	{
+		port.onmessage = (evt: MessageEvent) =>
+		{
+			let args: string[] = evt.data;
+
+			// CREATE ACCEPTOR
+			let acceptor = new AcceptorFactory<Provider>(port, args, () =>
+			{
+				this.acceptors_.erase(acceptor);
+			});
+			this.acceptors_.insert(acceptor);
+
+			// SHIFT TO THE CALLBACK
+			handler(acceptor);
+		};
+		port.postMessage("READY");
 	}
 
 	/* ----------------------------------------------------------------

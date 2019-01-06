@@ -12,7 +12,7 @@ async function iterate(path: string, level: number = 0): Promise<void>
 		
 		if (stat.isDirectory() === true)
 		{
-			if (file !== "browser")
+			if (file !== "browser" && file !== "internal")
 				await iterate(current_path, level + 1);
 			continue;
 		}

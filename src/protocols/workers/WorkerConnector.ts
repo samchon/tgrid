@@ -173,7 +173,6 @@ export class WorkerConnector<Provider extends object = {}>
 
 				// GO RETURN
 				this.connector_ = resolve;
-				this.worker_.postMessage("READY");
 			}
 			catch (exp)
 			{

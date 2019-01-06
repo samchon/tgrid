@@ -24,7 +24,7 @@ export class Calculator
 	}
 }
 
-class Scientific
+export class Scientific
 {
 	public pow(x: number, y: number): number
 	{
@@ -46,7 +46,7 @@ class Scientific
 	}
 }
 
-class Statistics
+export class Statistics
 {
 	public mean(...elems: number[]): number
 	{
