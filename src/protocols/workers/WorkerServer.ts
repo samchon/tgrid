@@ -88,6 +88,7 @@ export class WorkerServer<Provider extends object = {}>
 		{
 			this.provider_ = provider;
 			g.onmessage = this._Handle_message.bind(this);
+			g.postMessage("READY");
 		}
 		this.state_ = WorkerServer.State.OPEN;
 	}
@@ -186,9 +187,7 @@ export class WorkerServer<Provider extends object = {}>
 	 */
 	private _Handle_message(evt: MessageEvent): void
 	{
-		if (evt.data === "READY")
-			g.postMessage("READY");
-		else if (evt.data === "CLOSE")
+		if (evt.data === "CLOSE")
 			this.close();
 		else
 			this.replier(JSON.parse(evt.data));

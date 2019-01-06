@@ -1,9 +1,11 @@
 import * as std from "tstl";
 
 import { Driver } from "../../basic/Driver";
-import { Calculator } from "./Calculator";
+import { Calculator, Scientific, Statistics } from "./Calculator";
 
 export type ICalculator = Driver<Calculator>;
+export type IScientific = Driver<Scientific>;
+export type IStatistics = Driver<Statistics>;
 
 export namespace ICalculator
 {
@@ -14,7 +16,7 @@ export namespace ICalculator
 
 		// CALL FUNCTIONS IN SERVER FROM CLIENT
 		for (let i: number = 0; i < 100; ++i)
-			validate(controller, validator, talk);
+			await validate(controller, validator, talk);
 
 		// EXCEPTION THROWN BY THE SERVER
 		if (await get_exception(controller) === null)
@@ -57,9 +59,9 @@ export namespace ICalculator
 	}
 
 	const METHODS: string[] = [
-		/*"plus", "minus", "multiplies", "divides",
+		"plus", "minus", "multiplies", "divides",
 		"scientific.pow", "scientific.log", "scientific.sqrt",
-		"statistics.mean", */"statistics.stdev"
+		"statistics.mean", "statistics.stdev"
 	];
 }
 

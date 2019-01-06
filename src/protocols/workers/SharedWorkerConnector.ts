@@ -50,6 +50,11 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 * @hidden
 	 */
 	private state_: SharedWorkerConnector.State;
+
+	/**
+	 * @hidden
+	 */
+	private args_: string[];
 	
 	/**
 	 * @hidden
@@ -115,8 +120,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 			//----
 			try
 			{
-				// SET STATE & PROMISE RETURN
+				// PREPARE MEMBERS
 				this.state_ = SharedWorkerConnector.State.CONNECTING;
+				this.args_ = args;
 				this.connector_ = new Pair(resolve, reject);
 
 				// DO CONNECT
@@ -125,9 +131,6 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 				this.port_ = worker.port;
 				this.port_.onmessage = this._Handle_message.bind(this);
 				this.port_.start();
-
-				// DELIVER ARGUMENTS
-				this.port_.postMessage(args);
 			}
 			catch (exp)
 			{
@@ -196,7 +199,11 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 	 */
 	private _Handle_message(evt: MessageEvent): void
 	{
-		if (evt.data === "ACCEPT")
+		if (evt.data === "READY")
+		{
+			this.port_.postMessage(this.args_);
+		}
+		else if (evt.data === "ACCEPT")
 		{
 			this.state_ = SharedWorkerConnector.State.OPEN;
 			this.connector_.first();

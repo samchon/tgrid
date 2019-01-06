@@ -1,19 +1,19 @@
 //================================================================ 
 /** @module tgrid.basic */
 //================================================================
-import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
+import { HashMap } from "tstl/container/HashMap";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { RuntimeError } from "tstl/exception";
 
 import { Invoke } from "./Invoke";
 import { Driver } from "./Driver";
+import { RuntimeError } from "tstl/exception";
 
 /**
  * The basic communicator.
  * 
  * The `CommunicatorBase` is an abstract class taking full charge of network communication. 
- * Protocolized communicators like `WebConnector` are realized by extending the 
+ * Protocolized communicators like {@link WebConnector} are realized by extending the 
  * `CommunicatorBase` class.
  * 
  * You want to make your own communicator using special protocol, then extends this 
@@ -40,12 +40,12 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	protected provider_: Provider;
+	private static SEQUENCE: number = 0;
 
 	/**
 	 * @hidden
 	 */
-	private static SEQUENCE: number = 0;
+	protected provider_: Provider;
 
 	/**
 	 * @hidden
@@ -188,7 +188,10 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 		{
 			get: ({}, name: string) =>
 			{
-				return this._Proxy_func(name);
+				if (name === "then")
+					return null;
+				else
+					return this._Proxy_func(name);
 			}
 		});
 	}
@@ -198,13 +201,15 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	 */
 	private _Proxy_func(name: string): Function
 	{
-		return new Proxy<Function>((...params: any[]) => 
-		{
-			return this._Call_function(name, ...params);
-		},
+		let func = (...params: any[]) => this._Call_function(name, ...params);
+
+		return new Proxy(func, 
 		{
 			get: ({}, newName: string) =>
 			{
+				if (newName === "bind")
+					return (thisArg: any) => func.bind(thisArg);
+
 				return this._Proxy_func(`${name}.${newName}`);
 			}
 		});
@@ -260,7 +265,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 	/**
 	 * @hidden
 	 */
-	private _Handle_function(invoke: Invoke.IFunction): void
+	private async _Handle_function(invoke: Invoke.IFunction): Promise<void>
 	{
 		let uid: number = invoke.uid;
 
@@ -272,9 +277,12 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			if (!this.provider_) // PROVIDER MUST BE
 				throw new RuntimeError("Provider is not specified yet.");
 
+			// let ret = await eval(`this.provider_.${invoke.listener}(...invoke.parameters)`);
+			// this._Send_return(invoke.uid, true, ret);
+
 			// FIND FUNCTION (WITH THIS-ARG)
 			let func: Function = <any>this.provider_;
-			let thisArg: any = null;
+			let thisArg: any = undefined;
 
 			let routes: string[] = invoke.listener.split(".");
 			for (let name of routes)
@@ -282,19 +290,14 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 				thisArg = func;
 				func = thisArg[name];
 			}
+			func = func.bind(thisArg);
 
 			//----
 			// RETURN VALUE
 			//----
 			// CALL FUNCTION
-			let ret: any = func.apply(thisArg, invoke.parameters);
-
-			// PROMISE | ATOMIC
-			if (ret && ret.then instanceof Function) // Async
-				ret.then(this._Send_return.bind(this, uid, true))
-				   .catch(this._Send_return.bind(this, uid, false));
-			else
-				this._Send_return(uid, true, ret); // Sync
+			let ret: any = await func(...invoke.parameters);
+			this._Send_return(uid, true, ret);
 		}
 		catch (exp)
 		{
