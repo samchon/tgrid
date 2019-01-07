@@ -208,7 +208,11 @@ export abstract class CommunicatorBase<Provider extends object = {}>
 			get: ({}, newName: string) =>
 			{
 				if (newName === "bind")
-					return (thisArg: any) => func.bind(thisArg);
+					return (thisArg: any, ...args: any[]) => func.bind(thisArg, ...args);
+				else if (newName === "call")
+					return (thisArg: any, ...args: any[]) => func.call(thisArg, ...args);
+				else if (newName === "apply")
+					return (thisArg: any, args: any[]) => func.apply(thisArg, args);
 
 				return this._Proxy_func(`${name}.${newName}`);
 			}
