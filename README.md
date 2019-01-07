@@ -4,6 +4,7 @@
 [![Downloads](https://img.shields.io/npm/dm/tgrid.svg)](https://www.npmjs.com/package/tgrid)
 [![DeepScan grade](https://deepscan.io/api/teams/1932/projects/3409/branches/30529/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=1932&pid=3409&bid=30529)
 [![Chat on Gitter](https://badges.gitter.im/samchon/tgrid.svg)](https://gitter.im/samchon/tgrid?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsamchon%2Ftgrid.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsamchon%2Ftgrid?ref=badge_shield)
 
 **TGrid** is a tiny framework for *Grid Computing in TypeScript*, using such concepts.
   - *RFC*: Remote Function Call
@@ -118,3 +119,6 @@ main();
 - **Related Projects**
   - [TSTL](https://github.com/samchon/tstl)
   - [TGrid-Examples](https://github.com/samchon/tgrid-examples)
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsamchon%2Ftgrid.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsamchon%2Ftgrid?ref=badge_large)
