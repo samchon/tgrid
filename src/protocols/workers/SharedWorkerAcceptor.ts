@@ -26,183 +26,183 @@ import { DomainError } from "tstl";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerAcceptor<Provider extends object = {}>
-	extends CommunicatorBase<Provider>
-	implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
+    extends CommunicatorBase<Provider>
+    implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
-	/**
-	 * @hidden
-	 */
-	private port_: MessagePort;
+    /**
+     * @hidden
+     */
+    private port_: MessagePort;
 
-	/**
-	 * @hidden 
-	 */
-	private eraser_: ()=>void;
+    /**
+     * @hidden 
+     */
+    private eraser_: ()=>void;
 
-	/** 
-	 * @hidden
-	 */
-	private state_: SharedWorkerAcceptor.State;
+    /** 
+     * @hidden
+     */
+    private state_: SharedWorkerAcceptor.State;
 
-	/**
-	 * @hidden
-	 */
-	private arguments_: string[];
+    /**
+     * @hidden
+     */
+    private arguments_: string[];
 
-	/* ----------------------------------------------------------------
-		CONSTRUCTOR
-	---------------------------------------------------------------- */
-	/**
-	 * @hidden
-	 */
-	private constructor(port: MessagePort, args: string[], eraser: ()=>void)
-	{
-		super();
+    /* ----------------------------------------------------------------
+        CONSTRUCTOR
+    ---------------------------------------------------------------- */
+    /**
+     * @hidden
+     */
+    private constructor(port: MessagePort, args: string[], eraser: ()=>void)
+    {
+        super();
 
-		// ASSIGN MEMBER
-		this.port_ = port;
-		this.eraser_ = eraser;
-		this.arguments_ = args;
+        // ASSIGN MEMBER
+        this.port_ = port;
+        this.eraser_ = eraser;
+        this.arguments_ = args;
 
-		// PROPERTIES
-		this.state_ = SharedWorkerAcceptor.State.NONE;
-	}
+        // PROPERTIES
+        this.state_ = SharedWorkerAcceptor.State.NONE;
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	public async close(): Promise<void>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
+    /**
+     * @inheritDoc
+     */
+    public async close(): Promise<void>
+    {
+        // TEST CONDITION
+        let error: Error = this.inspector();
+        if (error)
+            throw error;
 
-		// CLOSE CONNECTION
-		this.state_ = SharedWorkerAcceptor.State.CLOSING;
-		await this._Close("CLOSE");
-	}
+        // CLOSE CONNECTION
+        this.state_ = SharedWorkerAcceptor.State.CLOSING;
+        await this._Close("CLOSE");
+    }
 
-	/**
-	 * @hidden
-	 */
-	private async _Close(message: string): Promise<void>
-	{
-		// CALL HANDLERS
-		this.eraser_();
-		this.port_.postMessage(message);
+    /**
+     * @hidden
+     */
+    private async _Close(message: string): Promise<void>
+    {
+        // CALL HANDLERS
+        this.eraser_();
+        this.port_.postMessage(message);
 
-		// DO CLOSE
-		await this.destructor();
-		this.port_.close();
+        // DO CLOSE
+        await this.destructor();
+        this.port_.close();
 
-		// WELL, IT MAY HARD TO SEE SUCH PROPERTIES
-		this.state_ = SharedWorkerAcceptor.State.CLOSED;
-	}
+        // WELL, IT MAY HARD TO SEE SUCH PROPERTIES
+        this.state_ = SharedWorkerAcceptor.State.CLOSED;
+    }
 
-	/* ----------------------------------------------------------------
-		ACCESSORS
-	---------------------------------------------------------------- */
-	/**
-	 * @inheritDoc
-	 */
-	public get state(): SharedWorkerAcceptor.State
-	{
-		return this.state_;
-	}
+    /* ----------------------------------------------------------------
+        ACCESSORS
+    ---------------------------------------------------------------- */
+    /**
+     * @inheritDoc
+     */
+    public get state(): SharedWorkerAcceptor.State
+    {
+        return this.state_;
+    }
 
-	/**
-	 * Arguments delivered from the connector.
-	 */
-	public get arguments(): string[]
-	{
-		return this.arguments_;
-	}
+    /**
+     * Arguments delivered from the connector.
+     */
+    public get arguments(): string[]
+    {
+        return this.arguments_;
+    }
 
-	/* ----------------------------------------------------------------
-		HANDSHAKES
-	---------------------------------------------------------------- */
-	/**
-	 * Accept connection.
-	 * 
-	 * Accept, permit the client's, connection to this server and start interaction.
-	 * 
-	 * @param provider An object providing features for remote system.
-	 */
-	public async accept(provider: Provider): Promise<void>
-	{
-		// TEST CONDITION
-		if (this.state_ !== SharedWorkerAcceptor.State.NONE)
-			throw new DomainError("You've already accepted (or rejected) the connection.");
+    /* ----------------------------------------------------------------
+        HANDSHAKES
+    ---------------------------------------------------------------- */
+    /**
+     * Accept connection.
+     * 
+     * Accept, permit the client's, connection to this server and start interaction.
+     * 
+     * @param provider An object providing features for remote system.
+     */
+    public async accept(provider: Provider): Promise<void>
+    {
+        // TEST CONDITION
+        if (this.state_ !== SharedWorkerAcceptor.State.NONE)
+            throw new DomainError("You've already accepted (or rejected) the connection.");
 
-		//----
-		// ACCEPT CONNECTION
-		//----
-		this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
-		{
-			// SET PROVIDER
-			this.provider_ = provider;
+        //----
+        // ACCEPT CONNECTION
+        //----
+        this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
+        {
+            // SET PROVIDER
+            this.provider_ = provider;
 
-			// PREPARE PORT
-			this.port_.onmessage = this._Handle_message.bind(this);
-			this.port_.start();
+            // PREPARE PORT
+            this.port_.onmessage = this._Handle_message.bind(this);
+            this.port_.start();
 
-			// INFORM ACCEPTANCE
-			this.port_.postMessage("ACCEPT");
-		}
-		this.state_ = SharedWorkerAcceptor.State.OPEN;
-	}
+            // INFORM ACCEPTANCE
+            this.port_.postMessage("ACCEPT");
+        }
+        this.state_ = SharedWorkerAcceptor.State.OPEN;
+    }
 
-	/**
-	 * Reject connection.
-	 * 
-	 * Reject without acceptance, any interaction. The connection would be closed immediately.
-	 */
-	public async reject(): Promise<void>
-	{
-		// TEST CONDITION
-		if (this.state_ !== SharedWorkerAcceptor.State.NONE)
-			throw new DomainError("You've already accepted (or rejected) the connection.");
+    /**
+     * Reject connection.
+     * 
+     * Reject without acceptance, any interaction. The connection would be closed immediately.
+     */
+    public async reject(): Promise<void>
+    {
+        // TEST CONDITION
+        if (this.state_ !== SharedWorkerAcceptor.State.NONE)
+            throw new DomainError("You've already accepted (or rejected) the connection.");
 
-		//----
-		// REJECT CONNECTION (CLOSE)
-		//----
-		this.state_ = SharedWorkerAcceptor.State.REJECTING;
-		await this._Close("REJECT");
-	}
+        //----
+        // REJECT CONNECTION (CLOSE)
+        //----
+        this.state_ = SharedWorkerAcceptor.State.REJECTING;
+        await this._Close("REJECT");
+    }
 
-	/* ----------------------------------------------------------------
-		COMMUNICATOR
-	---------------------------------------------------------------- */
-	/**
-	 * @hidden
-	 */
-	protected sender(invoke: Invoke): void
-	{
-		this.port_.postMessage(JSON.stringify(invoke));
-	}
-	
-	/**
-	 * @hidden
-	 */
-	protected inspector(): Error
-	{
-		return IAcceptor.inspect(this.state_);
-	}
+    /* ----------------------------------------------------------------
+        COMMUNICATOR
+    ---------------------------------------------------------------- */
+    /**
+     * @hidden
+     */
+    protected sender(invoke: Invoke): void
+    {
+        this.port_.postMessage(JSON.stringify(invoke));
+    }
+    
+    /**
+     * @hidden
+     */
+    protected inspector(): Error
+    {
+        return IAcceptor.inspect(this.state_);
+    }
 
-	/**
-	 * @hidden
-	 */
-	private _Handle_message(evt: MessageEvent): void
-	{
-		if (evt.data === "CLOSE")
-			this.close();
-		else
-			this.replier(JSON.parse(evt.data));
-	}
+    /**
+     * @hidden
+     */
+    private _Handle_message(evt: MessageEvent): void
+    {
+        if (evt.data === "CLOSE")
+            this.close();
+        else
+            this.replier(JSON.parse(evt.data));
+    }
 }
 
 export namespace SharedWorkerAcceptor
 {
-	export import State = IAcceptor.State;
+    export import State = IAcceptor.State;
 }

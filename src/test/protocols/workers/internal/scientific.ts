@@ -3,7 +3,7 @@ import { Scientific } from "../../../internal/Calculator";
 
 async function main(): Promise<void>
 {
-	let server = new WorkerServer();
-	await server.open(new Scientific());
+    let server = new WorkerServer();
+    await server.open(new Scientific());
 }
 main();

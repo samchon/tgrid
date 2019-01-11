@@ -34,16 +34,16 @@ export var Driver = Proxy;
  * @author Jeongho Nam <http://samchon.org>
  */
 export type Promisify<Instance extends object> = 
-	// IS FUNCTION?
-	Instance extends Function
-		? Instance extends (...args: infer Params) => infer Ret
-			? Ret extends Promise<any>
-				? (...args: Params) => Ret
-				: (...args: Params) => Promise<Ret>
-			: (...args: any[]) => Promise<any>
-	: 
-	{ // IS OBJECT?
-		[P in keyof Instance]: Instance[P] extends object
-			? Promisify<Instance[P]>
-			: never;
-	};
+    // IS FUNCTION?
+    Instance extends Function
+        ? Instance extends (...args: infer Params) => infer Ret
+            ? Ret extends Promise<any>
+                ? (...args: Params) => Ret
+                : (...args: Params) => Promise<Ret>
+            : (...args: any[]) => Promise<any>
+    : 
+    { // IS OBJECT?
+        [P in keyof Instance]: Instance[P] extends object
+            ? Promisify<Instance[P]>
+            : never;
+    };

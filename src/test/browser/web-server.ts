@@ -3,13 +3,13 @@ import { Calculator } from "../internal/Calculator";
 
 async function main(): Promise<void>
 {
-	let server = new WebServer();
-	await server.open(10489, async acceptor =>
-	{
-		await acceptor.accept(new Calculator());
+    let server = new WebServer();
+    await server.open(10489, async acceptor =>
+    {
+        await acceptor.accept(new Calculator());
 
-		await acceptor.join();
-		await server.close();
-	});
+        await acceptor.join();
+        await server.close();
+    });
 }
 main();

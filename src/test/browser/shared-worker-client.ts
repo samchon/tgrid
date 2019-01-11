@@ -4,11 +4,11 @@ import { complete } from "./internal";
 
 window.onload = async () =>
 {
-	let worker = new SharedWorkerConnector();
-	await worker.connect("shared-worker-server.js", "first", "second", "third");
+    let worker = new SharedWorkerConnector();
+    await worker.connect("shared-worker-server.js", "first", "second", "third");
 
-	await ICalculator.main(worker.getDriver<ICalculator>(), true);
-	await worker.close();
+    await ICalculator.main(worker.getDriver<ICalculator>(), true);
+    await worker.close();
 
-	complete();
+    complete();
 };

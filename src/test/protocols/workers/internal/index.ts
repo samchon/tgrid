@@ -5,9 +5,9 @@ import { ICalculator } from "../../../internal/ICalculator";
 
 async function main(): Promise<void>
 {
-	// DO CONNECT
-	let connector: WorkerConnector = new WorkerConnector();
-	await connector.connect(__dirname + "/calculator.js");
+    // DO CONNECT
+    let connector: WorkerConnector = new WorkerConnector();
+    await connector.connect(__dirname + "/calculator.js");
 
     // GET DRIVER
     let calc: Driver<ICalculator> = connector.getDriver<ICalculator>();
