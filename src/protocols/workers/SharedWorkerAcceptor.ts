@@ -3,7 +3,7 @@
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IAcceptor } from "../internal/IAcceptor";
+import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../basic/Invoke";
 
 import { DomainError } from "tstl";
@@ -123,11 +123,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         HANDSHAKES
     ---------------------------------------------------------------- */
     /**
-     * Accept connection.
-     * 
-     * Accept, permit the client's, connection to this server and start interaction.
-     * 
-     * @param provider An object providing features for remote system.
+     * @inheritDoc
      */
     public async accept(provider: Provider): Promise<void>
     {
@@ -187,7 +183,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     protected inspector(): Error
     {
-        return IAcceptor.inspect(this.state_);
+        return Acceptor.inspect(this.state_);
     }
 
     /**
@@ -204,5 +200,5 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 
 export namespace SharedWorkerAcceptor
 {
-    export import State = IAcceptor.State;
+    export import State = Acceptor.State;
 }

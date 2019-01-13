@@ -3,7 +3,7 @@
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
-import { IConnector } from "../internal/IConnector";
+import { IConnector, Connector } from "../internal/IConnector";
 
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
@@ -182,7 +182,7 @@ export class WebConnector<Provider extends object = {}>
      */
     protected inspector(): Error
     {
-        return IConnector.inspect(this.state);
+        return Connector.inspect(this.state);
     }
 
     /**
@@ -217,7 +217,7 @@ export class WebConnector<Provider extends object = {}>
 
 export namespace WebConnector
 {
-    export import State = IConnector.State;
+    export import State = Connector.State;
 }
 
 //----

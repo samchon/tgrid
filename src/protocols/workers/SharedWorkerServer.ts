@@ -1,6 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
+import { IState } from "../internal/IState";
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 import { is_node } from "tstl/utility/node";
@@ -29,6 +30,7 @@ import { DomainError } from "tstl/exception";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerServer<Provider extends object = {}>
+    implements IState<SharedWorkerServer.State>
 {
     /**
      * @hidden

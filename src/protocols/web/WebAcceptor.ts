@@ -5,7 +5,7 @@ import * as ws from "websocket";
 
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
-import { IAcceptor } from "../internal/IAcceptor";
+import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
@@ -102,11 +102,7 @@ export class WebAcceptor<Provider extends object = {}>
         HANDSHAKES
     ---------------------------------------------------------------- */
     /**
-     * Accept connection.
-     *
-     * Accept, permit the client's, connection to this server and start interaction.
-     * 
-     * @param provider An object providing features to remote system.
+     * @inheritDoc
      */
     public accept(provider: Provider = null): Promise<void>
     {
@@ -226,7 +222,7 @@ export class WebAcceptor<Provider extends object = {}>
      */
     protected inspector(): Error
     {
-        return IAcceptor.inspect(this.state_);
+        return Acceptor.inspect(this.state_);
     }
 
     /**
@@ -253,5 +249,5 @@ export class WebAcceptor<Provider extends object = {}>
 
 export namespace WebAcceptor
 {
-    export import State = IAcceptor.State;
+    export import State = Acceptor.State;
 }

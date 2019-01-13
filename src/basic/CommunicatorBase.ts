@@ -18,17 +18,17 @@ import { RuntimeError } from "tstl/exception";
  * 
  * You want to make your own communicator using special protocol, then extends this 
  * `CommunicatorBase` class. Key features of RFC (Remote Function Call) are already 
- * implemented in the `CommunicatorBase`. Thus, only you've to is specializing your 
- * protocol using those methods with overridings:
+ * implemented in the `CommunicatorBase`. Thus, only you've to is specializing your protocol 
+ * using those methods with overridings:
  * 
- *   - Assign it
- *     - `provider_`: See {@link provider}
- *   - Use them
- *     - `replier`: Reference {@link Communicator.replyData}
- *     - `destructor`: Reference {@link Communicator.destructor}
- *   - Override them
- *     - `insepctor`: Reference {@link Communicator.inspectReady}
- *     - `sender`: Reference {@link Communicator.sendData}
+ * - Assign it
+ *   - `provider_`: See {@link provider}
+ * - Use them
+ *   - `replier`: Reference {@link Communicator.replyData}
+ *   - `destructor`: Reference {@link Communicator.destructor}
+ * - Override them
+ *   - `insepctor`: Reference {@link Communicator.inspectReady}
+ *   - `sender`: Reference {@link Communicator.sendData}
  * 
  * @typeParam Provider Type of features provided for remote system.
  * @see {@link Communicator}: You prefer FP (Functional Programming), use it instead.

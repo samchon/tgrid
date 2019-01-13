@@ -25,6 +25,7 @@ export var Driver = Proxy;
  * Promisify an object type.
  * 
  * It promisifies all member types. When a member type is:
+ * 
  *   - function: returns `Promise` (`R` -> `Promise<R>`).
  *   - object: promisifies recursively (`O` -> `Promisify<O>`).
  *   - atomic value: be ignored (be `never` type).

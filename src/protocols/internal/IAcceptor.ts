@@ -1,19 +1,26 @@
 //================================================================ 
 /** @module tgrid.protocols */
 //================================================================
+import { IState } from "./IState";
 import { DomainError, RuntimeError } from "tstl/exception";
+
+export interface IAcceptor<State extends Acceptor.State, Provider extends object>
+    extends IState<State>
+{
+    /**
+     * Accept connection.
+     *
+     * Accept, permit the client's, connection with this server and start interaction.
+     * 
+     * @param provider An object providing features to remote system.
+     */
+    accept(provider?: Provider): Promise<void>;
+}
 
 /**
  * @hidden
  */
-export interface IAcceptor<State extends IAcceptor.State, Provider extends object>
-{
-    readonly state: State;
-
-    accept(provider: Provider): Promise<void>;
-}
-
-export namespace IAcceptor
+export namespace Acceptor
 {
     export enum State
     {

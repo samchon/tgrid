@@ -3,7 +3,7 @@
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IConnector } from "../internal/IConnector";
+import { IConnector, Connector } from "../internal/IConnector";
 import { Invoke } from "../../basic/Invoke";
 
 import { DomainError } from "tstl/exception";
@@ -233,7 +233,7 @@ export class WorkerConnector<Provider extends object = {}>
      */
     protected inspector(): Error
     {
-        return IConnector.inspect(this.state_);
+        return Connector.inspect(this.state_);
     }
 
     /**
@@ -265,7 +265,7 @@ export class WorkerConnector<Provider extends object = {}>
 
 export namespace WorkerConnector
 {
-    export import State = IConnector.State;
+    export import State = Connector.State;
 }
 
 //----

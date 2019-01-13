@@ -1,17 +1,18 @@
 //================================================================ 
 /** @module tgrid.protocols */
 //================================================================
+import { IState } from "./IState";
 import { DomainError, RuntimeError } from "tstl/exception";
+
+export interface IConnector<State extends Connector.State>
+    extends IState<State>
+{
+}
 
 /**
  * @hidden
  */
-export interface IConnector<State extends IConnector.State>
-{
-    readonly state: State;
-}
-
-export namespace IConnector
+export namespace Connector
 {
     export enum State
     {

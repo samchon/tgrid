@@ -5,6 +5,7 @@ import * as ws from "websocket";
 import * as http from "http";
 import * as https from "https";
 
+import { IState } from "../internal/IState";
 import { WebAcceptor } from "./WebAcceptor";
 import { DomainError, RuntimeError } from "tstl/exception";
 
@@ -24,6 +25,7 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebServer<Provider extends object = {}>
+    implements IState<WebServer.State>
 {
     /**
      * @hidden

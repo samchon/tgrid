@@ -8,7 +8,7 @@ import { Invoke } from "./Invoke";
  * The basic cmmunicator (FP version).
  * 
  * The `Communicator` is a basic class taking full charge of network communication like 
- * `CommunicatorBase`, for someone who prefer FP (Functional Programming) rather than 
+ * {@link CommunicatorBase}, for someone who prefer FP (Functional Programming) rather than 
  * OOP (Object Oriented Programming) using inheritance.
  * 
  * You want to make your own communicator using special protocol, then creates the 
@@ -16,13 +16,13 @@ import { Invoke } from "./Invoke";
  * implemented in the `Communicator`. Thus, only you've to do is specializing your 
  * protocol using those methods and assigning proper functions.
  * 
- *   - Use them:
- *     - {@link replyData}()
- *     - {@link destroy}()
- *   - Assign them:
- *     - {@link sendData}()
- *     - {@link inspectReady}()
- *     - {@link provider}()
+ * - Use them:
+ *   - {@link replyData}()
+ *   - {@link destroy}()
+ * - Assign them:
+ *   - {@link sendData}()
+ *   - {@link inspectReady}()
+ *   - {@link provider}()
  * 
  * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
