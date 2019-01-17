@@ -1,5 +1,5 @@
 import { WebConnector } from "../../protocols/web";
-import { ICalculator } from "../internal/ICalculator";
+import { ICalculator } from "../controllers/ICalculator";
 import { complete } from "./internal";
 
 window.onload = async () =>

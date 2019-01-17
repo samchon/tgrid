@@ -1,9 +1,9 @@
 import { WebServer, WebConnector } from "../../../protocols/web";
 import { Driver } from "../../../basic";
 
-import { IScript } from "./internal/IScript";
-import { IChatService } from "./internal/IChatService";
-import { IChatPrinter } from "./internal/IChatPrinter";
+import { IScript } from "../../controllers/IScript";
+import { IChatService } from "../../controllers/IChatService";
+import { IChatPrinter } from "../../controllers/IChatPrinter";
 
 import { DomainError, LengthError } from "tstl/exception";
 import { HashMap } from "tstl/container/HashMap";

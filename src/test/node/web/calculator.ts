@@ -3,9 +3,9 @@ import * as std from "tstl";
 import { WebServer, WebConnector } from "../../../protocols/web";
 import { Driver } from "../../../basic"
 
-import { Calculator } from "../../internal/Calculator";
-import { ICalculator } from "../../internal/ICalculator";
-import { IVector } from "../../internal/IVector";
+import { Calculator } from "../../providers/Calculator";
+import { ICalculator } from "../../controllers/ICalculator";
+import { IVector } from "../../controllers/IVector";
 
 const PORT: number = 10101;
 
@@ -43,7 +43,7 @@ export async function test_web_calculator(): Promise<void>
         }
         else
         {
-            let driver: Driver<IVector> = connector.getDriver<IVector>();
+            let driver: Driver<IVector<number>> = connector.getDriver<IVector<number>>();
             await IVector.main(driver);
         }
         

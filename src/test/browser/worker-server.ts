@@ -1,5 +1,5 @@
 import { WorkerServer } from "../../protocols/workers/WorkerServer";
-import { Calculator } from "../internal/Calculator";
+import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void>
 {

@@ -18,7 +18,7 @@
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Driver<Controller extends object> = Promisify<Controller>;
+export type Driver<Controller extends object> = Readonly<Promisify<Controller>>;
 export var Driver = Proxy;
 
 /**

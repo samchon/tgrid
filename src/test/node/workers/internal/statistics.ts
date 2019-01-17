@@ -1,9 +1,9 @@
 import { WorkerServer } from "../../../../protocols/workers";
-import { Scientific } from "../../../internal/Calculator";
+import { Statistics } from "../../../providers/Calculator";
 
 async function main(): Promise<void>
 {
     let server = new WorkerServer();
-    await server.open(new Scientific());
+    await server.open(new Statistics());
 }
 main();

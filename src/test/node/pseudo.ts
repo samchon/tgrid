@@ -1,7 +1,8 @@
 import { Communicator } from "../../basic/Communicator";
+import { Driver } from "../../basic/Driver";
 
-import { Calculator } from "../internal/Calculator";
-import { ICalculator } from "../internal/ICalculator";
+import { Calculator } from "../providers/Calculator";
+import { ICalculator } from "../controllers/ICalculator";
 
 export async function test_pseudo(): Promise<void>
 {
@@ -20,8 +21,8 @@ export async function test_pseudo(): Promise<void>
     // INTERACTS
     //----
     // GET DRIVER
-    let controller: ICalculator = client.getDriver<ICalculator>();
+    let driver: Driver<ICalculator> = client.getDriver<ICalculator>();
 
     // DO TEST
-    await ICalculator.main(controller);
+    await ICalculator.main(driver);
 }

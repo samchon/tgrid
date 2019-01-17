@@ -1,12 +1,41 @@
-import { NormalCalculator } from "./NormalCalculator";
+import { 
+    ICalculator, 
+    ISimple, IScientific, IStatistics
+} from "../controllers/ICalculator";
 
-export class Calculator extends NormalCalculator
+export class Simple 
+    implements ISimple
+{
+    public plus(x: number, y: number): number
+    {
+        return x + y;
+    }
+    public minus(x: number, y: number): number
+    {
+        return x - y;
+    }
+    
+    public multiplies(x: number, y: number): number
+    {
+        return x * y;
+    }
+    public divides(x: number, y: number): number
+    {
+        if (y === 0)
+            throw new Error("Divided by zero.");
+        return x / y;
+    }
+}
+
+export class Calculator 
+    extends Simple 
+    implements ICalculator
 {
     public scientific = new Scientific();
     public statistics = new Statistics();
 }
 
-export class Scientific
+export class Scientific implements IScientific
 {
     public pow(x: number, y: number): number
     {
@@ -28,7 +57,7 @@ export class Scientific
     }
 }
 
-export class Statistics
+export class Statistics implements IStatistics
 {
     public mean(...elems: number[]): number
     {

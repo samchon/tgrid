@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as cp from "child_process";
 
 import { WorkerConnector } from "../../../protocols/workers/WorkerConnector";
-import { ICalculator } from "../../internal/ICalculator";
+import { ICalculator } from "../../controllers/ICalculator";
 
 export function test_worker_connect(): Promise<void>
 {

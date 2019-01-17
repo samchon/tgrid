@@ -1,6 +1,6 @@
 import * as std from "tstl";
 
-import { WebServer, WebConnector } from "../../protocols/web";
+import { WebServer, WebConnector } from "../../../protocols/web";
 
 const PORT: number = 10101;
 const COUNT: number = 10;
@@ -12,7 +12,7 @@ class Provider
     public vector: std.Vector<number> = new std.Vector();
 }
 
-export async function test_remote_mutex(): Promise<void>
+export async function test_mutex(): Promise<void>
 {
     //----
     // PREPARES

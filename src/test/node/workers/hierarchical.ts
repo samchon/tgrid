@@ -1,7 +1,7 @@
 import { WorkerConnector } from "../../../protocols/workers";
 import { Driver } from "../../../basic";
 
-import { ICalculator } from "../../internal/ICalculator";
+import { ICalculator } from "../../controllers/ICalculator";
 
 export async function test_hierarchical_workers(): Promise<void>
 {

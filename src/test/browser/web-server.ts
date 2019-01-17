@@ -1,5 +1,5 @@
 import { WebServer } from "../../protocols/web";
-import { Calculator } from "../internal/Calculator";
+import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void>
 {

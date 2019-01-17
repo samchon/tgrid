@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-const PATH = __dirname;
+const PATH = __dirname + "/node";
 
 async function iterate(path: string, level: number = 0): Promise<void>
 {

@@ -1,33 +1,14 @@
 import { WorkerServer, WorkerConnector } from "../../../../protocols/workers";
 import { Driver } from "../../../../basic";
 
-import { IScientific, IStatistics } from "../../../internal/ICalculator";
+import { Simple } from "../../../providers/Calculator";
+import { IScientific, IStatistics } from "../../../controllers/ICalculator";
 
-class HierarchicalCalculator
+class HierarchicalCalculator extends Simple
 {
     // REMOTE CALCULATOR
     public scientific: Driver<IScientific>;
     public statistics: Driver<IStatistics>;
-
-    // BY ITSELF
-    public plus(x: number, y: number): number
-    {
-        return x + y;
-    }
-    public minus(x: number, y: number): number
-    {
-        return x - y;
-    }
-    public multiplies(x: number, y: number): number
-    {
-        return x * y;
-    }
-    public divides(x: number, y: number): number
-    {
-        if (y === 0)
-            throw new Error("Divided by zero.");
-        return x / y;
-    }
 }
 
 async function get<Controller extends object>
