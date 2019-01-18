@@ -9,7 +9,11 @@ import { Invoke } from "../../basic/Invoke";
 import { DomainError, RuntimeError } from "tstl/exception";
 import { Pair } from "tstl/utility/Pair";
 
-import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
+import { 
+    compile as _Compile, 
+    remove as _Remove 
+} from "./internal/web-worker";
+import { IReject } from "./internal/IReject";
 
 /**
  * SharedWorker Connector
@@ -183,7 +187,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        this.port_.postMessage(JSON.stringify(invoke));
+        this.port_.postMessage(invoke);
     }
 
     /**
@@ -199,34 +203,36 @@ export class SharedWorkerConnector<Provider extends Object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === "READY")
+        // RFC
+        if (evt.data instanceof Object)
         {
-            this.port_.postMessage(this.args_);
+            if ((evt.data as Invoke).uid !== undefined)
+                this.replier(evt.data);
+            else if ((evt.data as IReject).name === "reject")
+                this._Handle_reject((evt.data as IReject).reason);
         }
+
+        // PROCESSES
+        else if (evt.data === "READY")
+            this.port_.postMessage(this.args_);
         else if (evt.data === "ACCEPT")
         {
             this.state_ = SharedWorkerConnector.State.OPEN;
             this.connector_.first();
         }
-        else if (evt.data === "REJECT")
-        {
-            this._Handle_reject();
-        }
         else if (evt.data === "CLOSE")
-        {
             this._Handle_close();
-        }
-        else
-            this.replier(JSON.parse(evt.data));
+        else if (evt.data === "REJECT")
+            this._Handle_reject("Rejected by server.");
     }
 
     /**
      * @hidden
      */
-    private async _Handle_reject(): Promise<void>
+    private async _Handle_reject(reason: string): Promise<void>
     {
         this.state_ = SharedWorkerConnector.State.CLOSING;
-        this.connector_.second(new RuntimeError("Rejected by server."));
+        this.connector_.second(new RuntimeError(reason));
 
         await this._Handle_close();
     }

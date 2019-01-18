@@ -6,7 +6,8 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../basic/Invoke";
 
-import { DomainError } from "tstl";
+import { DomainError } from "tstl/exception";
+import { IReject } from "./internal/IReject";
 
 /**
  * SharedWorker acceptor for client.
@@ -86,7 +87,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    private async _Close(message: string): Promise<void>
+    private async _Close(message: "CLOSE" | IReject): Promise<void>
     {
         // CALL HANDLERS
         this.eraser_();
@@ -154,7 +155,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      * 
      * Reject without acceptance, any interaction. The connection would be closed immediately.
      */
-    public async reject(): Promise<void>
+    public async reject(reason: string): Promise<void>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -164,7 +165,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         // REJECT CONNECTION (CLOSE)
         //----
         this.state_ = SharedWorkerAcceptor.State.REJECTING;
-        await this._Close("REJECT");
+        await this._Close({ name: "reject", reason: reason });
     }
 
     /* ----------------------------------------------------------------
@@ -175,7 +176,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        this.port_.postMessage(JSON.stringify(invoke));
+        this.port_.postMessage(invoke);
     }
     
     /**
@@ -191,10 +192,10 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === "CLOSE")
+        if (evt.data instanceof Object)
+            this.replier(evt.data);
+        else if (evt.data === "CLOSE")
             this.close();
-        else
-            this.replier(JSON.parse(evt.data));
     }
 }
 

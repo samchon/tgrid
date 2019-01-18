@@ -155,7 +155,7 @@ export class WorkerServer<Provider extends object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        g.postMessage(JSON.stringify(invoke));
+        g.postMessage(invoke);
     }
 
     /**
@@ -187,10 +187,10 @@ export class WorkerServer<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === "CLOSE")
+        if (evt.data instanceof Object)
+            this.replier(evt.data);
+        else if (evt.data === "CLOSE")
             this.close();
-        else
-            this.replier(JSON.parse(evt.data));
     }
 }
 

@@ -108,12 +108,20 @@ export class SharedWorkerServer<Provider extends object = {}>
      */
     private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): void
     {
+        let acceptor: SharedWorkerAcceptor<Provider> = null;
+
         port.onmessage = (evt: MessageEvent) =>
         {
+            // CLOSE MESSAGE CHANNEL TEMPORARILY
+            port.onmessage = undefined;
+            if (acceptor !== null)
+                return;
+
+            // ARGUMENTS
             let args: string[] = evt.data;
 
             // CREATE ACCEPTOR
-            let acceptor = new AcceptorFactory<Provider>(port, args, () =>
+            acceptor = new AcceptorFactory<Provider>(port, args, () =>
             {
                 this.acceptors_.erase(acceptor);
             });
