@@ -7,7 +7,7 @@ import { ConditionVariable } from "tstl/thread/ConditionVariable";
 
 import { Invoke } from "./Invoke";
 import { Driver } from "./Driver";
-import { RuntimeError } from "tstl/exception";
+import { DomainError, RuntimeError } from "tstl/exception";
 
 /**
  * The basic communicator.
@@ -35,7 +35,7 @@ import { RuntimeError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
  */
-export abstract class CommunicatorBase<Provider extends object = {}>
+export abstract class CommunicatorBase<Provider>
 {
     /**
      * @hidden
@@ -45,7 +45,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected provider_?: Provider;
+    protected provider_: Provider;
 
     /**
      * @hidden
@@ -63,7 +63,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected constructor(provider?: Provider)
+    protected constructor(provider: Provider)
     {
         this.provider_ = provider;
 
@@ -118,7 +118,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
      * An object providing features (functions & objects) for remote system. The remote 
      * system would call the features (`Provider`) by using its `Driver<Controller>`.
      */
-    public get provider(): Provider | undefined
+    public get provider(): Provider
     {
         return this.provider_;
     }
@@ -278,14 +278,16 @@ export abstract class CommunicatorBase<Provider extends object = {}>
             //----
             // FIND FUNCTION
             //----
-            if (!this.provider_) // PROVIDER MUST BE
+            if (this.provider_ === undefined) // PROVIDER MUST BE
                 throw new RuntimeError("Provider is not specified yet.");
+            else if (this.provider === null)
+                throw new DomainError("No provider.");
 
             // let ret = await eval(`this.provider_.${invoke.listener}(...invoke.parameters)`);
             // this._Send_return(invoke.uid, true, ret);
 
             // FIND FUNCTION (WITH THIS-ARG)
-            let func: Function = <any>this.provider_;
+            let func: Function = this.provider_ as any;
             let thisArg: any = undefined;
 
             let routes: string[] = invoke.listener.split(".");

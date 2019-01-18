@@ -59,7 +59,7 @@ export namespace ICalculator
         let ret: number = await eval(`driver.${method}`)(x, y);
         let answer: number = eval(`validator.${method}(x, y)`);
 
-        if (talk)
+        if (talk === true)
             console.log(method, x, y, ret, answer);
         
         // VALIDATE

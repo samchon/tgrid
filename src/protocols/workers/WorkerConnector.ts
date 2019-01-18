@@ -4,8 +4,9 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { IProvider } from "../internal/IProvider";
 
+import { Invoke } from "../../basic/Invoke";
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
@@ -28,24 +29,24 @@ import { is_node } from "tstl/utility/node";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WorkerConnector<Provider extends object = {}>
+export class WorkerConnector<Provider extends object | null = null>
     extends CommunicatorBase<Provider>
     implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
 {
     /**
      * @hidden
      */
-    private worker_!: Worker;
-
-    /**
-     * @hidden
-     */
-    private connector_!: ()=>void;
-
-    /**
-     * @hidden
-     */
     private state_: WorkerConnector.State;
+
+    /**
+     * @hidden
+     */
+    private worker_?: Worker;
+
+    /**
+     * @hidden
+     */
+    private connector_?: ()=>void;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -55,9 +56,9 @@ export class WorkerConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(provider?: Provider)
+    public constructor(...provider: IProvider.Arguments<Provider>)
     {
-        super(provider);
+        super(IProvider.fetch(provider));
         
         // ASSIGN MEMBERS
         this.state_ = WorkerConnector.State.NONE;
@@ -89,7 +90,7 @@ export class WorkerConnector<Provider extends object = {}>
 
         // COMPILATION
         let path: string = await Compiler.compile(content);
-        let error!: Error; // FOR LAZY-THROWING
+        let error: Error | null = null; // FOR LAZY-THROWING
 
         //----
         // CONNECT
@@ -108,7 +109,7 @@ export class WorkerConnector<Provider extends object = {}>
         await Compiler.remove(path);
 
         // LAZY THROWING
-        if (error)
+        if (error !== null)
             throw error;
     }
 
@@ -197,7 +198,7 @@ export class WorkerConnector<Provider extends object = {}>
 
         // REQUEST CLOSE TO SERVER
         this.state_ = WorkerConnector.State.CLOSING;
-        this.worker_.postMessage("CLOSE");
+        this.worker_!.postMessage("CLOSE");
 
         // LAZY RETURN
         await ret;
@@ -222,7 +223,7 @@ export class WorkerConnector<Provider extends object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        this.worker_.postMessage(invoke);
+        this.worker_!.postMessage(invoke);
     }
 
     /**
@@ -243,7 +244,7 @@ export class WorkerConnector<Provider extends object = {}>
         else if (evt.data === "READY")
         {
             this.state_ = WorkerConnector.State.OPEN;
-            this.connector_();
+            this.connector_!();
         }
         else if (evt.data === "CLOSE")
             this._Handle_close();

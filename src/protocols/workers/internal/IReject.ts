@@ -1,5 +1,5 @@
 export interface IReject
 {
     name: "reject";
-    reason: string;
+    message: string;
 }

@@ -3,11 +3,13 @@
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { Invoke } from "../../basic/Invoke";
+import { IProvider } from "../internal/IProvider";
 
-import { is_node } from "tstl/utility/node";
+
+import { Invoke } from "../../basic/Invoke";
 import { URLVariables } from "../../utils/URLVariables";
 import { DomainError, RuntimeError } from "tstl/exception";
+import { is_node } from "tstl/utility/node";
 
 /**
  * Worker Server.
@@ -30,19 +32,19 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WorkerServer<Provider extends object = {}>
-    extends CommunicatorBase<Provider>
+export class WorkerServer<Provider extends object | null = {}>
+    extends CommunicatorBase<Provider | undefined>
     implements IWorkerSystem
 {
     /**
      * @hidden
      */
-    private args_!: string[];
+    private state_: WorkerServer.State;
 
     /**
      * @hidden
      */
-    private state_: WorkerServer.State;
+    private args_?: string[];
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -52,7 +54,7 @@ export class WorkerServer<Provider extends object = {}>
      */
     public constructor()
     {
-        super();
+        super(undefined);
         this.state_ = WorkerServer.State.NONE;
     }
 
@@ -68,7 +70,7 @@ export class WorkerServer<Provider extends object = {}>
      * 
      * @param provider An object providing featrues for the remote system.
      */
-    public async open(provider?: Provider): Promise<void>
+    public async open(...provider: IProvider.Arguments<Provider>): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === false)
@@ -84,7 +86,7 @@ export class WorkerServer<Provider extends object = {}>
         // OPEN WORKER
         this.state_ = WorkerServer.State.OPENING;
         {
-            this.provider_ = provider;
+            this.provider_ = IProvider.fetch(provider);
             g.onmessage = this._Handle_message.bind(this);
             g.postMessage("READY");
         }
@@ -142,7 +144,7 @@ export class WorkerServer<Provider extends object = {}>
                     ? JSON.parse(vars.get("__m_pArgs"))
                     : [];
             }
-        return this.args_;
+        return this.args_!;
     }
 
     /* ----------------------------------------------------------------

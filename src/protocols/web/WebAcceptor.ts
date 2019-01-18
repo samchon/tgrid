@@ -6,6 +6,7 @@ import * as ws from "websocket";
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
+import { IProvider } from "../internal/IProvider";
 
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
@@ -27,10 +28,15 @@ import { DomainError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebAcceptor<Provider extends object = {}>
-    extends CommunicatorBase<Provider>
+export class WebAcceptor<Provider extends object | null = {}>
+    extends CommunicatorBase<Provider | undefined>
     implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
+    /**
+     * @hidden
+     */
+    private state_: WebAcceptor.State;
+
     /**
      * @hidden
      */
@@ -39,12 +45,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    private connection_!: ws.connection;
-
-    /**
-     * @hidden
-     */
-    private state_: WebAcceptor.State;
+    private connection_?: ws.connection;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -54,8 +55,8 @@ export class WebAcceptor<Provider extends object = {}>
      */
     private constructor(request: ws.request)
     {
-        super();
-        
+        super(undefined);
+        0
         this.request_ = request;
         this.state_ = WebAcceptor.State.NONE;
     }
@@ -79,9 +80,9 @@ export class WebAcceptor<Provider extends object = {}>
         // DO CLOSE
         this.state_ = WebAcceptor.State.CLOSING;
         if (code === 1000)
-            this.connection_.close();
+            this.connection_!.close();
         else
-            this.connection_.sendCloseFrame(code, reason, true);
+            this.connection_!.sendCloseFrame(code, reason, true);
         
         // state would be closed in destructor() via _Handle_close()
         await ret;
@@ -102,7 +103,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public accept(provider?: Provider): Promise<void>
+    public accept(...provider: IProvider.Arguments<Provider>): Promise<void>
     {
         return new Promise((resolve, reject) =>
         {
@@ -128,7 +129,7 @@ export class WebAcceptor<Provider extends object = {}>
             // DO ACCEPT
             try
             {
-                this.provider_ = provider;
+                this.provider_ = IProvider.fetch(provider);
                 this.request_.accept();
             }
             catch (exp)
@@ -182,19 +183,6 @@ export class WebAcceptor<Provider extends object = {}>
         return this.request_.resource;
     }
 
-    public get protocol(): string
-    {
-        return this.connection_.protocol;
-    }
-
-    public get extensions(): string
-    {
-        return this.connection_
-            .extensions
-            .map(elem => elem.name)
-            .toString();
-    }
-
     /**
      * @inheritDoc
      */
@@ -211,7 +199,7 @@ export class WebAcceptor<Provider extends object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        this.connection_.sendUTF(JSON.stringify(invoke));
+        this.connection_!.sendUTF(JSON.stringify(invoke));
     }
 
     /**

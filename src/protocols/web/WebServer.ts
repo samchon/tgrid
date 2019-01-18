@@ -24,9 +24,14 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebServer<Provider extends object = {}>
+export class WebServer<Provider extends object | null = {}>
     implements IState<WebServer.State>
 {
+    /**
+     * @hidden
+     */
+    private state_: WebServer.State;
+
     /**
      * @hidden
      */
@@ -35,12 +40,7 @@ export class WebServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private protocol_!: ws.server;
-
-    /**
-     * @hidden
-     */
-    private state_: WebServer.State;
+    private protocol_?: ws.server;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -69,7 +69,7 @@ export class WebServer<Provider extends object = {}>
             ? http.createServer()
             : https.createServer({ key: key, cert: cert });
 
-        // SOCKET AND STATUS ARE YET
+        // STATUS AND SOCKET ARE YET
         this.state_ = WebServer.State.NONE;
     }
 
@@ -110,7 +110,7 @@ export class WebServer<Provider extends object = {}>
                 this.protocol_ = new ws.server({ httpServer: this.server_ });
                 this.protocol_.on("request", request =>
                 {
-                    let acceptor: WebAcceptor<Provider> = new AcceptorFactory(request);
+                    let acceptor: WebAcceptor<Provider> = new AcceptorFactory<Provider>(request);
                     handler(acceptor);
                 });
             }
@@ -198,5 +198,5 @@ export namespace WebServer
  */
 const AcceptorFactory:
 {
-    new<Provider extends object>(request: ws.request): WebAcceptor<Provider>;
+    new<Provider extends object | null>(request: ws.request): WebAcceptor<Provider>;
 } = <any>WebAcceptor;

@@ -17,10 +17,10 @@ export class WebSocket
     private connection_!: Connection;
     private state_: number;
 
-    public onopen!: Listener<"open">;
-    public onclose!: Listener<"close">;
-    public onmessage!: Listener<"message">;
-    public onerror!: Listener<"error">;
+    public onopen?: Listener<"open">;
+    public onclose?: Listener<"close">;
+    public onmessage?: Listener<"message">;
+    public onerror?: Listener<"error">;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -70,9 +70,7 @@ export class WebSocket
 
     public get protocol(): string
     {
-        return this.client_.protocols
-            ? this.client_.protocols[0]
-            : "";
+        return this.client_.protocols ? this.client_.protocols[0] : "";
     }
 
     public get extensions(): string

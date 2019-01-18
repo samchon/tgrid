@@ -29,25 +29,29 @@ export async function test_web_calculator(): Promise<void>
     //----
     // CLIENTS
     //----
-    for (let path of ["calculator", "vector"])
-    {
-        // DO CONNECT
-        let connector: WebConnector = new WebConnector();
-        await connector.connect(`ws://127.0.0.1:${PORT}/${path}`);
+    let connector: WebConnector = new WebConnector();
 
-        // SET DRIVER AND TEST BY CALCULATOR PROCESS
-        if (path === "calculator")
+    // TEST RE-USABILITY
+    for (let path of ["calculator", "vector"])
+        for (let i: number = 0; i < 3; ++i)
         {
-            let driver: Driver<ICalculator> = connector.getDriver<ICalculator>();
-            await ICalculator.main(driver);
+            // DO CONNECT
+            await connector.connect(`ws://127.0.0.1:${PORT}/${path}`);
+
+            // SET DRIVER AND TEST BY CALCULATOR PROCESS
+            if (path === "calculator")
+            {
+                let driver: Driver<ICalculator> = connector.getDriver<ICalculator>();
+                await ICalculator.main(driver);
+            }
+            else
+            {
+                let driver: Driver<IVector<number>> = connector.getDriver<IVector<number>>();
+                await IVector.main(driver);
+            }
+            await connector.close();
         }
-        else
-        {
-            let driver: Driver<IVector<number>> = connector.getDriver<IVector<number>>();
-            await IVector.main(driver);
-        }
-        
-        await connector.close();
-    }
+    
+    // CLOSE SERVER
     await server.close();
 }

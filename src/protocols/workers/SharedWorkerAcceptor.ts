@@ -4,10 +4,11 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
-import { Invoke } from "../../basic/Invoke";
+import { IProvider } from "../internal/IProvider";
 
-import { DomainError } from "tstl/exception";
+import { Invoke } from "../../basic/Invoke";
 import { IReject } from "./internal/IReject";
+import { DomainError } from "tstl/exception";
 
 /**
  * SharedWorker acceptor for client.
@@ -26,8 +27,8 @@ import { IReject } from "./internal/IReject";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerAcceptor<Provider extends object = {}>
-    extends CommunicatorBase<Provider>
+export class SharedWorkerAcceptor<Provider extends object | null = {}>
+    extends CommunicatorBase<Provider | undefined>
     implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
     /**
@@ -58,7 +59,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     private constructor(port: MessagePort, args: string[], eraser: ()=>void)
     {
-        super();
+        super(undefined);
 
         // ASSIGN MEMBER
         this.port_ = port;
@@ -126,7 +127,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public async accept(provider?: Provider): Promise<void>
+    public async accept(...provider: IProvider.Arguments<Provider>): Promise<void>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -138,7 +139,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
         {
             // SET PROVIDER
-            this.provider_ = provider;
+            this.provider_ = IProvider.fetch(provider);
 
             // PREPARE PORT
             this.port_.onmessage = this._Handle_message.bind(this);
@@ -154,8 +155,10 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      * Reject connection.
      * 
      * Reject without acceptance, any interaction. The connection would be closed immediately.
+     * 
+     * @param reason Detailed reason of the rejection. Default is "Rejected by server".
      */
-    public async reject(reason: string): Promise<void>
+    public async reject(reason: string = "Rejected by server"): Promise<void>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -165,7 +168,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         // REJECT CONNECTION (CLOSE)
         //----
         this.state_ = SharedWorkerAcceptor.State.REJECTING;
-        await this._Close({ name: "reject", reason: reason });
+        await this._Close({ name: "reject", message: reason });
     }
 
     /* ----------------------------------------------------------------

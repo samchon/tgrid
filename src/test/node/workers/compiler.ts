@@ -27,8 +27,12 @@ export async function test_worker_compile(): Promise<void>
 async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>, talk: boolean = false): Promise<void>
 {
     let worker = new WorkerConnector();
-    await connect(worker);
 
-    await ICalculator.main(worker.getDriver<ICalculator>(), talk)
-    await worker.close();
+    // TEST RE-USABILITY
+    for (let i: number = 0; i < 5; ++i)
+    {
+        await connect(worker);
+        await ICalculator.main(worker.getDriver<ICalculator>(), talk)
+        await worker.close();
+    }
 }

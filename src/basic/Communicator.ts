@@ -28,7 +28,7 @@ import { Invoke } from "./Invoke";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class Communicator<Provider extends object = {}>
-    extends CommunicatorBase<Provider>
+    extends CommunicatorBase<Provider | undefined | null>
 {
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -71,12 +71,12 @@ export class Communicator<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public get provider(): Provider | undefined
+    public get provider(): Provider | undefined | null
     {
         return this.provider_;
     }
 
-    public set provider(obj: Provider | undefined)
+    public set provider(obj: Provider | undefined | null)
     {
         this.provider_ = obj;
     }

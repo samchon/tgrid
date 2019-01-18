@@ -5,14 +5,15 @@ import { HashMap } from "tstl/container/HashMap";
 import { IChatPrinter } from "../controllers/IChatPrinter";
 
 import { IScript } from "../controllers/IScript";
+import { DomainError } from "tstl/exception";
 
 export class ChatService implements IChatService
 {
     private static participants_: HashMap<string, Driver<IChatPrinter>> = new HashMap();
     private scripts_!: IScript[];
-
     private driver_!: Driver<IChatPrinter>;
-    private name_!: string;
+
+    private name_?: string;
 
     public assign(driver: Driver<IChatPrinter>, scripts: IScript[]): void
     {
@@ -41,6 +42,9 @@ export class ChatService implements IChatService
 
     public talk(content: string): void
     {
+        if (!this.name_)
+            throw new DomainError("No name");
+
         // INFORM TO EVERYBODY
         for (let it of ChatService.participants_)
         {

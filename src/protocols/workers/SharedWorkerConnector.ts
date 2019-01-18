@@ -4,16 +4,14 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
+
 import { Invoke } from "../../basic/Invoke";
-
-import { DomainError, RuntimeError } from "tstl/exception";
-import { Pair } from "tstl/utility/Pair";
-
-import { 
-    compile as _Compile, 
-    remove as _Remove 
-} from "./internal/web-worker";
 import { IReject } from "./internal/IReject";
+import { Pair } from "tstl/utility/Pair";
+import { DomainError, RuntimeError } from "tstl/exception";
+
+import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
+import { IProvider } from "../internal/IProvider";
 
 /**
  * SharedWorker Connector
@@ -41,15 +39,10 @@ import { IReject } from "./internal/IReject";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerConnector<Provider extends Object = {}>
+export class SharedWorkerConnector<Provider extends object | null = null>
     extends CommunicatorBase<Provider>
     implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
 {
-    /**
-     * @hidden
-     */
-    private port_!: MessagePort;
-
     /**
      * @hidden
      */
@@ -58,12 +51,17 @@ export class SharedWorkerConnector<Provider extends Object = {}>
     /**
      * @hidden
      */
-    private args_!: string[];
+    private port_?: MessagePort;
+
+    /**
+     * @hidden
+     */
+    private args_?: string[];
     
     /**
      * @hidden
      */
-    private connector_!: Pair<()=>void, (error: Error)=>void>;
+    private connector_?: Pair<()=>void, (error: Error)=>void>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -73,9 +71,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
      * 
      * @param provider An object providing features (functions & objects) for remote system.
      */
-    public constructor(provider?: Provider)
+    public constructor(...provider: IProvider.Arguments<Provider>)
     {
-        super(provider);
+        super(IProvider.fetch(provider));
         this.state_ = SharedWorkerConnector.State.NONE;
     }
 
@@ -160,7 +158,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
 
         // REQUEST CLOSE TO SERVER
         this.state_ = SharedWorkerConnector.State.CLOSING;
-        this.port_.postMessage("CLOSE");
+        this.port_!.postMessage("CLOSE");
 
         // LAZY RETURN
         await ret;
@@ -185,7 +183,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        this.port_.postMessage(invoke);
+        this.port_!.postMessage(invoke);
     }
 
     /**
@@ -207,16 +205,16 @@ export class SharedWorkerConnector<Provider extends Object = {}>
             if ((evt.data as Invoke).uid !== undefined)
                 this.replier(evt.data);
             else if ((evt.data as IReject).name === "reject")
-                this._Handle_reject((evt.data as IReject).reason);
+                this._Handle_reject((evt.data as IReject).message);
         }
 
         // PROCESSES
         else if (evt.data === "READY")
-            this.port_.postMessage(this.args_);
+            this.port_!.postMessage(this.args_!);
         else if (evt.data === "ACCEPT")
         {
             this.state_ = SharedWorkerConnector.State.OPEN;
-            this.connector_.first();
+            this.connector_!.first();
         }
         else if (evt.data === "CLOSE")
             this._Handle_close();
@@ -230,7 +228,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
     private async _Handle_reject(reason: string): Promise<void>
     {
         this.state_ = SharedWorkerConnector.State.CLOSING;
-        this.connector_.second(new RuntimeError(reason));
+        this.connector_!.second(new RuntimeError(reason));
 
         await this._Handle_close();
     }

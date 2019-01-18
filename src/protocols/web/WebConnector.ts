@@ -4,6 +4,7 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector, Connector } from "../internal/IConnector";
+import { IProvider } from "../internal/IProvider";
 
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
@@ -28,14 +29,14 @@ import { is_node } from "tstl/utility/node";
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebConnector<Provider extends object = {}>
+export class WebConnector<Provider extends object | null = null>
     extends CommunicatorBase<Provider>
     implements IWebCommunicator, IConnector<WebConnector.State>
 {
     /**
      * @hidden
      */
-    private socket_!: WebSocket;
+    private socket_?: WebSocket;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -45,9 +46,9 @@ export class WebConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(provider?: Provider | undefined)
+    public constructor(...provider: IProvider.Arguments<Provider>)
     {
-        super(provider);
+        super(IProvider.fetch(provider));
     }
     
     /**
@@ -100,8 +101,8 @@ export class WebConnector<Provider extends object = {}>
             this.socket_.onopen = () =>
             {
                 // RE-DEFINE HANDLERS
-                this.socket_.onerror = this._Handle_error.bind(this);
-                this.socket_.onmessage = this._Handle_message.bind(this);
+                this.socket_!.onerror = this._Handle_error.bind(this);
+                this.socket_!.onmessage = this._Handle_message.bind(this);
                 
                 // RETURNS
                 resolve();
@@ -129,7 +130,7 @@ export class WebConnector<Provider extends object = {}>
         //----
         // DO CLOSE
         let ret: Promise<void> = this.join();
-        this.socket_.close(code, reason);
+        this.socket_!.close(code, reason);
 
         // LAZY RETURN
         await ret;
@@ -140,17 +141,7 @@ export class WebConnector<Provider extends object = {}>
     ---------------------------------------------------------------- */
     public get url(): string
     {
-        return this.socket_.url;
-    }
-
-    public get protocol(): string
-    {
-        return this.socket_.protocol;
-    }
-
-    public get extensions(): string
-    {
-        return this.socket_.extensions;
+        return this.socket_!.url;
     }
     
     /**
@@ -172,7 +163,7 @@ export class WebConnector<Provider extends object = {}>
      */
     protected sender(invoke: Invoke): void
     {
-        this.socket_.send(JSON.stringify(invoke));
+        this.socket_!.send(JSON.stringify(invoke));
     }
 
     /**

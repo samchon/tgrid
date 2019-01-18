@@ -3,8 +3,9 @@
 //================================================================
 import { IState } from "./IState";
 import { DomainError, RuntimeError } from "tstl/exception";
+import { IProvider } from "./IProvider";
 
-export interface IAcceptor<State extends Acceptor.State, Provider extends object>
+export interface IAcceptor<State extends Acceptor.State, Provider>
     extends IState<State>
 {
     /**
@@ -14,7 +15,7 @@ export interface IAcceptor<State extends Acceptor.State, Provider extends object
      * 
      * @param provider An object providing features to remote system.
      */
-    accept(provider?: Provider): Promise<void>;
+    accept(...provider: IProvider.Arguments<Provider>): Promise<void>;
 }
 
 /**

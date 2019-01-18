@@ -3,9 +3,6 @@
 //================================================================
 export interface IWebCommunicator
 {
-    readonly protocol: string;
-    readonly extensions: string;
-
     /**
      * Close connection.
      * 

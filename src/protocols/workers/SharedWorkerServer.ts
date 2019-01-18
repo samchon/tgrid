@@ -29,18 +29,18 @@ import { DomainError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerServer<Provider extends object = {}>
+export class SharedWorkerServer<Provider extends object | null = {}>
     implements IState<SharedWorkerServer.State>
 {
     /**
      * @hidden
      */
-    private acceptors_: HashSet<SharedWorkerAcceptor>;
+    private state_: SharedWorkerServer.State;
 
     /**
      * @hidden
      */
-    private state_: SharedWorkerServer.State;
+    private acceptors_: HashSet<SharedWorkerAcceptor<Provider>>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -74,7 +74,7 @@ export class SharedWorkerServer<Provider extends object = {}>
         //----
         this.state_ = SharedWorkerServer.State.OPENING;
         {
-            self.addEventListener("connect", (evt: Event) =>
+            self.addEventListener("connect", evt =>
             {
                 for (let port of (evt as OpenEvent).ports)
                     this._Handle_connect(port, handler);
@@ -108,13 +108,13 @@ export class SharedWorkerServer<Provider extends object = {}>
      */
     private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): void
     {
-        let acceptor!: SharedWorkerAcceptor<Provider>;
+        let acceptor: SharedWorkerAcceptor<Provider> | null = null;
 
         port.onmessage = (evt: MessageEvent) =>
         {
             // CLOSE MESSAGE CHANNEL TEMPORARILY
             port.onmessage = null;
-            if (acceptor)
+            if (acceptor !== null)
                 return;
 
             // ARGUMENTS
@@ -123,7 +123,7 @@ export class SharedWorkerServer<Provider extends object = {}>
             // CREATE ACCEPTOR
             acceptor = new AcceptorFactory<Provider>(port, args, () =>
             {
-                this.acceptors_.erase(acceptor);
+                this.acceptors_.erase(acceptor!);
             });
             this.acceptors_.insert(acceptor);
 
@@ -167,7 +167,7 @@ type OpenEvent = Event & {ports: MessagePort[]};
  */
 const AcceptorFactory:
 {
-    new<Provider extends object>
+    new<Provider extends object | null>
     (
         port: MessagePort, 
         args: string[],
