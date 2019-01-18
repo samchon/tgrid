@@ -7,8 +7,8 @@ import { IScientific, IStatistics } from "../../../controllers/ICalculator";
 class HierarchicalCalculator extends Simple
 {
     // REMOTE CALCULATOR
-    public scientific: Driver<IScientific>;
-    public statistics: Driver<IStatistics>;
+    public scientific!: Driver<IScientific>;
+    public statistics!: Driver<IStatistics>;
 }
 
 async function get<Controller extends object>

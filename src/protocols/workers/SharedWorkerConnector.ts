@@ -48,7 +48,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
     /**
      * @hidden
      */
-    private port_: MessagePort;
+    private port_!: MessagePort;
 
     /**
      * @hidden
@@ -58,12 +58,12 @@ export class SharedWorkerConnector<Provider extends Object = {}>
     /**
      * @hidden
      */
-    private args_: string[];
+    private args_!: string[];
     
     /**
      * @hidden
      */
-    private connector_: Pair<()=>void, (error: Error)=>void>;
+    private connector_!: Pair<()=>void, (error: Error)=>void>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -73,11 +73,9 @@ export class SharedWorkerConnector<Provider extends Object = {}>
      * 
      * @param provider An object providing features (functions & objects) for remote system.
      */
-    public constructor(provider: Provider = null)
+    public constructor(provider?: Provider)
     {
         super(provider);
-
-        this.port_ = null;
         this.state_ = SharedWorkerConnector.State.NONE;
     }
 
@@ -150,7 +148,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
 
@@ -193,7 +191,7 @@ export class SharedWorkerConnector<Provider extends Object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         return Connector.inspect(this.state_);
     }

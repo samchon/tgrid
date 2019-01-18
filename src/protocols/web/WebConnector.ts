@@ -35,7 +35,7 @@ export class WebConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private socket_: WebSocket;
+    private socket_!: WebSocket;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -45,11 +45,9 @@ export class WebConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(provider: Provider = null)
+    public constructor(provider?: Provider | undefined)
     {
         super(provider);
-
-        this.socket_ = null;
     }
     
     /**
@@ -122,7 +120,7 @@ export class WebConnector<Provider extends object = {}>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
         
@@ -180,7 +178,7 @@ export class WebConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         return Connector.inspect(this.state);
     }
@@ -207,7 +205,7 @@ export class WebConnector<Provider extends object = {}>
      */
     private async _Handle_close(event: CloseEvent): Promise<void>
     {
-        let error: WebError = (!event.code || event.code !== 1000)
+        let error: WebError | undefined = (!event.code || event.code !== 1000)
             ? new WebError(event.code, event.reason)
             : undefined;
         

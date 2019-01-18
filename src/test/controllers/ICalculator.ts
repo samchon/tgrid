@@ -67,7 +67,7 @@ export namespace ICalculator
             throw new std.DomainError("Error on function calling.");
     }
 
-    export async function get_exception(driver: Driver<ICalculator>): Promise<string>
+    export async function get_exception(driver: Driver<ICalculator>): Promise<string | null>
     {
         try 
         { 

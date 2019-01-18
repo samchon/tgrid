@@ -39,7 +39,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    private connection_: ws.connection;
+    private connection_!: ws.connection;
 
     /**
      * @hidden
@@ -57,18 +57,16 @@ export class WebAcceptor<Provider extends object = {}>
         super();
         
         this.request_ = request;
-        this.connection_ = null;
-
         this.state_ = WebAcceptor.State.NONE;
     }
 
     /**
      * @inheritDoc
      */
-    public async close(code: number = 1000, reason?: string): Promise<void>
+    public async close(code: number = 1000, reason: string = ""): Promise<void>
     {
         // TEST CONDITION
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
         
@@ -104,7 +102,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public accept(provider: Provider = null): Promise<void>
+    public accept(provider?: Provider): Promise<void>
     {
         return new Promise((resolve, reject) =>
         {
@@ -135,8 +133,7 @@ export class WebAcceptor<Provider extends object = {}>
             }
             catch (exp)
             {
-                this.provider_ = null;
-                this.connection_ = null;
+                this.provider_ = undefined;
                 this.state_ = WebAcceptor.State.CLOSED;
 
                 reject(exp);
@@ -220,7 +217,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         return Acceptor.inspect(this.state_);
     }
@@ -230,8 +227,11 @@ export class WebAcceptor<Provider extends object = {}>
      */
     private _Handle_message(message: ws.IMessage): void
     {
-        let invoke: Invoke = JSON.parse(message.utf8Data);
-        this.replier(invoke);
+        if (message.utf8Data)
+        {
+            let invoke: Invoke = JSON.parse(message.utf8Data);
+            this.replier(invoke);
+        }
     }
 
     /**
@@ -239,7 +239,7 @@ export class WebAcceptor<Provider extends object = {}>
      */
     private async _Handle_close(code: number, reason: string): Promise<void>
     {
-        let error: WebError = (code !== 100)
+        let error: WebError | undefined = (code !== 100)
             ? new WebError(code, reason)
             : undefined;
         

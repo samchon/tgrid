@@ -37,7 +37,7 @@ export class WorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private args_: string[];
+    private args_!: string[];
 
     /**
      * @hidden
@@ -53,8 +53,6 @@ export class WorkerServer<Provider extends object = {}>
     public constructor()
     {
         super();
-
-        this.args_ = null;
         this.state_ = WorkerServer.State.NONE;
     }
 
@@ -70,7 +68,7 @@ export class WorkerServer<Provider extends object = {}>
      * 
      * @param provider An object providing featrues for the remote system.
      */
-    public async open(provider: Provider = null): Promise<void>
+    public async open(provider?: Provider): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === false)
@@ -99,7 +97,7 @@ export class WorkerServer<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
 
@@ -161,7 +159,7 @@ export class WorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         // NO ERROR
         if (this.state_ === WorkerServer.State.OPEN)

@@ -42,11 +42,11 @@ function validate(x: IScript[], y: IScript[]): void
 ---------------------------------------------------------------- */
 class Client
 {
-    private name_: string;
-    private connector_: WebConnector<IChatPrinter>;
-    private scripts_: IScript[];
+    private name_!: string;
+    private connector_!: WebConnector<IChatPrinter>;
+    private scripts_!: IScript[];
 
-    private service_: Driver<IChatService>;
+    private service_!: Driver<IChatService>;
 
     public async participate(name: string): Promise<void>
     {
@@ -89,10 +89,10 @@ class Client
 ---------------------------------------------------------------- */
 class Server
 {
-    private server_: WebServer<IChatService>;
-    private participants_: HashMap<string, Driver<IChatPrinter>>;
+    private server_!: WebServer<IChatService>;
+    private participants_!: HashMap<string, Driver<IChatPrinter>>;
 
-    private scripts_: IScript[];
+    private scripts_!: IScript[];
 
     public async open(): Promise<void>
     {

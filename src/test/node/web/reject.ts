@@ -12,7 +12,7 @@ export async function test_web_reject(): Promise<void>
     });
 
     let connector = new WebConnector();
-    let error: Error = null;
+    let error: Error | undefined;
 
     try
     {

@@ -40,7 +40,7 @@ export class Communicator<Provider extends object = {}>
      * @param readyInspector A predicator function inspects whether the *network communication* is on ready. It must return null, if ready, otherwise *Error* object explaining why.
      * @param provider An object would be provided for the remote system.
      */
-    public constructor(sender: Sender, readyInspector: ReadyInspector, provider: Provider = null)
+    public constructor(sender: Sender, readyInspector: ReadyInspector, provider?: Provider)
     {
         super(provider);
 
@@ -71,12 +71,12 @@ export class Communicator<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public get provider(): Provider
+    public get provider(): Provider | undefined
     {
         return this.provider_;
     }
 
-    public set provider(obj: Provider)
+    public set provider(obj: Provider | undefined)
     {
         this.provider_ = obj;
     }
@@ -129,7 +129,7 @@ export class Communicator<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         return this.inspectReady();
     }
@@ -143,4 +143,4 @@ type Sender = (invoke: Invoke) => void;
 /**
  * @hidden
  */
-type ReadyInspector = () => Error;
+type ReadyInspector = () => Error | null;

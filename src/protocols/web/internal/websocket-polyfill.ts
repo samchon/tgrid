@@ -14,13 +14,13 @@ import { WebError } from "../WebError";
 export class WebSocket
 {
     private client_: Client;
-    private connection_: Connection;
+    private connection_!: Connection;
     private state_: number;
 
-    public onopen: Listener<"open">;
-    public onclose: Listener<"close">;
-    public onmessage: Listener<"message">;
-    public onerror: Listener<"error">;
+    public onopen!: Listener<"open">;
+    public onclose!: Listener<"close">;
+    public onmessage!: Listener<"message">;
+    public onerror!: Listener<"error">;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -57,7 +57,7 @@ export class WebSocket
         if (code === undefined)
             this.connection_.close();
         else
-            this.connection_.sendCloseFrame(code, reason, true);
+            this.connection_.sendCloseFrame(code, <string>reason, true);
     }
 
     /* ----------------------------------------------------------------
@@ -65,7 +65,7 @@ export class WebSocket
     ---------------------------------------------------------------- */
     public get url(): string
     {
-        return this.client_.url.href;
+        return this.client_.url.href as string;
     }
 
     public get protocol(): string

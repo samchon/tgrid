@@ -35,7 +35,7 @@ export class WebServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private protocol_: ws.server;
+    private protocol_!: ws.server;
 
     /**
      * @hidden
@@ -62,15 +62,14 @@ export class WebServer<Provider extends object = {}>
      */
     public constructor(key: string, cert: string);
 
-    public constructor(key: string = null, cert: string = null)
+    public constructor(key?: string, cert?: string)
     {
         // PREPARE SREVER INSTANCE
-        this.server_ = (key === null)
+        this.server_ = !key
             ? http.createServer()
             : https.createServer({ key: key, cert: cert });
 
         // SOCKET AND STATUS ARE YET
-        this.protocol_ = null;
         this.state_ = WebServer.State.NONE;
     }
 
@@ -90,7 +89,7 @@ export class WebServer<Provider extends object = {}>
             // POSSIBLE TO OPEN?
             if (!(this.state_ === WebServer.State.NONE || this.state_ === WebServer.State.CLOSED))
             {
-                let exp: Error;
+                let exp!: Error;
                 if (this.state_ === WebServer.State.OPEN)
                     exp = new DomainError("Server has already opened.");
                 else if (this.state_ === WebServer.State.OPENING)

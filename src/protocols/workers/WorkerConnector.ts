@@ -35,12 +35,12 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private worker_: Worker;
+    private worker_!: Worker;
 
     /**
      * @hidden
      */
-    private connector_: ()=>void;
+    private connector_!: ()=>void;
 
     /**
      * @hidden
@@ -55,14 +55,11 @@ export class WorkerConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(provider: Provider = null)
+    public constructor(provider?: Provider)
     {
         super(provider);
         
         // ASSIGN MEMBERS
-        this.worker_ = null;
-        this.connector_ = null;
-
         this.state_ = WorkerConnector.State.NONE;
     }
 
@@ -92,7 +89,7 @@ export class WorkerConnector<Provider extends object = {}>
 
         // COMPILATION
         let path: string = await Compiler.compile(content);
-        let error: Error = null; // FOR LAZY-THROWING
+        let error!: Error; // FOR LAZY-THROWING
 
         //----
         // CONNECT
@@ -188,7 +185,7 @@ export class WorkerConnector<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
 
@@ -231,7 +228,7 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         return Connector.inspect(this.state_);
     }

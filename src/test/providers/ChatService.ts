@@ -7,8 +7,8 @@ import { IChatPrinter } from "../controllers/IChatPrinter";
 export class ChatService implements IChatService
 {
     private static participants_: HashMap<string, Driver<IChatPrinter>> = new HashMap();
-    private driver_: Driver<IChatPrinter> = null;
-    private name_: string = null;
+    private driver_!: Driver<IChatPrinter>;
+    private name_!: string;
 
     public assign(driver: Driver<IChatPrinter>): void
     {
@@ -17,7 +17,7 @@ export class ChatService implements IChatService
 
     public destroy(): void
     {
-        if (this.name_ !== null)
+        if (this.name_)
             ChatService.participants_.erase(this.name_);
     }
 

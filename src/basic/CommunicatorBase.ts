@@ -45,7 +45,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected provider_: Provider;
+    protected provider_?: Provider;
 
     /**
      * @hidden
@@ -63,7 +63,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected constructor(provider: Provider = null)
+    protected constructor(provider?: Provider)
     {
         this.provider_ = provider;
 
@@ -97,7 +97,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected abstract inspector(): Error;
+    protected abstract inspector(): Error | null;
 
     /**
      * @hidden
@@ -118,7 +118,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
      * An object providing features (functions & objects) for remote system. The remote 
      * system would call the features (`Provider`) by using its `Driver<Controller>`.
      */
-    public get provider(): Provider
+    public get provider(): Provider | undefined
     {
         return this.provider_;
     }
@@ -150,7 +150,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
     public async join(param?: number | Date): Promise<void|boolean>
     {
         // IS JOINABLE ?
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
 
@@ -227,7 +227,7 @@ export abstract class CommunicatorBase<Provider extends object = {}>
         return new Promise((resolve, reject) =>
         {
             // READY TO SEND ?
-            let error: Error = this.inspector();
+            let error: Error | null = this.inspector();
             if (error)
             {
                 reject(error);

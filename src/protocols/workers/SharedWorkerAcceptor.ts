@@ -75,7 +75,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error = this.inspector();
+        let error: Error | null = this.inspector();
         if (error)
             throw error;
 
@@ -126,7 +126,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public async accept(provider: Provider): Promise<void>
+    public async accept(provider?: Provider): Promise<void>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -182,7 +182,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error
+    protected inspector(): Error | null
     {
         return Acceptor.inspect(this.state_);
     }

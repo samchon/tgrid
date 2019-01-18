@@ -32,7 +32,7 @@ export namespace Acceptor
         CLOSED
     }
 
-    export function inspect(state: State): Error
+    export function inspect(state: State): Error | null
     {
         // NO ERROR
         if (state === State.OPEN)
