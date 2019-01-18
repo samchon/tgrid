@@ -4,15 +4,20 @@ import { Driver } from "../../basic";
 import { HashMap } from "tstl/container/HashMap";
 import { IChatPrinter } from "../controllers/IChatPrinter";
 
+import { IScript } from "../controllers/IScript";
+
 export class ChatService implements IChatService
 {
     private static participants_: HashMap<string, Driver<IChatPrinter>> = new HashMap();
+    private scripts_!: IScript[];
+
     private driver_!: Driver<IChatPrinter>;
     private name_!: string;
 
-    public assign(driver: Driver<IChatPrinter>): void
+    public assign(driver: Driver<IChatPrinter>, scripts: IScript[]): void
     {
         this.driver_ = driver;
+        this.scripts_ = scripts;
     }
 
     public destroy(): void
@@ -40,15 +45,15 @@ export class ChatService implements IChatService
         for (let it of ChatService.participants_)
         {
             let driver: Driver<IChatPrinter> = it.second;
-            if (driver === this.driver_)
-                continue; // SKIP HIMSELF
 
             // INFORM IT TO CLIENT
-            let promise: Promise<void> = driver.print(this.name_, content)
+            let promise: Promise<void> = driver.print(this.name_, content);
 
             // DISCONNECTION WHILE TALKING MAY POSSIBLE
-            promise.catch(() => {}); 
+            promise.catch(() => {});
         }
-        console.log(this.name_ + ": " + content);
+
+        // LOG ARCHIVE
+        this.scripts_.push({ name: this.name_, message: content });
     }
 }

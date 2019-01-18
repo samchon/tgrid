@@ -132,7 +132,7 @@ export class WorkerServer<Provider extends object = {}>
      */
     public get arguments(): string[]
     {
-        if (this.args_ === null)
+        if (this.args_ === undefined)
             if (is_node())
                 this.args_ = global.process.argv.slice(2);
             else
