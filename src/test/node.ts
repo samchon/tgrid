@@ -2,7 +2,7 @@ import * as fs from "fs";
 
 const PATH = __dirname + "/node";
 
-async function iterate(path: string, level: number = 0): Promise<void>
+async function iterate(path: string): Promise<void>
 {
     let file_list: string[] = fs.readdirSync(path);
     for (let file of file_list)
@@ -13,10 +13,10 @@ async function iterate(path: string, level: number = 0): Promise<void>
         if (stat.isDirectory() === true)
         {
             if (file !== "browser" && file !== "internal")
-                await iterate(current_path, level + 1);
+                await iterate(current_path);
             continue;
         }
-        else if (file.substr(-3) !== ".js" || level === 0)
+        else if (file.substr(-3) !== ".js")
             continue;
 
         let external: any = await import(current_path);
