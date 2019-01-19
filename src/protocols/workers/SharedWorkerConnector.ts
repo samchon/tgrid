@@ -11,7 +11,6 @@ import { Pair } from "tstl/utility/Pair";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
-import { IProvider } from "../internal/IProvider";
 
 /**
  * SharedWorker Connector
@@ -39,8 +38,8 @@ import { IProvider } from "../internal/IProvider";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerConnector<Provider extends object | null = null>
-    extends CommunicatorBase<Provider>
+export class SharedWorkerConnector<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null>
     implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
 {
     /**
@@ -71,9 +70,9 @@ export class SharedWorkerConnector<Provider extends object | null = null>
      * 
      * @param provider An object providing features (functions & objects) for remote system.
      */
-    public constructor(...provider: IProvider.Arguments<Provider>)
+    public constructor(provider: Provider | null = null)
     {
-        super(IProvider.fetch(provider));
+        super(provider);
         this.state_ = SharedWorkerConnector.State.NONE;
     }
 

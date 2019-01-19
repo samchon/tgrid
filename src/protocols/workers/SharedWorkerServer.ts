@@ -29,7 +29,7 @@ import { DomainError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerServer<Provider extends object | null = {}>
+export class SharedWorkerServer<Provider extends object = {}>
     implements IState<SharedWorkerServer.State>
 {
     /**
@@ -167,7 +167,7 @@ type OpenEvent = Event & {ports: MessagePort[]};
  */
 const AcceptorFactory:
 {
-    new<Provider extends object | null>
+    new<Provider extends object>
     (
         port: MessagePort, 
         args: string[],

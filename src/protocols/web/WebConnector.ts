@@ -4,7 +4,6 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector, Connector } from "../internal/IConnector";
-import { IProvider } from "../internal/IProvider";
 
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
@@ -29,8 +28,8 @@ import { is_node } from "tstl/utility/node";
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebConnector<Provider extends object | null = null>
-    extends CommunicatorBase<Provider>
+export class WebConnector<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null>
     implements IWebCommunicator, IConnector<WebConnector.State>
 {
     /**
@@ -46,9 +45,9 @@ export class WebConnector<Provider extends object | null = null>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(...provider: IProvider.Arguments<Provider>)
+    public constructor(provider: Provider | null = null)
     {
-        super(IProvider.fetch(provider));
+        super(provider);
     }
     
     /**

@@ -4,7 +4,6 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
-import { IProvider } from "../internal/IProvider";
 
 import { Invoke } from "../../basic/Invoke";
 import { DomainError } from "tstl/exception";
@@ -29,8 +28,8 @@ import { is_node } from "tstl/utility/node";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WorkerConnector<Provider extends object | null = null>
-    extends CommunicatorBase<Provider>
+export class WorkerConnector<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null>
     implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
 {
     /**
@@ -56,9 +55,9 @@ export class WorkerConnector<Provider extends object | null = null>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(...provider: IProvider.Arguments<Provider>)
+    public constructor(provider: Provider | null = null)
     {
-        super(IProvider.fetch(provider));
+        super(provider);
         
         // ASSIGN MEMBERS
         this.state_ = WorkerConnector.State.NONE;

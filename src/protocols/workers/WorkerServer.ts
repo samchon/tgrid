@@ -3,7 +3,6 @@
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IProvider } from "../internal/IProvider";
 
 
 import { Invoke } from "../../basic/Invoke";
@@ -32,8 +31,8 @@ import { is_node } from "tstl/utility/node";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WorkerServer<Provider extends object | null = {}>
-    extends CommunicatorBase<Provider | undefined>
+export class WorkerServer<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null | undefined>
     implements IWorkerSystem
 {
     /**
@@ -70,7 +69,7 @@ export class WorkerServer<Provider extends object | null = {}>
      * 
      * @param provider An object providing featrues for the remote system.
      */
-    public async open(...provider: IProvider.Arguments<Provider>): Promise<void>
+    public async open(provider: Provider | null = null): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === false)
@@ -86,7 +85,7 @@ export class WorkerServer<Provider extends object | null = {}>
         // OPEN WORKER
         this.state_ = WorkerServer.State.OPENING;
         {
-            this.provider_ = IProvider.fetch(provider);
+            this.provider_ = provider;
             g.onmessage = this._Handle_message.bind(this);
             g.postMessage("READY");
         }

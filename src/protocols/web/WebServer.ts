@@ -24,7 +24,7 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebServer<Provider extends object | null = {}>
+export class WebServer<Provider extends object = {}>
     implements IState<WebServer.State>
 {
     /**
@@ -198,5 +198,5 @@ export namespace WebServer
  */
 const AcceptorFactory:
 {
-    new<Provider extends object | null>(request: ws.request): WebAcceptor<Provider>;
+    new<Provider extends object>(request: ws.request): WebAcceptor<Provider>;
 } = <any>WebAcceptor;

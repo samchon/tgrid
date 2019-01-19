@@ -6,7 +6,6 @@ import * as ws from "websocket";
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
-import { IProvider } from "../internal/IProvider";
 
 import { Invoke } from "../../basic/Invoke";
 import { WebError } from "./WebError";
@@ -28,8 +27,8 @@ import { DomainError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
-export class WebAcceptor<Provider extends object | null = {}>
-    extends CommunicatorBase<Provider | undefined>
+export class WebAcceptor<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null | undefined>
     implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
     /**
@@ -56,7 +55,7 @@ export class WebAcceptor<Provider extends object | null = {}>
     private constructor(request: ws.request)
     {
         super(undefined);
-        0
+        
         this.request_ = request;
         this.state_ = WebAcceptor.State.NONE;
     }
@@ -103,7 +102,7 @@ export class WebAcceptor<Provider extends object | null = {}>
     /**
      * @inheritDoc
      */
-    public accept(...provider: IProvider.Arguments<Provider>): Promise<void>
+    public accept(provider: Provider | null = null): Promise<void>
     {
         return new Promise((resolve, reject) =>
         {
@@ -129,7 +128,7 @@ export class WebAcceptor<Provider extends object | null = {}>
             // DO ACCEPT
             try
             {
-                this.provider_ = IProvider.fetch(provider);
+                this.provider_ = provider;
                 this.request_.accept();
             }
             catch (exp)

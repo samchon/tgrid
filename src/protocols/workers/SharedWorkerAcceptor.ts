@@ -4,7 +4,6 @@
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
-import { IProvider } from "../internal/IProvider";
 
 import { Invoke } from "../../basic/Invoke";
 import { IReject } from "./internal/IReject";
@@ -27,8 +26,8 @@ import { DomainError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerAcceptor<Provider extends object | null = {}>
-    extends CommunicatorBase<Provider | undefined>
+export class SharedWorkerAcceptor<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null | undefined>
     implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
     /**
@@ -127,7 +126,7 @@ export class SharedWorkerAcceptor<Provider extends object | null = {}>
     /**
      * @inheritDoc
      */
-    public async accept(...provider: IProvider.Arguments<Provider>): Promise<void>
+    public async accept(provider: Provider | null = null): Promise<void>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
@@ -139,7 +138,7 @@ export class SharedWorkerAcceptor<Provider extends object | null = {}>
         this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
         {
             // SET PROVIDER
-            this.provider_ = IProvider.fetch(provider);
+            this.provider_ = provider;
 
             // PREPARE PORT
             this.port_.onmessage = this._Handle_message.bind(this);
