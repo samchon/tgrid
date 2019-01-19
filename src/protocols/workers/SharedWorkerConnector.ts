@@ -3,11 +3,12 @@
 //================================================================
 import { CommunicatorBase } from "../../basic/CommunicatorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IConnector } from "../internal/IConnector";
-import { Invoke } from "../../basic/Invoke";
+import { IConnector, Connector } from "../internal/IConnector";
 
-import { DomainError, RuntimeError } from "tstl/exception";
+import { Invoke } from "../../basic/Invoke";
+import { IReject } from "./internal/IReject";
 import { Pair } from "tstl/utility/Pair";
+import { DomainError, RuntimeError } from "tstl/exception";
 
 import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
 
@@ -37,232 +38,232 @@ import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export class SharedWorkerConnector<Provider extends Object = {}>
-	extends CommunicatorBase<Provider>
-	implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
+export class SharedWorkerConnector<Provider extends object = {}>
+    extends CommunicatorBase<Provider | null>
+    implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
 {
-	/**
-	 * @hidden
-	 */
-	private port_: MessagePort;
+    /**
+     * @hidden
+     */
+    private state_: SharedWorkerConnector.State;
 
-	/**
-	 * @hidden
-	 */
-	private state_: SharedWorkerConnector.State;
+    /**
+     * @hidden
+     */
+    private port_?: MessagePort;
 
-	/**
-	 * @hidden
-	 */
-	private args_: string[];
-	
-	/**
-	 * @hidden
-	 */
-	private connector_: Pair<()=>void, (error: Error)=>void>;
+    /**
+     * @hidden
+     */
+    private args_?: string[];
+    
+    /**
+     * @hidden
+     */
+    private connector_?: Pair<()=>void, (error: Error)=>void>;
 
-	/* ----------------------------------------------------------------
-		CONSTRUCTOR
-	---------------------------------------------------------------- */
-	/**
-	 * Initializer Constructor.
-	 * 
-	 * @param provider An object providing features (functions & objects) for remote system.
-	 */
-	public constructor(provider: Provider = null)
-	{
-		super(provider);
+    /* ----------------------------------------------------------------
+        CONSTRUCTOR
+    ---------------------------------------------------------------- */
+    /**
+     * Initializer Constructor.
+     * 
+     * @param provider An object providing features (functions & objects) for remote system.
+     */
+    public constructor(provider: Provider | null = null)
+    {
+        super(provider);
+        this.state_ = SharedWorkerConnector.State.NONE;
+    }
 
-		this.port_ = null;
-		this.state_ = SharedWorkerConnector.State.NONE;
-	}
+    /**
+     * Connect to remote server.
+     * 
+     * The {@link connect}() method tries to connect an `SharedWorker` instance. If the 
+     * `SharedWorker` instance is not created yet, the `SharedWorker` instance would be newly
+     * created. After the creation, the `SharedWorker` program must open that server using 
+     * the {@link SharedWorkerServer.open}() method.
+     * 
+     * After you business has been completed, you've to close the `SharedWorker` using one of 
+     * them below. If you don't close that, vulnerable memory usage and communication channel 
+     * would not be destroyed and it may cause the memory leak:
+     * 
+     *  - {@link close}()
+     *  - {@link ShareDWorkerAcceptor.close}()
+     *  - {@link SharedWorkerServer.close}()
+     * 
+     * @param jsFile JS File to be {@link SharedWorkerServer}.
+     * @param args Arguments to deliver.
+     */
+    public connect(jsFile: string, ...args: string[]): Promise<void>
+    {
+        return new Promise((resolve, reject) => 
+        {
+            // TEST CONDITION
+            if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
+            {
+                let err: Error;
+                if (this.state_ === SharedWorkerConnector.State.CONNECTING)
+                    err = new DomainError("On connecting.");
+                else if (this.state_ === SharedWorkerConnector.State.OPEN)
+                    err = new DomainError("Already connected.");
+                else
+                    err = new DomainError("Closing.");
 
-	/**
-	 * Connect to remote server.
-	 * 
-	 * The {@link connect}() method tries to connect an `SharedWorker` instance. If the 
-	 * `SharedWorker` instance is not created yet, the `SharedWorker` instance would be newly
-	 * created. After the creation, the `SharedWorker` program must open that server using 
-	 * the {@link SharedWorkerServer.open}() method.
-	 * 
-	 * After you business has been completed, you've to close the `SharedWorker` using one of 
-	 * them below. If you don't close that, vulnerable memory usage and communication channel 
-	 * would not be destroyed and it may cause the memory leak:
-	 * 
-	 *  - {@link close}()
-	 *  - {@link ShareDWorkerAcceptor.close}()
-	 *  - {@link SharedWorkerServer.close}()
-	 * 
-	 * @param jsFile JS File to be {@link SharedWorkerServer}.
-	 * @param args Arguments to deliver.
-	 */
-	public connect(jsFile: string, ...args: string[]): Promise<void>
-	{
-		return new Promise((resolve, reject) => 
-		{
-			// TEST CONDITION
-			if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
-			{
-				let err: Error;
-				if (this.state_ === SharedWorkerConnector.State.CONNECTING)
-					err = new DomainError("On connecting.");
-				else if (this.state_ === SharedWorkerConnector.State.OPEN)
-					err = new DomainError("Already connected.");
-				else
-					err = new DomainError("Closing.");
+                reject(err);
+                return;
+            }
 
-				reject(err);
-				return;
-			}
+            //----
+            // CONNECTOR
+            //----
+            try
+            {
+                // PREPARE MEMBERS
+                this.state_ = SharedWorkerConnector.State.CONNECTING;
+                this.args_ = args;
+                this.connector_ = new Pair(resolve, reject);
 
-			//----
-			// CONNECTOR
-			//----
-			try
-			{
-				// PREPARE MEMBERS
-				this.state_ = SharedWorkerConnector.State.CONNECTING;
-				this.args_ = args;
-				this.connector_ = new Pair(resolve, reject);
+                // DO CONNECT
+                let worker = new SharedWorker(jsFile);
+                
+                this.port_ = worker.port;
+                this.port_.onmessage = this._Handle_message.bind(this);
+                this.port_.start();
+            }
+            catch (exp)
+            {
+                this.state_ = SharedWorkerConnector.State.NONE;
+                reject(exp);
+            }
+        });
+    }
 
-				// DO CONNECT
-				let worker = new SharedWorker(jsFile);
-				
-				this.port_ = worker.port;
-				this.port_.onmessage = this._Handle_message.bind(this);
-				this.port_.start();
-			}
-			catch (exp)
-			{
-				this.state_ = SharedWorkerConnector.State.NONE;
-				reject(exp);
-			}
-		});
-	}
+    /**
+     * @inheritDoc
+     */
+    public async close(): Promise<void>
+    {
+        // TEST CONDITION
+        let error: Error | null = this.inspector();
+        if (error)
+            throw error;
 
-	/**
-	 * @inheritDoc
-	 */
-	public async close(): Promise<void>
-	{
-		// TEST CONDITION
-		let error: Error = this.inspector();
-		if (error)
-			throw error;
+        //----
+        // CLOSE WITH JOIN
+        //----
+        // PROMISE RETURN
+        let ret: Promise<void> = this.join();
 
-		//----
-		// CLOSE WITH JOIN
-		//----
-		// PROMISE RETURN
-		let ret: Promise<void> = this.join();
+        // REQUEST CLOSE TO SERVER
+        this.state_ = SharedWorkerConnector.State.CLOSING;
+        this.port_!.postMessage("CLOSE");
 
-		// REQUEST CLOSE TO SERVER
-		this.state_ = SharedWorkerConnector.State.CLOSING;
-		this.port_.postMessage("CLOSE");
+        // LAZY RETURN
+        await ret;
+    }
 
-		// LAZY RETURN
-		await ret;
-	}
+    /* ----------------------------------------------------------------
+        ACCESSORS
+    ---------------------------------------------------------------- */
+    /**
+     * @inheritDoc
+     */
+    public get state(): SharedWorkerConnector.State
+    {
+        return this.state_;
+    }
 
-	/* ----------------------------------------------------------------
-		ACCESSORS
-	---------------------------------------------------------------- */
-	/**
-	 * @inheritDoc
-	 */
-	public get state(): SharedWorkerConnector.State
-	{
-		return this.state_;
-	}
+    /* ----------------------------------------------------------------
+        COMMUNICATOR
+    ---------------------------------------------------------------- */
+    /**
+     * @hidden
+     */
+    protected sender(invoke: Invoke): void
+    {
+        this.port_!.postMessage(invoke);
+    }
 
-	/* ----------------------------------------------------------------
-		COMMUNICATOR
-	---------------------------------------------------------------- */
-	/**
-	 * @hidden
-	 */
-	protected sender(invoke: Invoke): void
-	{
-		this.port_.postMessage(JSON.stringify(invoke));
-	}
+    /**
+     * @hidden
+     */
+    protected inspector(): Error | null
+    {
+        return Connector.inspect(this.state_);
+    }
 
-	/**
-	 * @hidden
-	 */
-	protected inspector(): Error
-	{
-		return IConnector.inspect(this.state_);
-	}
+    /**
+     * @hidden
+     */
+    private _Handle_message(evt: MessageEvent): void
+    {
+        // RFC
+        if (evt.data instanceof Object)
+        {
+            if ((evt.data as Invoke).uid !== undefined)
+                this.replier(evt.data);
+            else if ((evt.data as IReject).name === "reject")
+                this._Handle_reject((evt.data as IReject).message);
+        }
 
-	/**
-	 * @hidden
-	 */
-	private _Handle_message(evt: MessageEvent): void
-	{
-		if (evt.data === "READY")
-		{
-			this.port_.postMessage(this.args_);
-		}
-		else if (evt.data === "ACCEPT")
-		{
-			this.state_ = SharedWorkerConnector.State.OPEN;
-			this.connector_.first();
-		}
-		else if (evt.data === "REJECT")
-		{
-			this._Handle_reject();
-		}
-		else if (evt.data === "CLOSE")
-		{
-			this._Handle_close();
-		}
-		else
-			this.replier(JSON.parse(evt.data));
-	}
+        // PROCESSES
+        else if (evt.data === "READY")
+            this.port_!.postMessage(this.args_!);
+        else if (evt.data === "ACCEPT")
+        {
+            this.state_ = SharedWorkerConnector.State.OPEN;
+            this.connector_!.first();
+        }
+        else if (evt.data === "CLOSE")
+            this._Handle_close();
+        else if (evt.data === "REJECT")
+            this._Handle_reject("Rejected by server.");
+    }
 
-	/**
-	 * @hidden
-	 */
-	private async _Handle_reject(): Promise<void>
-	{
-		this.state_ = SharedWorkerConnector.State.CLOSING;
-		this.connector_.second(new RuntimeError("Rejected by server."));
+    /**
+     * @hidden
+     */
+    private async _Handle_reject(reason: string): Promise<void>
+    {
+        this.state_ = SharedWorkerConnector.State.CLOSING;
+        this.connector_!.second(new RuntimeError(reason));
 
-		await this._Handle_close();
-	}
+        await this._Handle_close();
+    }
 
-	/**
-	 * @hidden
-	 */
-	private async _Handle_close(): Promise<void>
-	{
-		await this.destructor();
-		this.state_ = SharedWorkerConnector.State.CLOSED;
-	}
+    /**
+     * @hidden
+     */
+    private async _Handle_close(): Promise<void>
+    {
+        await this.destructor();
+        this.state_ = SharedWorkerConnector.State.CLOSED;
+    }
 }
 
 export namespace SharedWorkerConnector
 {
-	export import State = IConnector.State;
-	
-	/**
-	 * Compile JS source code.
-	 * 
-	 * @param content Source code
-	 * @return Temporary URL.
-	 */
-	export function compile(content: string): string
-	{
-		return _Compile(content);
-	}
+    export import State = Connector.State;
+    
+    /**
+     * Compile JS source code.
+     * 
+     * @param content Source code
+     * @return Temporary URL.
+     */
+    export function compile(content: string): string
+    {
+        return _Compile(content);
+    }
 
-	/**
-	 * Remove compiled JS file.
-	 * 
-	 * @param url Temporary URL.
-	 */
-	export function remove(url: string): void
-	{
-		_Remove(url);
-	}
+    /**
+     * Remove compiled JS file.
+     * 
+     * @param url Temporary URL.
+     */
+    export function remove(url: string): void
+    {
+        _Remove(url);
+    }
 }

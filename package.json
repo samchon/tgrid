@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.1.4",
+  "version": "0.1.7",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -47,7 +47,7 @@
   "keywords": [
     "TGrid",
     "typescript grid computing framework",
-    "real timet network communication",
+    "realtime network communication",
     "RFC",
     "ROC",
     "OON",

@@ -18,13 +18,14 @@
  * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Driver<Controller extends object> = Promisify<Controller>;
+export type Driver<Controller extends object> = Readonly<Promisify<Controller>>;
 export var Driver = Proxy;
 
 /**
  * Promisify an object type.
  * 
  * It promisifies all member types. When a member type is:
+ * 
  *   - function: returns `Promise` (`R` -> `Promise<R>`).
  *   - object: promisifies recursively (`O` -> `Promisify<O>`).
  *   - atomic value: be ignored (be `never` type).
@@ -34,16 +35,16 @@ export var Driver = Proxy;
  * @author Jeongho Nam <http://samchon.org>
  */
 export type Promisify<Instance extends object> = 
-	// IS FUNCTION?
-	Instance extends Function
-		? Instance extends (...args: infer Params) => infer Ret
-			? Ret extends Promise<any>
-				? (...args: Params) => Ret
-				: (...args: Params) => Promise<Ret>
-			: (...args: any[]) => Promise<any>
-	: 
-	{ // IS OBJECT?
-		[P in keyof Instance]: Instance[P] extends object
-			? Promisify<Instance[P]>
-			: never;
-	};
+    // IS FUNCTION?
+    Instance extends Function
+        ? Instance extends (...args: infer Params) => infer Ret
+            ? Ret extends Promise<any>
+                ? (...args: Params) => Ret
+                : (...args: Params) => Promise<Ret>
+            : (...args: any[]) => Promise<any>
+    : 
+    { // IS OBJECT?
+        [P in keyof Instance]: Instance[P] extends object
+            ? Promisify<Instance[P]>
+            : never;
+    };

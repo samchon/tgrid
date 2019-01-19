@@ -1,15 +1,18 @@
 import { WebServer } from "../../protocols/web";
-import { Calculator } from "../internal/Calculator";
+import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void>
 {
-	let server = new WebServer();
-	await server.open(10489, async acceptor =>
-	{
-		await acceptor.accept(new Calculator());
+    let server = new WebServer();
+    let index: number = 0;
 
-		await acceptor.join();
-		await server.close();
-	});
+    await server.open(10489, async acceptor =>
+    {
+        await acceptor.accept(new Calculator());
+        
+        await acceptor.join();
+        if (++index === 5)
+            await server.close();
+    });
 }
 main();
