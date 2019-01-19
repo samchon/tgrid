@@ -29,7 +29,8 @@ import { DomainError } from "tstl/exception";
  */
 export class WebAcceptor<Provider extends object = {}>
     extends CommunicatorBase<Provider | null | undefined>
-    implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
+    implements IWebCommunicator, 
+        IAcceptor<WebAcceptor.State, Provider>
 {
     /**
      * @hidden
@@ -63,7 +64,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public async close(code: number = 1000, reason: string = ""): Promise<void>
+    public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
         let error: Error | null = this.inspector();
@@ -81,7 +82,7 @@ export class WebAcceptor<Provider extends object = {}>
         if (code === 1000)
             this.connection_!.close();
         else
-            this.connection_!.sendCloseFrame(code, reason, true);
+            this.connection_!.sendCloseFrame(code!, reason!, true);
         
         // state would be closed in destructor() via _Handle_close()
         await ret;

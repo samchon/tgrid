@@ -7,9 +7,9 @@ import { not_equal_to } from "tstl/functional";
 /**
  * URLVariables class is for representing variables of HTTP.
  * 
- * The {@link URLVariables} class allows you to transfer variables between an application and server.
+ * The `{@link `URLVariables` class allows you to transfer variables between an application and server.
  * 
- * When transfering, {@link URLVariables} should be converted to a *URI* string.
+ * When transfering, the `URLVariables` should be converted to a *URI* string through {@link toString}().
  * - URI: Uniform Resource Identifier
  * 
  * @reference http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/URLVariables.html

@@ -138,9 +138,9 @@ export class WebConnector<Provider extends object = {}>
     /* ----------------------------------------------------------------
         ACCESSORS
     ---------------------------------------------------------------- */
-    public get url(): string
+    public get url(): string | undefined
     {
-        return this.socket_!.url;
+        return this.socket_ ? this.socket_.url : undefined;
     }
     
     /**
@@ -148,10 +148,7 @@ export class WebConnector<Provider extends object = {}>
      */
     public get state(): WebConnector.State
     {
-        if (!this.socket_)
-            return WebConnector.State.NONE;
-        else
-            return this.socket_.readyState;
+        return this.socket_ ? this.socket_.readyState : WebConnector.State.NONE;
     }
 
     /* ----------------------------------------------------------------

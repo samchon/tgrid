@@ -1,6 +1,9 @@
 //================================================================ 
 /** @module tgrid.protocols */
 //================================================================
+/**
+ * @hidden
+ */
 export namespace IProvider
 {
     export type Arguments<Provider> = Provider extends null

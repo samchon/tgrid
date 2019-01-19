@@ -28,7 +28,8 @@ import { DomainError } from "tstl/exception";
  */
 export class SharedWorkerAcceptor<Provider extends object = {}>
     extends CommunicatorBase<Provider | null | undefined>
-    implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
+    implements IWorkerSystem, 
+        IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
     /**
      * @hidden
