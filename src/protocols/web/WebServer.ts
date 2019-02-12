@@ -128,7 +128,7 @@ export class WebServer<Provider extends object = {}>
                 this.protocol_ = new ws.server({ httpServer: this.server_ });
                 this.protocol_.on("request", request =>
                 {
-                    let acceptor: WebAcceptor<Provider> = new AcceptorFactory<Provider>(request);
+                    let acceptor: WebAcceptor<Provider> = WebAcceptor.create<Provider>(request);
                     handler(acceptor);
                 });
             }
@@ -212,11 +212,3 @@ export namespace WebServer
         CLOSED = 3
     }
 }
-
-/**
- * @hidden
- */
-const AcceptorFactory:
-{
-    new<Provider extends object>(request: ws.request): WebAcceptor<Provider>;
-} = <any>WebAcceptor;
