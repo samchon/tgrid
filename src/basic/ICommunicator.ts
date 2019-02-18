@@ -1,5 +1,14 @@
+//================================================================ 
+/** @module tgrid.basic */
+//================================================================
 import { Driver } from "./Driver";
 
+/**
+ * Common interface for communicators.
+ * 
+ * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
+ * @author Jeongho Nam <http://samchon.org>
+ */
 export interface ICommunicator<Provider>
 {
     /* ----------------------------------------------------------------
