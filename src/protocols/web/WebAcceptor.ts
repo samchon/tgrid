@@ -51,6 +51,15 @@ export class WebAcceptor<Provider extends object = {}>
         CONSTRUCTORS
     ---------------------------------------------------------------- */
     /**
+     * @internal
+     */
+    public static create<Provider extends object>
+        (request: ws.request): WebAcceptor<Provider>
+    {
+        return new WebAcceptor<Provider>(request);
+    }
+
+    /**
      * @hidden
      */
     private constructor(request: ws.request)

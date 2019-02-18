@@ -7,7 +7,7 @@ import { not_equal_to } from "tstl/functional";
 /**
  * URLVariables class is for representing variables of HTTP.
  * 
- * The `{@link `URLVariables` class allows you to transfer variables between an application and server.
+ * The `URLVariables` class allows you to transfer variables between an application and server.
  * 
  * When transfering, the `URLVariables` should be converted to a *URI* string through {@link toString}().
  * - URI: Uniform Resource Identifier

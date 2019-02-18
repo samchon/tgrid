@@ -1,12 +1,14 @@
 //================================================================ 
 /** @module tgrid.basic */
 //================================================================
+import { ICommunicator } from "./ICommunicator";
+
+import { Driver } from "./Driver";
+import { Invoke } from "./Invoke";
+
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-
-import { Invoke } from "./Invoke";
-import { Driver } from "./Driver";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 /**
@@ -35,7 +37,8 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
  */
-export abstract class CommunicatorBase<Provider>
+export abstract class CommunicatorBase<Provider> 
+    implements ICommunicator<Provider>
 {
     /**
      * @hidden
@@ -113,10 +116,7 @@ export abstract class CommunicatorBase<Provider>
         PROVIDER
     ---------------------------------------------------------------- */
     /**
-     * Current `Provider`.
-     * 
-     * An object providing features (functions & objects) for remote system. The remote 
-     * system would call the features (`Provider`) by using its `Driver<Controller>`.
+     * @inheritDoc
      */
     public get provider(): Provider
     {
@@ -127,23 +127,17 @@ export abstract class CommunicatorBase<Provider>
         JOINERS
     ---------------------------------------------------------------- */
     /**
-     * Join connection.
+     * @inheritDoc
      */
     public join(): Promise<void>;
 
     /**
-     * Join connection or timeout.
-     * 
-     * @param ms The maximum milliseconds for joining.
-     * @return Whether awaken by disconnection or timeout.
+     * @inheritDoc
      */
     public join(ms: number): Promise<boolean>;
 
     /**
-     * Join connection or time expiration.
-     * 
-     * @param at The maximum time point to join.
-     * @return Whether awaken by disconnection or time expiration.
+     * @inheritDoc
      */
     public join(at: Date): Promise<boolean>;
 
@@ -167,20 +161,7 @@ export abstract class CommunicatorBase<Provider>
         DRIVER
     ---------------------------------------------------------------- */
     /**
-     * Get Driver for RFC (Remote Function Call).
-     * 
-     * The `Controller` is an interface who defines provided functions from the remote 
-     * system. The `Driver` is an object who makes to call remote functions, defined in 
-     * the `Controller` and provided by `Provider` in the remote system, possible.
-     * 
-     * In other words, calling a functions in the `Driver<Controller>`, it means to call 
-     * a matched function in the remote system's `Provider` object.
-     * 
-     *   - `Controller`: Definition only
-     *   - `Driver`: Remote Function Call
-     * 
-     * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
-     * @return A Driver for the RFC.
+     * @inheritDoc
      */
     public getDriver<Controller extends object>(): Driver<Controller>
     {

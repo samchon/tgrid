@@ -55,6 +55,15 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         CONSTRUCTOR
     ---------------------------------------------------------------- */
     /**
+     * @internal
+     */
+    public static create<Provider extends object>
+        (port: MessagePort, args: string[], eraser: ()=>void): SharedWorkerAcceptor<Provider>
+    {
+        return new SharedWorkerAcceptor<Provider>(port, args, eraser);
+    }
+
+    /**
      * @hidden
      */
     private constructor(port: MessagePort, args: string[], eraser: ()=>void)

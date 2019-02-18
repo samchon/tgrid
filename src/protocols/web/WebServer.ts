@@ -35,6 +35,11 @@ export class WebServer<Provider extends object = {}>
     /**
      * @hidden
      */
+    private options_?: https.ServerOptions;
+
+    /**
+     * @hidden
+     */
     private server_: http.Server | https.Server;
 
     /**
@@ -65,9 +70,13 @@ export class WebServer<Provider extends object = {}>
     public constructor(key?: string, cert?: string)
     {
         // PREPARE SREVER INSTANCE
-        this.server_ = !key
-            ? http.createServer()
-            : https.createServer({ key: key, cert: cert });
+        if (key)
+        {
+            this.options_ = ({ key: key, cert: cert });
+            this.server_ = https.createServer(this.options_);
+        }
+        else
+            this.server_ = http.createServer();
 
         // STATUS AND SOCKET ARE YET
         this.state_ = WebServer.State.NONE;
@@ -84,7 +93,7 @@ export class WebServer<Provider extends object = {}>
         return new Promise((resolve, reject) =>
         {
             //----
-            // TEST CONDITION
+            // PRELIMINARIES
             //----
             // POSSIBLE TO OPEN?
             if (!(this.state_ === WebServer.State.NONE || this.state_ === WebServer.State.CLOSED))
@@ -100,6 +109,15 @@ export class WebServer<Provider extends object = {}>
                 reject(exp);
                 return;
             }
+            
+            // RE-OPEN ?
+            if (this.state_ === WebServer.State.CLOSED)
+                this.server_ = this.server_ instanceof http.Server
+                    ? http.createServer()
+                    : https.createServer(this.options_!);
+
+            // SET STATE
+            this.state_ = WebServer.State.OPENING;
 
             //----
             // OPEN SERVER
@@ -110,13 +128,16 @@ export class WebServer<Provider extends object = {}>
                 this.protocol_ = new ws.server({ httpServer: this.server_ });
                 this.protocol_.on("request", request =>
                 {
-                    let acceptor: WebAcceptor<Provider> = new AcceptorFactory<Provider>(request);
+                    let acceptor: WebAcceptor<Provider> = WebAcceptor.create<Provider>(request);
                     handler(acceptor);
                 });
             }
             catch (exp)
             {
+                // FAILED TO OPEN
+                this.state_ = WebServer.State.NONE;
                 reject(exp);
+
                 return;    
             }
 
@@ -159,13 +180,12 @@ export class WebServer<Provider extends object = {}>
             
             // START CLOSING
             this.state_ = WebServer.State.CLOSING;
-            this.server_.on("close", () =>
+            this.server_.close(() =>
             {
                 // BE CLOSED
                 this.state_ = WebServer.State.CLOSED;
                 resolve();
             });
-            this.server_.close();
         });
     }
 
@@ -192,11 +212,3 @@ export namespace WebServer
         CLOSED = 3
     }
 }
-
-/**
- * @hidden
- */
-const AcceptorFactory:
-{
-    new<Provider extends object>(request: ws.request): WebAcceptor<Provider>;
-} = <any>WebAcceptor;

@@ -27,7 +27,7 @@ export async function test_web_reject(): Promise<void>
             error = exp;
         }
         await server.close();
-
+        
         if (!error)
             throw new Error("Catching reject has failed.");
     }
