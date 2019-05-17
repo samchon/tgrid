@@ -1,7 +1,8 @@
-import * as std from "tstl";
 import { Driver } from "../../basic/Driver";
-
 import { Calculator } from "../providers/Calculator";
+import { DomainError, InvalidArgument } from "tstl/exception/LogicError";
+
+import { randint } from "tstl/algorithm/random";
 
 export interface ICalculator 
     extends ISimple
@@ -42,18 +43,18 @@ export namespace ICalculator
 
         // EXCEPTION THROWN BY THE SERVER
         if (await get_exception(driver) === null)
-            throw new std.DomainError("Throwing exception doesn't work.");
+            throw new DomainError("Throwing exception doesn't work.");
     }
 
     async function validate(driver: Driver<ICalculator>, validator: Calculator, talk: boolean): Promise<void>
     {
         if (driver === <any>validator)
-            throw new std.InvalidArgument("Mistaken arguments.");
+            throw new InvalidArgument("Mistaken arguments.");
 
         // SPECIFY METHODS
-        let method: string = METHODS[std.randint(0, METHODS.length - 1)];
-        let x: number = std.randint(2, 10);
-        let y: number = std.randint(2, 10);
+        let method: string = METHODS[randint(0, METHODS.length - 1)];
+        let x: number = randint(2, 10);
+        let y: number = randint(2, 10);
 
         // CALL FUNCTION & GET ANSWER
         let ret: number = await eval(`driver.${method}`)(x, y);
@@ -64,7 +65,7 @@ export namespace ICalculator
         
         // VALIDATE
         if (ret !== answer)
-            throw new std.DomainError("Error on function calling.");
+            throw new DomainError("Error on function calling.");
     }
 
     export async function get_exception(driver: Driver<ICalculator>): Promise<string | null>

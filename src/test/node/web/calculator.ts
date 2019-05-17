@@ -1,11 +1,11 @@
-import * as std from "tstl";
-
 import { WebServer, WebConnector } from "../../../protocols/web";
 import { Driver } from "../../../basic"
 
 import { Calculator } from "../../providers/Calculator";
 import { ICalculator } from "../../controllers/ICalculator";
 import { IVector } from "../../controllers/IVector";
+
+import { Vector } from "tstl/container/Vector";
 
 const PORT: number = 10101;
 
@@ -20,7 +20,7 @@ export async function test_web_calculator(): Promise<void>
         // SPEICFY PROVIDER
         let provider = /calculator/.test(acceptor.path)
             ? new Calculator()
-            : new std.Vector<number>();
+            : new Vector<number>();
 
         // ALLOW CONNECTION
         await acceptor.accept(provider);
