@@ -9,7 +9,9 @@ import { Invoke } from "./Invoke";
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError, RuntimeError, Exception } from "tstl/exception";
+
+import serializeError = require("serialize-error");
 
 /**
  * The basic communicator.
@@ -322,11 +324,10 @@ export abstract class CommunicatorBase<Provider>
         // SPECIAL LOGIC FOR ERROR -> FOR CLEAR JSON ENCODING
         if (flag === false && val instanceof Error)
         {
-            let obj = JSON.parse(JSON.stringify(val));
-            obj.name = val.name;
-            obj.message = val.message;
-
-            val = obj;
+            if ((val as Exception).toJSON instanceof Function)
+                val = (val as Exception).toJSON();
+            else
+                val = serializeError(val);
         }
 
         // RETURNS

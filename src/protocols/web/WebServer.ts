@@ -125,10 +125,7 @@ export class WebServer<Provider extends object = {}>
             // PROTOCOL - ADAPTOR & ACCEPTOR
             try
             {
-                this.protocol_ = new ws.server({ httpServer: this.server_,
-                    maxReceivedFrameSize: 100 * MB,
-                    maxReceivedMessageSize: 100 * MB
-                });
+                this.protocol_ = new ws.server({ httpServer: this.server_, maxReceivedMessageSize: 100 * MB });
                 this.protocol_.on("request", request =>
                 {
                     let acceptor: WebAcceptor<Provider> = WebAcceptor.create<Provider>(request);
