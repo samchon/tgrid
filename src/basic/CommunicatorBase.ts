@@ -9,7 +9,9 @@ import { Invoke } from "./Invoke";
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError, RuntimeError, Exception } from "tstl/exception";
+
+import serializeError = require("serialize-error");
 
 /**
  * The basic communicator.
@@ -60,6 +62,11 @@ export abstract class CommunicatorBase<Provider>
      */
     private join_cv_: ConditionVariable;
 
+    /**
+     * @hidden
+     */
+    private driver_: Driver<object> | null;
+
     /* ----------------------------------------------------------------
         CONSTRUCTORS
     ---------------------------------------------------------------- */
@@ -72,6 +79,7 @@ export abstract class CommunicatorBase<Provider>
 
         this.promises_ = new HashMap();
         this.join_cv_ = new ConditionVariable();
+        this.driver_ = null;
     }
 
     /**
@@ -165,16 +173,18 @@ export abstract class CommunicatorBase<Provider>
      */
     public getDriver<Controller extends object>(): Driver<Controller>
     {
-        return new Proxy<Driver<Controller>>({} as Driver<Controller>,
-        {
-            get: ({}, name: string) =>
+        if (this.driver_ === null)
+            this.driver_ =  new Proxy<Driver<Controller>>({} as Driver<Controller>,
             {
-                if (name === "then")
-                    return null;
-                else
-                    return this._Proxy_func(name);
-            }
-        });
+                get: ({}, name: string) =>
+                {
+                    if (name === "then")
+                        return null;
+                    else
+                        return this._Proxy_func(name);
+                }
+            });
+        return this.driver_ as Driver<Controller>;
     }
 
     /**
@@ -322,11 +332,10 @@ export abstract class CommunicatorBase<Provider>
         // SPECIAL LOGIC FOR ERROR -> FOR CLEAR JSON ENCODING
         if (flag === false && val instanceof Error)
         {
-            let obj = JSON.parse(JSON.stringify(val));
-            obj.name = val.name;
-            obj.message = val.message;
-
-            val = obj;
+            if ((val as Exception).toJSON instanceof Function)
+                val = (val as Exception).toJSON();
+            else
+                val = serializeError(val);
         }
 
         // RETURNS

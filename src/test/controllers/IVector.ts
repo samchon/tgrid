@@ -1,5 +1,7 @@
-import * as std from "tstl";
 import { Driver } from "../../basic";
+
+import { DomainError } from "tstl/exception/LogicError";
+import { randint } from "tstl/algorithm/random";
 
 export interface IVector<T>
 {
@@ -18,7 +20,7 @@ export namespace IVector
 
         for (let i: number = 0; i < 10; ++i)
         {
-            let val: number = std.randint(1, 10);
+            let val: number = randint(1, 10);
 
             mySum += val;
             await driver.push_back(val);
@@ -28,6 +30,6 @@ export namespace IVector
             serverSum += await driver.at(i);
 
         if (mySum !== serverSum)
-            throw new std.DomainError("Error on function returning.");
+            throw new DomainError("Error on function returning.");
     }
 }

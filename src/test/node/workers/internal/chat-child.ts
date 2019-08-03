@@ -2,7 +2,8 @@ import { WorkerServer } from "../../../../protocols/workers";
 import { IScript } from "../../../controllers/IScript";
 import { Driver } from "../../../../basic";
 import { IChatService } from "../../../controllers/IChatService";
-import { sleep_for } from "tstl";
+
+import { sleep_for } from "tstl/thread/global";
 
 async function main(): Promise<void>
 {

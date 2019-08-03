@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.1.8",
+  "version": "0.1.10",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -20,7 +20,8 @@
     "api": "node build/api"
   },
   "dependencies": {
-    "tstl": "^2.1.2",
+    "serialize-error": "^4.1.0",
+    "tstl": "^2.2.3",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
@@ -32,7 +33,7 @@
     "browserify": "^16.2.3",
     "local-web-server": "^2.6.0",
     "mv": "^2.1.1",
-    "puppeteer": "^1.11.0",
+    "puppeteer": "^1.17.0",
     "whatwg-fetch": "^3.0.0"
   },
   "homepage": "https://github.com/samchon/tgrid#readme",
