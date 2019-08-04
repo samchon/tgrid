@@ -230,7 +230,10 @@ export abstract class CommunicatorBase<Provider>
             {
                 uid: ++CommunicatorBase.SEQUENCE,
                 listener: name,
-                parameters: params
+                parameters: params.map(p => ({
+                    type: typeof p,
+                    value: p
+                }))
             };
 
             // DO SEND WITH PROMISE
@@ -293,7 +296,9 @@ export abstract class CommunicatorBase<Provider>
             // RETURN VALUE
             //----
             // CALL FUNCTION
-            let ret: any = await func(...invoke.parameters);
+            let parameters: any[] = invoke.parameters.map(p => p.value);
+            let ret: any = await func(...parameters);
+
             this._Send_return(uid, true, ret);
         }
         catch (exp)

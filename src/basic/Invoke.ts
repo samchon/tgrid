@@ -14,8 +14,7 @@ export namespace Invoke
     /**
      * Message for Requesting RFC.
      */
-    export interface IFunction<Params extends any[] = any[]>
-        extends IBase
+    export interface IFunction extends IBase
     {
         /**
          * Target function (sometimes calsuled in objects) to call.
@@ -25,14 +24,19 @@ export namespace Invoke
         /**
          * Parameters for the function call.
          */
-        parameters: Params;
+        parameters: IParameter[];
+    }
+
+    export interface IParameter
+    {
+        type: string;
+        value: any;
     }
 
     /**
      * Message for Returning RFC.
      */
-    export interface IReturn<T = any>
-        extends IBase
+    export interface IReturn extends IBase
     {
         /**
          * `true` -> return, `false` -> exception.
@@ -42,7 +46,7 @@ export namespace Invoke
         /**
          * Returned value or thrown exception.
          */
-        value: T;
+        value: any;
     }
 
     /**
