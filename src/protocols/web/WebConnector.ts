@@ -1,7 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Communicator } from "../../basic/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector, Connector } from "../internal/IConnector";
 
@@ -29,7 +29,7 @@ import { is_node } from "tstl/utility/node";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebConnector<Provider extends object = {}>
-    extends CommunicatorBase<Provider | null>
+    extends Communicator<Provider | null>
     implements IWebCommunicator, IConnector<WebConnector.State>
 {
     /**
@@ -120,7 +120,7 @@ export class WebConnector<Provider extends object = {}>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspector();
+        let error: Error | null = this.inspectReady();
         if (error)
             throw error;
         
@@ -157,7 +157,7 @@ export class WebConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    protected sendData(invoke: Invoke): void
     {
         this.socket_!.send(JSON.stringify(invoke));
     }
@@ -165,7 +165,7 @@ export class WebConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    protected inspectReady(): Error | null
     {
         return Connector.inspect(this.state);
     }
@@ -175,7 +175,7 @@ export class WebConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        this.replier(JSON.parse(evt.data));
+        this.replyData(JSON.parse(evt.data));
     }
 
     /**

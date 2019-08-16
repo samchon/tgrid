@@ -3,9 +3,7 @@ import { Driver } from "../../../basic";
 
 import { ChatService } from "../../providers/ChatService";
 import { IChatPrinter } from "../../controllers/IChatPrinter";
-
 import { IScript } from "../../controllers/IScript";
-import { Latch } from "tstl/experimental/thread";
 
 interface IChatClient extends IChatPrinter
 {
@@ -53,11 +51,11 @@ export async function test_worker_chat(): Promise<void>
         }
 
         // START CHATTING
-        let latch: Latch = new Latch(instanceList.length);
-        for (let instace of instanceList)
-            instace.driver.shout().then(() => latch.arrive());
+        let promiseList: Promise<void>[] = [];
+        for (let instance of instanceList)
+            promiseList.push(instance.driver.shout());
 
-        await latch.wait();
+        await Promise.all(promiseList);
 
         // VALIDATES
         for (let instance of instanceList)

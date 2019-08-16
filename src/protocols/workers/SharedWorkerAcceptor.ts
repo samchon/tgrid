@@ -1,7 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Communicator } from "../../basic/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 
@@ -27,7 +27,7 @@ import { DomainError } from "tstl/exception";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerAcceptor<Provider extends object = {}>
-    extends CommunicatorBase<Provider | null | undefined>
+    extends Communicator<Provider | null | undefined>
     implements IWorkerSystem, 
         IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
@@ -85,7 +85,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspector();
+        let error: Error | null = this.inspectReady();
         if (error)
             throw error;
 
@@ -186,7 +186,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    protected sendData(invoke: Invoke): void
     {
         this.port_.postMessage(invoke);
     }
@@ -194,7 +194,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    protected inspectReady(): Error | null
     {
         return Acceptor.inspect(this.state_);
     }
@@ -205,7 +205,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     private _Handle_message(evt: MessageEvent): void
     {
         if (evt.data instanceof Object)
-            this.replier(evt.data);
+            this.replyData(evt.data);
         else if (evt.data === "CLOSE")
             this.close();
     }

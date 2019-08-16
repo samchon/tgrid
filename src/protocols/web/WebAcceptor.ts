@@ -3,7 +3,7 @@
 //================================================================
 import * as ws from "websocket";
 
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Communicator } from "../../basic/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 
@@ -28,9 +28,8 @@ import { DomainError } from "tstl/exception";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebAcceptor<Provider extends object = {}>
-    extends CommunicatorBase<Provider | null | undefined>
-    implements IWebCommunicator, 
-        IAcceptor<WebAcceptor.State, Provider>
+    extends Communicator<Provider | null | undefined>
+    implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
     /**
      * @hidden
@@ -53,8 +52,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @internal
      */
-    public static create<Provider extends object>
-        (request: ws.request): WebAcceptor<Provider>
+    public static create<Provider extends object>(request: ws.request): WebAcceptor<Provider>
     {
         return new WebAcceptor<Provider>(request);
     }
@@ -76,7 +74,7 @@ export class WebAcceptor<Provider extends object = {}>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspector();
+        let error: Error | null = this.inspectReady();
         if (error)
             throw error;
         
@@ -206,7 +204,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    protected sendData(invoke: Invoke): void
     {
         this.connection_!.sendUTF(JSON.stringify(invoke));
     }
@@ -214,7 +212,7 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    protected inspectReady(): Error | null
     {
         return Acceptor.inspect(this.state_);
     }
@@ -227,7 +225,7 @@ export class WebAcceptor<Provider extends object = {}>
         if (message.utf8Data)
         {
             let invoke: Invoke = JSON.parse(message.utf8Data);
-            this.replier(invoke);
+            this.replyData(invoke);
         }
     }
 

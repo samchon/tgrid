@@ -1,7 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Communicator } from "../../basic/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
 
@@ -29,7 +29,7 @@ import { is_node } from "tstl/utility/node";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WorkerConnector<Provider extends object = {}>
-    extends CommunicatorBase<Provider | null>
+    extends Communicator<Provider | null>
     implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
 {
     /**
@@ -185,7 +185,7 @@ export class WorkerConnector<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspector();
+        let error: Error | null = this.inspectReady();
         if (error)
             throw error;
 
@@ -220,7 +220,7 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    protected sendData(invoke: Invoke): void
     {
         this.worker_!.postMessage(invoke);
     }
@@ -228,7 +228,7 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    protected inspectReady(): Error | null
     {
         return Connector.inspect(this.state_);
     }
@@ -239,7 +239,7 @@ export class WorkerConnector<Provider extends object = {}>
     private _Handle_message(evt: MessageEvent): void
     {
         if (evt.data instanceof Object)
-            this.replier(evt.data);
+            this.replyData(evt.data);
         else if (evt.data === "READY")
         {
             this.state_ = WorkerConnector.State.OPEN;

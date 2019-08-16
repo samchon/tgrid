@@ -1,7 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Communicator } from "../../basic/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
 
@@ -39,7 +39,7 @@ import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerConnector<Provider extends object = {}>
-    extends CommunicatorBase<Provider | null>
+    extends Communicator<Provider | null>
     implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
 {
     /**
@@ -145,7 +145,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspector();
+        let error: Error | null = this.inspectReady();
         if (error)
             throw error;
 
@@ -180,7 +180,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    protected sendData(invoke: Invoke): void
     {
         this.port_!.postMessage(invoke);
     }
@@ -188,7 +188,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    protected inspectReady(): Error | null
     {
         return Connector.inspect(this.state_);
     }
@@ -202,7 +202,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
         if (evt.data instanceof Object)
         {
             if ((evt.data as Invoke).uid !== undefined)
-                this.replier(evt.data);
+                this.replyData(evt.data);
             else if ((evt.data as IReject).name === "reject")
                 this._Handle_reject((evt.data as IReject).message);
         }

@@ -1,51 +1,87 @@
 //================================================================ 
 /** @module tgrid.basic */
 //================================================================
-import { CommunicatorBase } from "./CommunicatorBase";
+import { Driver } from "./Driver";
 import { Invoke } from "./Invoke";
 
+import { Pair } from "tstl/utility/Pair";
+import { HashMap } from "tstl/container/HashMap";
+import { ConditionVariable } from "tstl/thread/ConditionVariable";
+import { DomainError, RuntimeError, Exception } from "tstl/exception";
+
+import serializeError = require("serialize-error");
+
 /**
- * The basic cmmunicator (FP version).
+ * The basic communicator.
  * 
- * The `Communicator` is a basic class taking full charge of network communication like 
- * {@link CommunicatorBase}, for someone who prefer FP (Functional Programming) rather than 
- * OOP (Object Oriented Programming) using inheritance.
+ * The `Communicator` is an abstract class taking full charge of network communication. 
+ * Protocolized communicators like {@link WebConnector} are realized by extending the 
+ * `Communicator` class.
  * 
- * You want to make your own communicator using special protocol, then creates the 
- * `Communicator` instance. Key features of RFC (Remote Function Call) are already 
- * implemented in the `Communicator`. Thus, only you've to do is specializing your 
- * protocol using those methods and assigning proper functions.
+ * You want to make your own communicator using special protocol, extends this `Communicator` 
+ * class. After the extending, implement your special communicator by overriding those methods.
  * 
- * - Use them:
- *   - {@link replyData}()
- *   - {@link destroy}()
- * - Assign them:
- *   - {@link sendData}()
- *   - {@link inspectReady}()
- *   - {@link provider}()
+ *   - {@link inspectReady}
+ *   - {@link replyData}
+ *   - {@link sendData}
  * 
+ * @typeParam Provider Type of features provided for remote system.
  * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
  */
-export class Communicator<Provider extends object = {}>
-    extends CommunicatorBase<Provider | undefined | null>
+export abstract class Communicator<Provider>
 {
+    /**
+     * @hidden
+     */
+    private static SEQUENCE: number = 0;
+
+    /**
+     * @hidden
+     */
+    protected provider_: Provider;
+
+    /**
+     * @hidden
+     */
+    private promises_: HashMap<number, Pair<Function, Function>>;
+
+    /**
+     * @hidden
+     */
+    private join_cv_: ConditionVariable;
+
+    /**
+     * @hidden
+     */
+    private driver_: Driver<object>;
+
     /* ----------------------------------------------------------------
         CONSTRUCTORS
     ---------------------------------------------------------------- */
     /**
      * Initializer Constructor.
      * 
-     * @param sender A function sending data to the remote system.
-     * @param readyInspector A predicator function inspects whether the *network communication* is on ready. It must return null, if ready, otherwise *Error* object explaining why.
-     * @param provider An object would be provided for the remote system.
+     * @param provider An object providing features for remote system.
      */
-    public constructor(sender: Sender, readyInspector: ReadyInspector, provider?: Provider)
+    protected constructor(provider: Provider)
     {
-        super(provider);
+        // PROVIDER & DRIVER
+        this.provider_ = provider;
+        this.driver_ = new Proxy({},
+        {
+            get: ({}, name: string) =>
+            {
+                if (name === "then")
+                    return null;
+                else
+                    return this._Proxy_func(name);
+            }
+        });
 
-        this.sendData = sender;
-        this.inspectReady = readyInspector;
+        // OTHER MEMBERS
+        this.promises_ = new HashMap();
+        this.join_cv_ = new ConditionVariable();
     }
 
     /**
@@ -60,42 +96,178 @@ export class Communicator<Provider extends object = {}>
      * 
      * @param error An error instance to be thrown to the unreturned functions.
      */
-    public destory(error?: Error): Promise<void>
+    protected async destructor(error?: Error): Promise<void>
     {
-        return this.destructor(error);
-    }
+        // REJECT UNRETURNED FUNCTIONS
+        let rejectError: Error = error 
+            ? error 
+            : new RuntimeError("Connection has been closed.");
+        
+        for (let entry of this.promises_)
+        {
+            let reject: Function = entry.second.second;
+            reject(rejectError);
+        }
+        
+        // CLEAR PROMISES
+        this.promises_.clear();
 
-    /* ----------------------------------------------------------------
-        ACCESSORS
-    ---------------------------------------------------------------- */
-    /**
-     * @inheritDoc
-     */
-    public get provider(): Provider | undefined | null
-    {
-        return this.provider_;
+        // RESOLVE JOINERS
+        await this.join_cv_.notify_all();
     }
-
-    public set provider(obj: Provider | undefined | null)
-    {
-        this.provider_ = obj;
-    }
-
-    /**
-     * A function sending data to the remote system.
-     */
-    public readonly sendData: Sender;
 
     /**
      * A predicator inspects whether the *network communication* is on ready.
      */
-    public readonly inspectReady: ReadyInspector;
+    protected abstract inspectReady(): Error | null;
 
-    /* ----------------------------------------------------------------
-        COMMUNICATIONS
+    /* ================================================================
+        ACCESSORS
+            - PROVIDER
+            - DRIVER
+            - JOINERS
+    ===================================================================
+        PROVIDER
     ---------------------------------------------------------------- */
     /**
-     * Data Replier.
+     * Current `Provider`.
+     * 
+     * An object providing features (functions & objects) for remote system. The remote 
+     * system would call the features (`Provider`) by using its `Driver<Controller>`.
+     */
+    public get provider(): Provider
+    {
+        return this.provider_;
+    }
+
+    /* ----------------------------------------------------------------
+        JOINERS
+    ---------------------------------------------------------------- */
+    /**
+     * Join connection.
+     */
+    public join(): Promise<void>;
+
+    /**
+     * Join connection or timeout.
+     * 
+     * @param ms The maximum milliseconds for joining.
+     * @return Whether awaken by disconnection or timeout.
+     */
+    public join(ms: number): Promise<boolean>;
+
+    /**
+     * Join connection or time expiration.
+     * 
+     * @param at The maximum time point to join.
+     * @return Whether awaken by disconnection or time expiration.
+     */
+    public join(at: Date): Promise<boolean>;
+
+    public async join(param?: number | Date): Promise<void|boolean>
+    {
+        // IS JOINABLE ?
+        let error: Error | null = this.inspectReady();
+        if (error)
+            throw error;
+
+        // FUNCTION OVERLOADINGS
+        if (param === undefined)
+            await this.join_cv_.wait();
+        else if (param instanceof Date)
+            return await this.join_cv_.wait_until(param);
+        else
+            return await this.join_cv_.wait_for(param);
+    }
+
+    /* ----------------------------------------------------------------
+        DRIVER
+    ---------------------------------------------------------------- */
+    /**
+     * Get Driver for RFC (Remote Function Call).
+     * 
+     * The `Controller` is an interface who defines provided functions from the remote 
+     * system. The `Driver` is an object who makes to call remote functions, defined in 
+     * the `Controller` and provided by `Provider` in the remote system, possible.
+     * 
+     * In other words, calling a functions in the `Driver<Controller>`, it means to call 
+     * a matched function in the remote system's `Provider` object.
+     * 
+     *   - `Controller`: Definition only
+     *   - `Driver`: Remote Function Call
+     * 
+     * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
+     * @return A Driver for the RFC.
+     */
+    public getDriver<Controller extends object>(): Driver<Controller>
+    {
+        return this.driver_ as Driver<Controller>;
+    }
+
+    /**
+     * @hidden
+     */
+    private _Proxy_func(name: string): Function
+    {
+        let func = (...params: any[]) => this._Call_function(name, ...params);
+
+        return new Proxy(func, 
+        {
+            get: ({}, newName: string) =>
+            {
+                if (newName === "bind")
+                    return (thisArg: any, ...args: any[]) => func.bind(thisArg, ...args);
+                else if (newName === "call")
+                    return (thisArg: any, ...args: any[]) => func.call(thisArg, ...args);
+                else if (newName === "apply")
+                    return (thisArg: any, args: any[]) => func.apply(thisArg, args);
+
+                return this._Proxy_func(`${name}.${newName}`);
+            }
+        });
+    }
+
+    /**
+     * @hidden
+     */
+    private _Call_function(name: string, ...params: any[]): Promise<any>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            // READY TO SEND ?
+            let error: Error | null = this.inspectReady();
+            if (error)
+            {
+                reject(error);
+                return;
+            }
+
+            // CONSTRUCT INVOKE MESSAGE
+            let invoke: Invoke.IFunction =
+            {
+                uid: ++Communicator.SEQUENCE,
+                listener: name,
+                parameters: params.map(p => ({
+                    type: typeof p,
+                    value: p
+                }))
+            };
+
+            // DO SEND WITH PROMISE
+            this.promises_.emplace(invoke.uid, new Pair(resolve, reject));
+            this.sendData(invoke);
+        });
+    }
+
+    /* ================================================================
+        COMMUNICATORS
+            - REPLIER
+            - SENDER
+    ===================================================================
+        REPLIER
+    ---------------------------------------------------------------- */
+    /**
+     * Data Reply Function.
      * 
      * A function should be called when data has come from the remote system.
      * 
@@ -105,42 +277,104 @@ export class Communicator<Provider extends object = {}>
      * 
      * @param invoke Structured data converted by your special protocol.
      */
-    public replyData(invoke: Invoke): void
+    protected replyData(invoke: Invoke): void
     {
-        return this.replier(invoke);
+        if ((invoke as Invoke.IFunction).listener)
+            this._Handle_function(invoke as Invoke.IFunction);
+        else
+            this._Handle_return(invoke as Invoke.IReturn);
     }
 
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    private async _Handle_function(invoke: Invoke.IFunction): Promise<void>
     {
-        return this.sendData(invoke);
+        let uid: number = invoke.uid;
+
+        try
+        {
+            //----
+            // FIND FUNCTION
+            //----
+            if (this.provider_ === undefined) // PROVIDER MUST BE
+                throw new RuntimeError("Provider is not specified yet.");
+            else if (this.provider === null)
+                throw new DomainError("No provider.");
+
+            // let ret = await eval(`this.provider_.${invoke.listener}(...invoke.parameters)`);
+            // this._Send_return(invoke.uid, true, ret);
+
+            // FIND FUNCTION (WITH THIS-ARG)
+            let func: Function = this.provider_ as any;
+            let thisArg: any = undefined;
+
+            let routes: string[] = invoke.listener.split(".");
+            for (let name of routes)
+            {
+                thisArg = func;
+                func = thisArg[name];
+            }
+            func = func.bind(thisArg);
+
+            //----
+            // RETURN VALUE
+            //----
+            // CALL FUNCTION
+            let parameters: any[] = invoke.parameters.map(p => p.value);
+            let ret: any = await func(...parameters);
+
+            this._Send_return(uid, true, ret);
+        }
+        catch (exp)
+        {
+            this._Send_return(uid, false, exp);
+        }
     }
 
     /**
      * @hidden
      */
-    protected replier(invoke: Invoke): void
+    private _Handle_return(invoke: Invoke.IReturn): void
     {
-        return super.replier(invoke);
+        // GET THE PROMISE OBJECT
+        let it = this.promises_.find(invoke.uid);
+        if (it.equals(this.promises_.end()))
+            return;
+
+        // RETURNS
+        let func: Function = invoke.success 
+            ? it.second.first 
+            : it.second.second;
+        this.promises_.erase(it);
+        
+        func(invoke.value); 
     }
+
+    /* ----------------------------------------------------------------
+        SENDER
+    ---------------------------------------------------------------- */
+    /**
+     * A function sending data to the remote system.
+     */
+    protected abstract sendData(invoke: Invoke): void;
 
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    private _Send_return(uid: number, flag: boolean, val: any): void
     {
-        return this.inspectReady();
+        // SPECIAL LOGIC FOR ERROR -> FOR CLEAR JSON ENCODING
+        if (flag === false && val instanceof Error)
+        {
+            if ((val as Exception).toJSON instanceof Function)
+                val = (val as Exception).toJSON();
+            else
+                val = serializeError(val);
+        }
+
+        // RETURNS
+        let ret: Invoke.IReturn = {uid: uid, success: flag, value: val};
+        this.sendData(ret);
     }
 }
-
-/**
- * @hidden
- */
-type Sender = (invoke: Invoke) => void;
-
-/**
- * @hidden
- */
-type ReadyInspector = () => Error | null;

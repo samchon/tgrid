@@ -1,7 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { CommunicatorBase } from "../../basic/CommunicatorBase";
+import { Communicator } from "../../basic/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 
@@ -32,7 +32,7 @@ import { is_node } from "tstl/utility/node";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WorkerServer<Provider extends object = {}>
-    extends CommunicatorBase<Provider | null | undefined>
+    extends Communicator<Provider | null | undefined>
     implements IWorkerSystem
 {
     /**
@@ -98,7 +98,7 @@ export class WorkerServer<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspector();
+        let error: Error | null = this.inspectReady();
         if (error)
             throw error;
 
@@ -152,7 +152,7 @@ export class WorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected sender(invoke: Invoke): void
+    protected sendData(invoke: Invoke): void
     {
         g.postMessage(invoke);
     }
@@ -160,7 +160,7 @@ export class WorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspector(): Error | null
+    protected inspectReady(): Error | null
     {
         // NO ERROR
         if (this.state_ === WorkerServer.State.OPEN)
@@ -187,7 +187,7 @@ export class WorkerServer<Provider extends object = {}>
     private _Handle_message(evt: MessageEvent): void
     {
         if (evt.data instanceof Object)
-            this.replier(evt.data);
+            this.replyData(evt.data);
         else if (evt.data === "CLOSE")
             this.close();
     }

@@ -6,7 +6,6 @@ import { IChatPrinter } from "../../controllers/IChatPrinter";
 import { IChatService } from "../../controllers/IChatService";
 import { ChatService } from "../../providers/ChatService";
 
-import { Latch } from "tstl/experimental/thread/Latch";
 import { sleep_for } from "tstl/thread";
 
 const PORT = 10101;
@@ -110,13 +109,10 @@ export async function test_web_chat(): Promise<void>
     }
 
     // START CHATTING
-    let latch: Latch = new Latch(clients.length);
+    let promiseList: Promise<void>[] = [];
     for (let c of clients)
-        c.shout().then(() =>
-        {
-            latch.arrive();
-        });
-    await latch.wait();
+        promiseList.push(c.shout());
+    await Promise.all(promiseList);
 
     // VALIDATIONS
     for (let c of clients)
