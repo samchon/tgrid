@@ -1,4 +1,4 @@
-import { Driver } from "../../basic";
+import { Driver } from "../../components";
 
 import { DomainError } from "tstl/exception/LogicError";
 import { randint } from "tstl/algorithm/random";

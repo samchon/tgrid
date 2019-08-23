@@ -3,11 +3,11 @@
 //================================================================
 import * as ws from "websocket";
 
-import { Communicator } from "../../basic/Communicator";
+import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 import { DomainError } from "tstl/exception";
 

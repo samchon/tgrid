@@ -1,6 +1,6 @@
 import { WorkerServer } from "../../../../protocols/workers";
 import { IScript } from "../../../controllers/IScript";
-import { Driver } from "../../../../basic";
+import { Driver } from "../../../../components";
 import { IChatService } from "../../../controllers/IChatService";
 
 import { sleep_for } from "tstl/thread/global";

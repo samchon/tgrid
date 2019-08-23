@@ -1,5 +1,5 @@
 import { WebServer, WebConnector } from "../../../protocols/web";
-import { Driver } from "../../../basic/Driver";
+import { Driver } from "../../../components/Driver";
 
 import { Vector } from "tstl/container/Vector";
 import { Mutex } from "tstl/thread/Mutex";

@@ -1,9 +1,9 @@
-import { Communicator } from "../../basic/Communicator";
-import { Driver } from "../../basic/Driver";
+import { Communicator } from "../../components/Communicator";
+import { Driver } from "../../components/Driver";
 
 import { Calculator } from "../providers/Calculator";
 import { ICalculator } from "../controllers/ICalculator";
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 
 class PseudoCommunicator<Provider> extends Communicator<Provider>
 {

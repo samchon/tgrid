@@ -1,5 +1,5 @@
 import { WebServer, WebConnector } from "../../../protocols/web";
-import { Driver } from "../../../basic";
+import { Driver } from "../../../components";
 
 import { IScript } from "../../controllers/IScript";
 import { IChatPrinter } from "../../controllers/IChatPrinter";

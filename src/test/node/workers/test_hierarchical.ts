@@ -1,5 +1,5 @@
 import { WorkerConnector } from "../../../protocols/workers";
-import { Driver } from "../../../basic";
+import { Driver } from "../../../components";
 
 import { ICalculator } from "../../controllers/ICalculator";
 

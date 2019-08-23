@@ -1,11 +1,11 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { Communicator } from "../../basic/Communicator";
+import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 import { URLVariables } from "../../utils/URLVariables";
 import { DomainError, RuntimeError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";

@@ -1,4 +1,4 @@
-import { Driver } from "../../basic/Driver";
+import { Driver } from "../../components/Driver";
 import { Calculator } from "../providers/Calculator";
 import { DomainError, InvalidArgument } from "tstl/exception/LogicError";
 

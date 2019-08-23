@@ -1,11 +1,11 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { Communicator } from "../../basic/Communicator";
+import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
 
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
 import { DomainError } from "tstl/exception";
 

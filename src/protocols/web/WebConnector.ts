@@ -1,11 +1,11 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import { Communicator } from "../../basic/Communicator";
+import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector, Connector } from "../internal/IConnector";
 
-import { Invoke } from "../../basic/Invoke";
+import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
