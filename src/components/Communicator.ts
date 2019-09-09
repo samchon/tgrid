@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.basic */
+/** @module tgrid.components */
 //================================================================
 import { Driver } from "./Driver";
 import { Invoke } from "./Invoke";

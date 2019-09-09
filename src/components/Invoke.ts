@@ -1,5 +1,5 @@
 //================================================================ 
-/** @module tgrid.basic */
+/** @module tgrid.components */
 //================================================================
 /**
  * Message structure for RFC (Remote Function Call).
