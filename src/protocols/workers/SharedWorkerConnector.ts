@@ -4,13 +4,15 @@
 import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
+import { IJoinable, Joinable } from "../internal/IJoinable";
 
 import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
-import { Pair } from "tstl/utility/Pair";
-import { DomainError, RuntimeError } from "tstl/exception";
-
 import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
+
+import { ConditionVariable } from "tstl/thread/ConditionVariable";
+import { DomainError, RuntimeError } from "tstl/exception";
+import { Pair } from "tstl/utility/Pair";
 
 /**
  * SharedWorker Connector
@@ -35,12 +37,11 @@ import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
  *  - {@link SharedWorkerServer.close}()
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerConnector<Provider extends object = {}>
     extends Communicator<Provider | null>
-    implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
+    implements IWorkerSystem, IConnector<SharedWorkerConnector.State>, IJoinable
 {
     /**
      * @hidden
@@ -62,6 +63,11 @@ export class SharedWorkerConnector<Provider extends object = {}>
      */
     private connector_?: Pair<()=>void, (error: Error)=>void>;
 
+    /**
+     * @hidden
+     */
+    private join_cv_: ConditionVariable;
+
     /* ----------------------------------------------------------------
         CONSTRUCTOR
     ---------------------------------------------------------------- */
@@ -73,7 +79,18 @@ export class SharedWorkerConnector<Provider extends object = {}>
     public constructor(provider: Provider | null = null)
     {
         super(provider);
+
         this.state_ = SharedWorkerConnector.State.NONE;
+        this.join_cv_ = new ConditionVariable();
+    }
+
+    /**
+     * @hidden
+     */
+    protected async destructor(error?: Error): Promise<void>
+    {
+        await super.destructor(error);
+        await this.join_cv_.notify_all();
     }
 
     /**
@@ -172,6 +189,26 @@ export class SharedWorkerConnector<Provider extends object = {}>
     public get state(): SharedWorkerConnector.State
     {
         return this.state_;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public join(): Promise<void>;
+
+    /**
+     * @inheritDoc
+     */
+    public join(ms: number): Promise<boolean>;
+
+    /**
+     * @inheritDoc
+     */
+    public join(at: Date): Promise<boolean>;
+
+    public join(param?: number | Date): Promise<void|boolean>
+    {
+        return Joinable.join(this.join_cv_, this.inspectReady(), param);
     }
 
     /* ----------------------------------------------------------------

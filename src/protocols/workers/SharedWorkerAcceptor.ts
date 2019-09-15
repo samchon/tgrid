@@ -23,7 +23,6 @@ import { DomainError } from "tstl/exception";
  * business has been completed.
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerAcceptor<Provider extends object = {}>

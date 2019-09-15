@@ -4,8 +4,11 @@
 import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector, Connector } from "../internal/IConnector";
+import { IJoinable, Joinable } from "../internal/IJoinable";
 
 import { Invoke } from "../../components/Invoke";
+
+import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
@@ -25,12 +28,11 @@ import { is_node } from "tstl/utility/node";
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WorkerConnector<Provider extends object = {}>
     extends Communicator<Provider | null>
-    implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
+    implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">, IJoinable
 {
     /**
      * @hidden
@@ -47,6 +49,11 @@ export class WorkerConnector<Provider extends object = {}>
      */
     private connector_?: ()=>void;
 
+    /**
+     * @hidden
+     */
+    private join_cv_: ConditionVariable;
+
     /* ----------------------------------------------------------------
         CONSTRUCTOR
     ---------------------------------------------------------------- */
@@ -61,6 +68,16 @@ export class WorkerConnector<Provider extends object = {}>
         
         // ASSIGN MEMBERS
         this.state_ = WorkerConnector.State.NONE;
+        this.join_cv_ = new ConditionVariable();
+    }
+
+    /**
+     * @hidden
+     */
+    protected async destructor(error?: Error): Promise<void>
+    {
+        await super.destructor(error);
+        await this.join_cv_.notify_all();
     }
 
     /**
@@ -212,6 +229,26 @@ export class WorkerConnector<Provider extends object = {}>
     public get state(): WorkerConnector.State
     {
         return this.state_;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public join(): Promise<void>;
+
+    /**
+     * @inheritDoc
+     */
+    public join(ms: number): Promise<boolean>;
+
+    /**
+     * @inheritDoc
+     */
+    public join(at: Date): Promise<boolean>;
+
+    public join(param?: number | Date): Promise<void|boolean>
+    {
+        return Joinable.join(this.join_cv_, this.inspectReady(), param);
     }
     
     /* ----------------------------------------------------------------

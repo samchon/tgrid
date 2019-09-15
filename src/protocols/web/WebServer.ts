@@ -21,7 +21,6 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * called whenever a client has been connected.
  * 
  * @typeParam Provider Type of features provided for remote systems.
- * @wiki https://github.com/samchon/tgrid/wiki/Web-Socket
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebServer<Provider extends object = {}>

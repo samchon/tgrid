@@ -6,7 +6,6 @@ import { Invoke } from "./Invoke";
 
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
-import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError, RuntimeError, Exception } from "tstl/exception";
 
 import serializeError = require("serialize-error");
@@ -26,7 +25,6 @@ import serializeError = require("serialize-error");
  *   - {@link sendData}
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @wiki https://github.com/samchon/tgrid/wiki/Basic-Concepts
  * @author Jeongho Nam <http://samchon.org>
  */
 export abstract class Communicator<Provider>
@@ -45,11 +43,6 @@ export abstract class Communicator<Provider>
      * @hidden
      */
     private promises_: HashMap<number, Pair<Function, Function>>;
-
-    /**
-     * @hidden
-     */
-    private join_cv_: ConditionVariable;
 
     /**
      * @hidden
@@ -81,7 +74,6 @@ export abstract class Communicator<Provider>
 
         // OTHER MEMBERS
         this.promises_ = new HashMap();
-        this.join_cv_ = new ConditionVariable();
     }
 
     /**
@@ -111,9 +103,6 @@ export abstract class Communicator<Provider>
         
         // CLEAR PROMISES
         this.promises_.clear();
-
-        // RESOLVE JOINERS
-        await this.join_cv_.notify_all();
     }
 
     /**
@@ -121,12 +110,7 @@ export abstract class Communicator<Provider>
      */
     protected abstract inspectReady(): Error | null;
 
-    /* ================================================================
-        ACCESSORS
-            - PROVIDER
-            - DRIVER
-            - JOINERS
-    ===================================================================
+    /* ----------------------------------------------------------------
         PROVIDER
     ---------------------------------------------------------------- */
     /**
@@ -138,46 +122,6 @@ export abstract class Communicator<Provider>
     public get provider(): Provider
     {
         return this.provider_;
-    }
-
-    /* ----------------------------------------------------------------
-        JOINERS
-    ---------------------------------------------------------------- */
-    /**
-     * Join connection.
-     */
-    public join(): Promise<void>;
-
-    /**
-     * Join connection or timeout.
-     * 
-     * @param ms The maximum milliseconds for joining.
-     * @return Whether awaken by disconnection or timeout.
-     */
-    public join(ms: number): Promise<boolean>;
-
-    /**
-     * Join connection or time expiration.
-     * 
-     * @param at The maximum time point to join.
-     * @return Whether awaken by disconnection or time expiration.
-     */
-    public join(at: Date): Promise<boolean>;
-
-    public async join(param?: number | Date): Promise<void|boolean>
-    {
-        // IS JOINABLE ?
-        let error: Error | null = this.inspectReady();
-        if (error)
-            throw error;
-
-        // FUNCTION OVERLOADINGS
-        if (param === undefined)
-            await this.join_cv_.wait();
-        else if (param instanceof Date)
-            return await this.join_cv_.wait_until(param);
-        else
-            return await this.join_cv_.wait_for(param);
     }
 
     /* ----------------------------------------------------------------

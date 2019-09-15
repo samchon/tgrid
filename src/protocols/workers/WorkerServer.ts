@@ -4,7 +4,6 @@
 import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
-
 import { Invoke } from "../../components/Invoke";
 import { URLVariables } from "../../utils/URLVariables";
 import { DomainError, RuntimeError } from "tstl/exception";
@@ -28,7 +27,6 @@ import { is_node } from "tstl/utility/node";
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @wiki https://github.com/samchon/tgrid/wiki/Workers
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WorkerServer<Provider extends object = {}>
