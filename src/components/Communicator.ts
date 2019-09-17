@@ -30,14 +30,12 @@ import serializeError = require("serialize-error");
 export abstract class Communicator<Provider>
 {
     /**
-     * @hidden
+     * Current `Provider`.
+     * 
+     * An object providing features (functions & objects) for remote system. The remote 
+     * system would call the features (`Provider`) by using its `Driver<Controller>`.
      */
-    private static SEQUENCE: number = 0;
-
-    /**
-     * @hidden
-     */
-    protected provider_: Provider;
+    public provider: Provider;
 
     /**
      * @hidden
@@ -48,6 +46,11 @@ export abstract class Communicator<Provider>
      * @hidden
      */
     private driver_: Driver<object>;
+
+    /**
+     * @hidden
+     */
+    private static SEQUENCE: number = 0;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -60,7 +63,7 @@ export abstract class Communicator<Provider>
     protected constructor(provider: Provider)
     {
         // PROVIDER & DRIVER
-        this.provider_ = provider;
+        this.provider = provider;
         this.driver_ = new Proxy({},
         {
             get: ({}, name: string) =>
@@ -109,20 +112,6 @@ export abstract class Communicator<Provider>
      * A predicator inspects whether the *network communication* is on ready.
      */
     protected abstract inspectReady(): Error | null;
-
-    /* ----------------------------------------------------------------
-        PROVIDER
-    ---------------------------------------------------------------- */
-    /**
-     * Current `Provider`.
-     * 
-     * An object providing features (functions & objects) for remote system. The remote 
-     * system would call the features (`Provider`) by using its `Driver<Controller>`.
-     */
-    public get provider(): Provider
-    {
-        return this.provider_;
-    }
 
     /* ----------------------------------------------------------------
         DRIVER
@@ -241,7 +230,7 @@ export abstract class Communicator<Provider>
             //----
             // FIND FUNCTION
             //----
-            if (this.provider_ === undefined) // PROVIDER MUST BE
+            if (this.provider === undefined) // PROVIDER MUST BE
                 throw new RuntimeError("Provider is not specified yet.");
             else if (this.provider === null)
                 throw new DomainError("No provider.");
@@ -250,7 +239,7 @@ export abstract class Communicator<Provider>
             // this._Send_return(invoke.uid, true, ret);
 
             // FIND FUNCTION (WITH THIS-ARG)
-            let func: Function = this.provider_ as any;
+            let func: Function = this.provider as any;
             let thisArg: any = undefined;
 
             let routes: string[] = invoke.listener.split(".");

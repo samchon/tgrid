@@ -147,7 +147,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         this.state_ = SharedWorkerAcceptor.State.ACCEPTING;
         {
             // SET PROVIDER
-            this.provider_ = provider;
+            this.provider = provider;
 
             // PREPARE PORT
             this.port_.onmessage = this._Handle_message.bind(this);
