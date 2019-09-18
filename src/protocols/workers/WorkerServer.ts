@@ -83,7 +83,7 @@ export class WorkerServer<Provider extends object = {}>
         // OPEN WORKER
         this.state_ = WorkerServer.State.OPENING;
         {
-            this.provider = provider;
+            this.provider_ = provider;
             g.onmessage = this._Handle_message.bind(this);
             g.postMessage("READY");
         }

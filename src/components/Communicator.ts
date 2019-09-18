@@ -6,7 +6,7 @@ import { Invoke } from "./Invoke";
 
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
-import { DomainError, RuntimeError, Exception } from "tstl/exception";
+import { Exception, DomainError, RuntimeError } from "tstl/exception";
 
 import serializeError = require("serialize-error");
 
@@ -14,7 +14,7 @@ import serializeError = require("serialize-error");
  * The basic communicator.
  * 
  * The `Communicator` is an abstract class taking full charge of network communication. 
- * Protocolized communicators like {@link WebConnector} are realized by extending the 
+ * Protocolized communicators like {@link WebConnector} are realized by extending this 
  * `Communicator` class.
  * 
  * You want to make your own communicator using special protocol, extends this `Communicator` 
@@ -30,12 +30,9 @@ import serializeError = require("serialize-error");
 export abstract class Communicator<Provider>
 {
     /**
-     * Current `Provider`.
-     * 
-     * An object providing features (functions & objects) for remote system. The remote 
-     * system would call the features (`Provider`) by using its `Driver<Controller>`.
+     * @hidden
      */
-    public provider: Provider;
+    protected provider_: Provider;
 
     /**
      * @hidden
@@ -63,7 +60,7 @@ export abstract class Communicator<Provider>
     protected constructor(provider: Provider)
     {
         // PROVIDER & DRIVER
-        this.provider = provider;
+        this.provider_ = provider;
         this.driver_ = new Proxy({},
         {
             get: ({}, name: string) =>
@@ -114,8 +111,31 @@ export abstract class Communicator<Provider>
     protected abstract inspectReady(): Error | null;
 
     /* ----------------------------------------------------------------
-        DRIVER
+        ACCESSORS
     ---------------------------------------------------------------- */
+    /**
+     * Set `Provider`
+     * 
+     * @param obj An object would be provided for remote system.
+     */
+    public setProvider(obj: Provider): void
+    {
+        this.provider_ = obj;
+    }
+
+    /**
+     * Get current `Provider`.
+     * 
+     * Get an object providing features (functions & objects) for remote system. The remote 
+     * system would call the features (`Provider`) by using its `Driver<Controller>`.
+     * 
+     * @return Current `Provider` object
+     */
+    public getProvider(): Provider
+    {
+        return this.provider_;
+    }
+
     /**
      * Get Driver for RFC (Remote Function Call).
      * 
@@ -230,16 +250,16 @@ export abstract class Communicator<Provider>
             //----
             // FIND FUNCTION
             //----
-            if (this.provider === undefined) // PROVIDER MUST BE
+            if (this.provider_ === undefined) // PROVIDER MUST BE
                 throw new RuntimeError("Provider is not specified yet.");
-            else if (this.provider === null)
+            else if (this.provider_ === null)
                 throw new DomainError("No provider.");
 
             // let ret = await eval(`this.provider_.${invoke.listener}(...invoke.parameters)`);
             // this._Send_return(invoke.uid, true, ret);
 
             // FIND FUNCTION (WITH THIS-ARG)
-            let func: Function = this.provider as any;
+            let func: Function = this.provider_ as any;
             let thisArg: any = undefined;
 
             let routes: string[] = invoke.listener.split(".");

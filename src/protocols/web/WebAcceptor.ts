@@ -146,12 +146,12 @@ export class WebAcceptor<Provider extends object = {}>
             // DO ACCEPT
             try
             {
-                this.provider = provider;
+                this.provider_ = provider;
                 this.request_.accept();
             }
             catch (exp)
             {
-                this.provider = undefined;
+                this.provider_ = undefined;
                 this.state_ = WebAcceptor.State.CLOSED;
 
                 reject(exp);
