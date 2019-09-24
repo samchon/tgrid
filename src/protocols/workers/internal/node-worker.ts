@@ -29,7 +29,7 @@ export async function compile(content: string): Promise<string>
         }
     }
 
-    await FileSystem.writeFile(path, content, "utf8");
+    await FileSystem.write(path, content);
     return path;
 }
 

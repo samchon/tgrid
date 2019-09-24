@@ -4,12 +4,10 @@
 import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IConnector, Connector } from "../internal/IConnector";
-import { IJoinable, Joinable } from "../internal/IJoinable";
 
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 
-import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
@@ -32,17 +30,12 @@ import { is_node } from "tstl/utility/node";
  */
 export class WebConnector<Provider extends object = {}>
     extends Communicator<Provider | null>
-    implements IWebCommunicator, IConnector<WebConnector.State>, IJoinable
+    implements IWebCommunicator, IConnector<WebConnector.State>
 {
     /**
      * @hidden
      */
     private socket_?: WebSocket;
-
-    /**
-     * @hidden
-     */
-    private join_cv_: ConditionVariable;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -55,18 +48,8 @@ export class WebConnector<Provider extends object = {}>
     public constructor(provider: Provider | null = null)
     {
         super(provider);
-        this.join_cv_ = new ConditionVariable();
     }
 
-    /**
-     * @hidden
-     */
-    protected async destructor(error?: Error): Promise<void>
-    {
-        await super.destructor(error);
-        await this.join_cv_.notify_all();
-    }
-    
     /**
      * Connect to remote websocket server.
      * 
@@ -166,26 +149,6 @@ export class WebConnector<Provider extends object = {}>
     public get state(): WebConnector.State
     {
         return this.socket_ ? this.socket_.readyState : WebConnector.State.NONE;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public join(): Promise<void>;
-
-    /**
-     * @inheritDoc
-     */
-    public join(ms: number): Promise<boolean>;
-
-    /**
-     * @inheritDoc
-     */
-    public join(at: Date): Promise<boolean>;
-
-    public join(param?: number | Date): Promise<void|boolean>
-    {
-        return Joinable.join(this.join_cv_, this.inspectReady(), param);
     }
 
     /* ----------------------------------------------------------------

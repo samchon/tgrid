@@ -6,12 +6,10 @@ import * as ws from "websocket";
 import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { IAcceptor, Acceptor } from "../internal/IAcceptor";
-import { IJoinable, Joinable } from "../internal/IJoinable";
 
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 
-import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { DomainError } from "tstl/exception";
 
 /**
@@ -31,7 +29,7 @@ import { DomainError } from "tstl/exception";
  */
 export class WebAcceptor<Provider extends object = {}>
     extends Communicator<Provider | null | undefined>
-    implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>, IJoinable
+    implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
     /**
      * @hidden
@@ -47,11 +45,6 @@ export class WebAcceptor<Provider extends object = {}>
      * @hidden
      */
     private connection_?: ws.connection;
-
-    /**
-     * @hidden
-     */
-    private join_cv_: ConditionVariable;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -73,7 +66,6 @@ export class WebAcceptor<Provider extends object = {}>
         
         this.request_ = request;
         this.state_ = WebAcceptor.State.NONE;
-        this.join_cv_ = new ConditionVariable();
     }
 
     /**
@@ -110,8 +102,6 @@ export class WebAcceptor<Provider extends object = {}>
     {
         await super.destructor(error);
         this.state_ = WebAcceptor.State.CLOSED;
-
-        await this.join_cv_.notify_all();
     }
 
     /* ----------------------------------------------------------------
@@ -206,26 +196,6 @@ export class WebAcceptor<Provider extends object = {}>
     public get state(): WebAcceptor.State
     {
         return this.state_;
-    }
-
-     /**
-     * @inheritDoc
-     */
-    public join(): Promise<void>;
-
-    /**
-     * @inheritDoc
-     */
-    public join(ms: number): Promise<boolean>;
-
-    /**
-     * @inheritDoc
-     */
-    public join(at: Date): Promise<boolean>;
-
-    public join(param?: number | Date): Promise<void|boolean>
-    {
-        return Joinable.join(this.join_cv_, this.inspectReady(), param);
     }
 
     /* ----------------------------------------------------------------

@@ -6,6 +6,7 @@ import { Invoke } from "./Invoke";
 
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
+import { ConditionVariable } from "tstl/thread/ConditionVariable";
 import { Exception, DomainError, RuntimeError } from "tstl/exception";
 
 import serializeError = require("serialize-error");
@@ -32,12 +33,12 @@ export abstract class Communicator<Provider>
     /**
      * @hidden
      */
-    protected provider_: Provider;
+    private static SEQUENCE: number = 0;
 
     /**
      * @hidden
      */
-    private promises_: HashMap<number, Pair<Function, Function>>;
+    protected provider_: Provider;
 
     /**
      * @hidden
@@ -47,7 +48,12 @@ export abstract class Communicator<Provider>
     /**
      * @hidden
      */
-    private static SEQUENCE: number = 0;
+    private promises_: HashMap<number, Pair<Function, Function>>;
+
+    /**
+     * @hidden
+     */
+    private join_cv_: ConditionVariable;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -74,6 +80,7 @@ export abstract class Communicator<Provider>
 
         // OTHER MEMBERS
         this.promises_ = new HashMap();
+        this.join_cv_ = new ConditionVariable();
     }
 
     /**
@@ -103,59 +110,15 @@ export abstract class Communicator<Provider>
         
         // CLEAR PROMISES
         this.promises_.clear();
+
+        // RESOLVE JOINERS
+        await this.join_cv_.notify_all();
     }
 
     /**
      * A predicator inspects whether the *network communication* is on ready.
      */
     protected abstract inspectReady(): Error | null;
-
-    /* ----------------------------------------------------------------
-        ACCESSORS
-    ---------------------------------------------------------------- */
-    /**
-     * Set `Provider`
-     * 
-     * @param obj An object would be provided for remote system.
-     */
-    public setProvider(obj: Provider): void
-    {
-        this.provider_ = obj;
-    }
-
-    /**
-     * Get current `Provider`.
-     * 
-     * Get an object providing features (functions & objects) for remote system. The remote 
-     * system would call the features (`Provider`) by using its `Driver<Controller>`.
-     * 
-     * @return Current `Provider` object
-     */
-    public getProvider(): Provider
-    {
-        return this.provider_;
-    }
-
-    /**
-     * Get Driver for RFC (Remote Function Call).
-     * 
-     * The `Controller` is an interface who defines provided functions from the remote 
-     * system. The `Driver` is an object who makes to call remote functions, defined in 
-     * the `Controller` and provided by `Provider` in the remote system, possible.
-     * 
-     * In other words, calling a functions in the `Driver<Controller>`, it means to call 
-     * a matched function in the remote system's `Provider` object.
-     * 
-     *   - `Controller`: Definition only
-     *   - `Driver`: Remote Function Call
-     * 
-     * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
-     * @return A Driver for the RFC.
-     */
-    public getDriver<Controller extends object>(): Driver<Controller>
-    {
-        return this.driver_ as Driver<Controller>;
-    }
 
     /**
      * @hidden
@@ -210,6 +173,90 @@ export abstract class Communicator<Provider>
             this.promises_.emplace(invoke.uid, new Pair(resolve, reject));
             this.sendData(invoke);
         });
+    }
+
+    /* ----------------------------------------------------------------
+        ACCESSORS
+    ---------------------------------------------------------------- */
+    /**
+     * Set `Provider`
+     * 
+     * @param obj An object would be provided for remote system.
+     */
+    public setProvider(obj: Provider): void
+    {
+        this.provider_ = obj;
+    }
+
+    /**
+     * Get current `Provider`.
+     * 
+     * Get an object providing features (functions & objects) for remote system. The remote 
+     * system would call the features (`Provider`) by using its `Driver<Controller>`.
+     * 
+     * @return Current `Provider` object
+     */
+    public getProvider(): Provider
+    {
+        return this.provider_;
+    }
+
+    /**
+     * Get Driver for RFC (Remote Function Call).
+     * 
+     * The `Controller` is an interface who defines provided functions from the remote 
+     * system. The `Driver` is an object who makes to call remote functions, defined in 
+     * the `Controller` and provided by `Provider` in the remote system, possible.
+     * 
+     * In other words, calling a functions in the `Driver<Controller>`, it means to call 
+     * a matched function in the remote system's `Provider` object.
+     * 
+     *   - `Controller`: Definition only
+     *   - `Driver`: Remote Function Call
+     * 
+     * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
+     * @return A Driver for the RFC.
+     */
+    public getDriver<Controller extends object>(): Driver<Controller>
+    {
+        return this.driver_ as Driver<Controller>;
+    }
+
+    /**
+     * Join connection.
+     */
+    public join(): Promise<void>;
+
+    /**
+     * Join connection or timeout.
+     * 
+     * @param ms The maximum milliseconds for joining.
+     * @return Whether awaken by disconnection or timeout.
+     */
+    public join(ms: number): Promise<boolean>;
+
+    /**
+     * Join connection or time expiration.
+     * 
+     * @param at The maximum time point to join.
+     * @return Whether awaken by disconnection or time expiration.
+     */
+    public join(at: Date): Promise<boolean>;
+
+    public async join(param?: number | Date): Promise<void|boolean>
+    {
+        // IS JOINABLE ?
+        let error: Error | null = this.inspectReady();
+        if (error)
+            throw error;
+
+        // FUNCTION OVERLOADINGS
+        if (param === undefined)
+            await this.join_cv_.wait();
+        else if (param instanceof Date)
+            return await this.join_cv_.wait_until(param);
+        else
+            return await this.join_cv_.wait_for(param);
     }
 
     /* ================================================================
@@ -327,7 +374,11 @@ export abstract class Communicator<Provider>
         }
 
         // RETURNS
-        let ret: Invoke.IReturn = {uid: uid, success: flag, value: val};
+        let ret: Invoke.IReturn = {
+            uid: uid, 
+            success: flag, 
+            value: val
+        };
         this.sendData(ret);
     }
 }

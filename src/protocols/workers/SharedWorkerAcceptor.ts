@@ -27,8 +27,7 @@ import { DomainError } from "tstl/exception";
  */
 export class SharedWorkerAcceptor<Provider extends object = {}>
     extends Communicator<Provider | null | undefined>
-    implements IWorkerSystem, 
-        IAcceptor<SharedWorkerAcceptor.State, Provider>
+    implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
     /**
      * @hidden
@@ -56,10 +55,13 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @internal
      */
-    public static create<Provider extends object>
-        (port: MessagePort, args: string[], eraser: ()=>void): SharedWorkerAcceptor<Provider>
+    public static create<Provider extends object>(
+            port: MessagePort, 
+            args: string[], 
+            eraser: ()=>void
+        ): SharedWorkerAcceptor<Provider>
     {
-        return new SharedWorkerAcceptor<Provider>(port, args, eraser);
+        return new SharedWorkerAcceptor(port, args, eraser);
     }
 
     /**
@@ -98,13 +100,16 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     private async _Close(message: "CLOSE" | IReject): Promise<void>
     {
-        // CALL HANDLERS
+        // DESTRUCTOR
         this.eraser_();
-        this.port_.postMessage(message);
+        await this.destructor();
 
         // DO CLOSE
-        await this.destructor();
-        this.port_.close();
+        setTimeout(() =>
+        {
+            this.port_.postMessage(message);
+            this.port_.close();
+        });
 
         // WELL, IT MAY HARD TO SEE SUCH PROPERTIES
         this.state_ = SharedWorkerAcceptor.State.CLOSED;

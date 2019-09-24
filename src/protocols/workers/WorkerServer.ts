@@ -106,11 +106,14 @@ export class WorkerServer<Provider extends object = {}>
         this.state_ = WorkerServer.State.CLOSING;
         {
             // HANDLERS
-            g.postMessage("CLOSE");
             await this.destructor();
             
             // DO CLOSE
-            g.close();
+            setTimeout(() =>
+            {
+                g.postMessage("CLOSE");
+                g.close();
+            });
         }
         this.state_ = WorkerServer.State.CLOSED;
     }
