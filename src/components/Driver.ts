@@ -37,8 +37,10 @@ export type Promisify<Instance extends object> =
     Instance extends Function
         ? Instance extends (...args: infer Params) => infer Ret
             ? Ret extends Promise<any>
-                ? (...args: Params) => Ret
-                : (...args: Params) => Promise<Ret>
+                ? Ret extends Promise<infer PromiseRet>
+                    ? (...args: Params) => Promise<Primitify<PromiseRet>>
+                    : (...args: Params) => Promise<any>
+                : (...args: Params) => Promise<Primitify<Ret>>
             : (...args: any[]) => Promise<any>
     : 
     { // IS OBJECT?
@@ -46,3 +48,18 @@ export type Promisify<Instance extends object> =
             ? Promisify<Instance[P]>
             : never;
     };
+
+/**
+ * Primitify a type.
+ * 
+ * If target type is an object, all methods defined in the object would be removed.
+ * 
+ * @typeParam A type to be primitive
+ * @author Jeongho Nam <http://samchon.org>
+ */
+export type Primitify<T> = T extends object
+    ? {
+        [P in keyof T]: T[P] extends Function
+            ? never
+            : Primitify<T[P]>
+    } : T;
