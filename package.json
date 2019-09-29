@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "serialize-error": "^4.1.0",
-    "tstl": "^2.3.0-dev.20190831",
+    "tstl": "^2.3.0",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
