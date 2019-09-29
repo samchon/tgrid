@@ -31,8 +31,7 @@ To know more, refer below links. If you are the first comer to the **TGrid**, I 
 
 
 ### 1.2. Grid Computing
-<img src="https://tgrid.dev/assets/images/concepts/grid-computing.png" 
-     style="max-width: 563.4px" />
+![Grid Computing](https://tgrid.dev/assets/images/concepts/grid-computing.png)
 
 > Computers be a (virtual) computer
 
@@ -130,65 +129,196 @@ main();
 
 
 
+<!-- 
+must define those templates
+
+  - chapter
+  - assets
+  - blockchain.md
+  - examples.md
+  - Grid Computing
+  - Remote Function Call
+
+-->
+
 ## 2. Strengths
 ### 2.1. Easy Development
-Anyone can make a network system very easily.
+Anyone can easily make a network system.
 
-### 2.2. Flexible Structure
-Significant changes to network systems can be handled very flexibly.
+It's difficult to make network system because many of computers are interacting together to accomplish a common task. Therefore, the word 'perfect' is inserted on every development processes; requirements must be analyzed perfectly, use-cases must be identified perfectly, data and network architectures must be designed, perfectly and mutual interaction test must be perfectly.
+
+  - Something to Read
+    - [Blockchain's Network System, Steps to Hell](https://tgrid.dev/en/appendix/blockchain.html#steps-to-hell)
+
+However, with TGrid and [Remote Function Call](#13-remote-function-call), you can come true the true [Grid Computing](#12-grid-computing). Many computers interacting with network communication are replaced by only <u>one virtual computer</u>. Even *Business Logic* code of the virtual computer is same with another *Business Logic* code running on a single physical computer.
+
+Thus, you can make a network system very easily if you use the **TGrid**. Forget everything about the network; protocolcs and designing message structures, etc. You only concentrate on the *Business Logic*, the essence of what you want to make. Remeber that, as long as you use the TGrid, you're just making a single program running on a single (virtual) computer.
+
+### 2.2. Safe Implementation
+By compilation and type checking, you can make network system safe.
+
+When developing a distributed processing system with network communication, one of the most embarrassing thing for developers is the run-time error. Whether network messages are correctly constructed and exactly parsed, all can be detected at the run-time, not the compile-time.
+
+Let's assume a situation; There's a distributed processing system build by traditional method and there's a critical error on the system. Also, the critical error wouldn't be detected until the service starts. How terrible it is? To avoid such terrible situation, should we make a test program validating all of the network messages and all of the related scenarios? If compilation and type checking was supported, everything would be simple and clear.
+
+**TGrid** provides exact solution about this compilation issue. TGrid has invented [Remote Function Call](#13-remote-function-call) to come true the real [Grid Computing](#12-grid-computing). What the [Remote Function Call](#13-remote-function-call) is? Calling functions remotly, isn't it a function call itself? Naturally, the function call is protected by *TypeScript Compilter*, therefore guarantees the *Type Safety*.
+
+Thus, with **TGrid** and [Remote Function Call](#13-remote-function-call), you can adapt compilation and type checking on the network system. It helps you to develop a network system safely and conveniently. Let's close this chapter with an example of *Safey Implementation*.
+
+```typescript
+import { WebConnector } from "tgrid/protocols/web/WebConnector"
+import { Driver } from "tgrid/components/Driver";
+
+interface ICalculator
+{
+    plus(x: number, y: number): number;
+    minus(x: number, y: number): number;
+
+    multiplies(x: number, y: number): number;
+    divides(x: number, y: number): number;
+    divides(x: number, y: 0): never;
+}
+
+async function main(): Promise<void>
+{
+    //----
+    // CONNECTION
+    //----
+    let connector: WebConnector = new WebConnector();
+    await connector.connect("ws://127.0.0.1:10101");
+
+    //----
+    // CALL REMOTE FUNCTIONS
+    //----
+    // GET DRIVER
+    let calc: Driver<ICalculator> = connector.getDriver<ICalculator>();
+
+    // CALL FUNCTIONS REMOTELY
+    console.log("1 + 6 =", await calc.plus(1, 6));
+    console.log("7 * 2 =", await calc.multiplies(7, 2));
+
+    // WOULD BE COMPILE ERRORS
+    console.log("1 ? 3", await calc.pliuowjhof(1, 3));
+    console.log("1 - 'second'", await calc.minus(1, "second"));
+    console.log("4 / 0", await calc.divides(4, 0));
+}
+main();
+```
+
+> ```bash
+> $ tsc
+> src/index.ts:33:37 - error TS2339: Property 'pliuowjhof' does not exist on type 'Driver<ICalculator>'.
+> 
+>     console.log("1 ? 3", await calc.pliuowjhof(1, 3));
+> 
+> src/index.ts:34:53 - error TS2345: Argument of type '"second"' is not assignable to parameter of type 'number'.
+> 
+>     console.log("1 - 'second'", await calc.minus(1, "second"));
+> 
+> src/index.ts:35:32 - error TS2349: Cannot invoke an expression whose type lacks a call signature. Type 'never' has no compatible call signatures.
+> 
+>     console.log("4 / 0", await calc.divides(4, 0));
+> ```
+
+### 2.3. Network Refactoring
+Critical changes on network systems can be resolved flexibly.
+
+In most case of developing network distributed processing system, there can be an issue that, necessary to major change on the network system. In someday, neccessary to *refactoring* in network level would be come, like software refactoring.
+
+The most representative of that is the *performance* issue. For an example, there is a task and you estimated that the task can be done by one computer. However, when you actually started the service, the computation was so large that one computer was not enough. Thus, you should distribute the task to multiple computers. On contrary, you prepared multiple computers for a task. However, when you actually started the service, the computation was so small that just one computer is sufficient for the task. Sometimes, assigning a computer is even excessive, so you might need to merge the task into another computer.
 
 ![Diagram of Composite Calculator](https://tgrid.dev/assets/images/examples/composite-calculator.png) | ![Diagram of Hierarchical Calculator](https://tgrid.dev/assets/images/examples/hierarchical-calculator.png)
 :-------------------:|:-----------------------:
-Composite Calculator | Hierarchical Calculator
+[Composite Calculator](https://tgrid.dev/en/tutorial/examples.html#22-remote-object-call) | [Hierarchical Calculator](https://tgrid.dev/en/tutorial/examples.html#23-object-oriented-network)
 
-### 2.3. Safe Implementation
-Compilation and type checking help you to implement safe network system.
-
+I'll explain this *Network Refactoring*, caused by performance issue, through an example case that is very simple and clear. In a distributed processing system, there was a computer that providing a calculator. However, when this system was actually started, amount of the computations was so enormous that the single computer couldn't afford the computations. Thus, decided to separate the computer to three computers.
 
 
+  - [`scientific`](https://tgrid.dev/en/tutorial/examples.html#hierarchical-calculatorscientificts): scientific calculator server
+  - [`statistics`](https://tgrid.dev/en/tutorial/examples.html#hierarchical-calculatorstatisticsts): statistics calculator server
+  - [`calculator`](https://tgrid.dev/en/tutorial/examples.html#hierarchical-calculatorcalculatorts): mainframe server
+    - four arithmetic operations are computed by itself
+    - scientific and statistics operations are shifted to another computers
+    - and intermediates the computation results to client
 
-## 3. Block Chain
-### 3.1. Business Logic
-Principle components of Blockchain are simpler and easy to implement.
+If you solve this *Network Refactoring* by traditional method, it would be a hardcore duty. At first, you've to design a message protocol used for neetwork communication between those three computers. At next, you would write parsers for the designed network messges and reprocess the events according to the newly defined network architecture. Finally, you've to also prepare the verifications for those developments.
 
-The core elements of Blockchain are 'Block' and 'Chain'. The first, 'Block' is a data level issue. Considers how to design the data structure and how to archive them. The second, 'Chain' is a policy issue that how to reach to an agreement when writing some data to 'Block'.
+> Things to be changed
+>  - Network Architecture
+>  - Message Protocol
+>  - Event Handling
+>  - *Business Logic* Code
+
+However, if you use the **TGrid** and [Remote Function Call](#13-remote-function-call), the issue can't be a problem. In the **TGrid**, each computer in the network system is just one object. Whether you implement the remote calculator in one computer or distribute operations to three computers, its *Business Logic* code must be the same, in always.
+
+I also provide you the best example for this *performance* issue causing the *Network Refactoring*. The first demonstration code is an implementation of a single calculator server and the second demonstration code is an implementation of a system distributing operations to three servers. As you can see, although principle structure of network system has been changed, you don't need to worry about it if you're using the **TGrid** and [Remote Function Call](#13-remote-function-call).
+
+  - [Demonstration - Remote Object Call](https://tgrid.dev/en/tutorial/examples.html#22-remote-object-call)
+  - [Demonstration - Object Oriented Network](https://tgrid.dev/en/tutorial/examples.html#23-object-oriented-network)
+
+
+
+
+
+## 3. Opportunities
+### 3.1. Blockchain
+> Detailed Content: [**Appendix** > **Blockchain**](https://tgrid.dev/en/appendix/blockchain.html)
+
+With **TGrid**, you can develop *Blockchain* easily.
+
+It's a famous story that difficulty of developing blockchain is very high. Not only because of the high wages of the blockchain developers, but also from a technical point of view, blockchain is actually very difficult to implement. But, if you ask me what is such difficult, I will answer that not Business Logic* but *Network System*.
+
+The [Network System](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) used by blockchain is a type of great distributed processing system, conostructed by millions of computers interacting with network communication. The great distributed processing systems like the blockchain always present us the tremendous difficulties. The word 'perfect' is inserted on every development processes; requirements must be analyzed perfectly, use-cases must be identified perfectly, data and network architectures must be designed, perfectly and mutual interaction test must be perfectly.
+
+On contrary, [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#3-business-logic) of the blockchain is not such difficult. Core elements of the blockchain are, as the name suggest, the first is 'Block' and the second is 'Chain'. The 'Block' is about defining and storing data and the 'Chain' is about policy that how to reach to an agreement when writing data to the 'Block'.
 
  Component | Conception     | Description
 -----------|----------------|---------------------------------------
  Block     | Data Structure | Way to defining and storing data
  Chain     | Requirements   | A policy for reaching to an agreement
 
-Let's imagine a situation that develop these 'Block' and 'Chain' onto not Network System but a single computer. In that case, those skills are required:
+Let's assume that you are developing the 'Block' and 'Chain' as a program running only on a single computer. In this case, you just need to design the data structure and implement code storing the data on disk. Also, you would analyze the requirements (policy) and implement them. Those skills are just the essentials for programmers. In other word, [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#3-business-logic) of blockchain is something that any skilled programmers can implement.
 
-  - Ability to design Data Structure
-  - Ability to store Data on Device
-  - Ability to analyze policy (requirements)
-  - Ability to implement them
+  - To develop the *Block* and *Chain*:
+    - Ability to design Data Structure
+    - Ability to store Data on Device
+    - Ability to analyze policy (requirements)
+    - Ability to implement them
 
-Those skills are just the essentials for programmers. In other word, *Business Logic* of Blockchain is something that any skilled programmers can implement.
+Do you remember? With **TGrid** and [Remote Function Call](#13-remote-function-call), you can come true the true [Grid Computing](#12-grid-computing). Many computers interacting with network communication are replaced by only <u>one virtual computer</u>. Even [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) code of the virtual computer is same with another [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) code running on a single physical computer.
 
-### 3.2. Network System
-The real challenge to implementing Blockchain comes from the Distributed Processing System using Network Communication.
+Thus, if you adapt the **TGrid** and [Remote Function Call](#13-remote-function-call), difficulty of the blockchain development would be dropped to the level of [Business Logic](https://tgrid.dev/en/appendix/blockchain.html rather than [Network System](https://tgrid.dev/en/appendix/blockchain.html#2-network-system). Forget complex [Network System](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) and just focus on the essence of what you want to develop; the [Business Logic](https://tgrid.dev/en/appendix/blockchain.html.
 
-I said that [Business Logic](#31-business-logic) of Blockchain is easy. However, it's a conditional story only when developing the Blockchain programming running on a single computer. The actual Blockchain projects, they're not running only on a single computer, but on very large Distributed Processing System. The Distributed Processing System is composed with over millions of computers and they're interacting through network communications.
+### 3.2. Public Grid
+> Related Project: [**Tutorial** > **Projects** > **Grid Market**](https://tgrid.dev/en/tutorial/projects/market.html)
 
-Those enormous Distributed Processing Sytems always present us tremendous difficulties. Because over millions of computers are interacting together thorugh network communication, its architecutre design must be through and perfect. There must not be any contradiction and error. If there's an error on below step, you've to roll back whole processes and start again.
+With **TGrid**, you can procure resources for [Grid Computing](#12-grid-computing) from unspecified crowds, very easily and inexpensively.
 
-  - Read Path to Hell
-    - [English](https://tgrid.dev/english/appendix/swot.html#path-to-hell)
-    - [한국어](https://tgrid.dev/korean/appendix/swot.html#path-to-hell)
+When composing *traditional Grid Computing*, of course, many computers should be prepared. As the number of computers required increases, so does the infrastructure and costs associated with procuring them. Also, you've to install programs and configure settings for the network communication on the prepared computers. Such duties increase your efforts and let you to be tired. Is it so nature?
 
-It's tremendous difficult to develop such an actual Blockchain. No matter how simple the Business Logic is, behind it lies the path to heel, an enormous Distributed Processing System. If you want to develop a Blockchain, you've hire the excellent architects and developers, who are in the genius level. 
+Name | Consumer                              | Supplier
+-----|---------------------------------------|-------------------------------
+Who  | Developer of [Grid Computing](#12-grid-computing)    | Unspecified crowds connecting to the Internet
+What | Consumes resources of the *Suppliers* | Provides resources to *Consumer*
+How  | Deliver program code to *Suppliers*   | Connect to special URL by Internet Browser
 
-However, even those crazy architects and genius developers cannot assure the success. Even they can be fallen into the swamp due to incomplete requirement analyses or mistakes on architecture designs. I think those crazy difficulties may be a reason why many people and companies, who had made loud noises developing Blockchain, are quite in nowadays.
+However, TGrid even can economize such costs and efforts dramatically. You can procure resources for [Grid Computing](#12-grid-computing) from the unspecified crowds. Those unspecified crowds do not need to prepare anything like installing some program or configuring some setting. The only need those unspecified crowds is just connecting to special URL by Internet Browser.
 
-### 3.3. Conclusion
-Reading the stories, it can be summarized as '[Business Logic](#31-business-logic) of Blockchain is easy, however composing its [Network System](#32-network-system) is extremely difficult'.
+The program that each *Supplier* should run is provided by the *Consumer* as JavaScript code. Each *Supplier* would act its role by the JavaScript code. Of course, interactions with *Supplier* and *Consumer* (or with a third-party computer) would use the [Remote Function Call](#13-remote-function-call), so they are just one virtual computer.
 
-Do you remember? With **TGrid** and [Remote Function Call](#13-remote-function-call), you can turn multiple computers into a single virtual computer. Also, program code running on the virtual computer is similar with which runs on only one computer. Only in [Business Logic](#31-business-logic) level, two programs' codes are perfectly same. Thus, following conclusions can be drawn:
+> Base language of the **TGrid** is *TypeScript* and compilation result of the TypeScript is the *JavaScript* file. As *JavaScript* is a type of script language, it can be executed dinamiccaly. Therefore, the *Supplier* can execute the program by script code delivered by the *Consumer*.
 
-  - Blockchain's [Business Logic](#31-business-logic) is not difficult.
-  - With **TGrid**, you can concentrate only on the [Business Logic](#31-business-logic).
-  - Thus, you can implement Blockchain easily through **TGrid**.
+![Grid Market](https://tgrid.dev/assets/images/projects/market/actors.png)
 
-Are you preparing a new Blockchain project? Then realize [Grid Computing](#12-grid-computing) with **TGrid** and [Remote Function Call](#13-remote-function-call). Focus only on the essence of the Blockchain what you want to create, [Business Logic](#31-business-logic) itself.
+[Grid Market](https://tgrid.dev/en/tutorial/projects/market.html) is one of the most typical example case for the *Public Grid*, a demo project for tutorial learning. In this demo project, *Consumer* also procures resources from the *Suppliers* for composing the [Grid Computing](#12-grid-computing) system. *Supplier* also provides its resources just by connecting to the special URL by Internet Browser, too. Of course, in the [Grid Market](https://tgrid.dev/en/tutorial/projects/market.html), the program that *Supplier* would run still comes from the *Consumer*.
+
+However, there's a special thing about the [Grid Market](https://tgrid.dev/en/tutorial/projects/market.html), it is that there is a *cost* for the *Consumer* to procure the *Suppliers*' resources. Also, intermediary *Market* exists and it charges fee for mediation between the *Consumer* and *Supplier*.
+
+  - `Market`: Intermediary market for the *Suppliers* and *Consumers*.
+  - `Consumer`: Purchase resources from the *Suppliers.
+  - `Supplier`: Sells its own resources to the *Consumer*.
+
+### 3.3. Market Expansions
+The [Grid Computing](#12-grid-computing) market would be grown up day by day.
+
+The future belongs to those who prepare. Prepare the future by **TGrid** and [Remote Function Call](#13-remote-function-call). Also, I hope you to hold some changes from the future.
