@@ -67,7 +67,7 @@ export abstract class Communicator<Provider>
     {
         // PROVIDER & DRIVER
         this.provider_ = provider;
-        this.driver_ = new Proxy({},
+        this.driver_ = new Proxy<object>({},
         {
             get: ({}, name: string) =>
             {
@@ -76,7 +76,7 @@ export abstract class Communicator<Provider>
                 else
                     return this._Proxy_func(name);
             }
-        });
+        }) as any;
 
         // OTHER MEMBERS
         this.promises_ = new HashMap();
@@ -302,9 +302,6 @@ export abstract class Communicator<Provider>
             else if (this.provider_ === null)
                 throw new DomainError("No provider.");
 
-            // let ret = await eval(`this.provider_.${invoke.listener}(...invoke.parameters)`);
-            // this._Send_return(invoke.uid, true, ret);
-
             // FIND FUNCTION (WITH THIS-ARG)
             let func: Function = this.provider_ as any;
             let thisArg: any = undefined;
@@ -314,6 +311,12 @@ export abstract class Communicator<Provider>
             {
                 thisArg = func;
                 func = thisArg[name];
+
+                // SECURITY-ERRORS
+                if (name === "toString" && func === Function.toString)
+                    throw new RuntimeError("RFC on Function.toString() is not allowed.");
+                else if (name === "constructor" || name === "prototype")
+                    throw new RuntimeError(`RFC does not allow access to ${name}.`);
             }
             func = func.bind(thisArg);
 

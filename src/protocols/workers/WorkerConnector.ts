@@ -222,7 +222,7 @@ export class WorkerConnector<Provider extends object = {}>
      */
     protected sendData(invoke: Invoke): void
     {
-        this.worker_!.postMessage(invoke);
+        this.worker_!.postMessage(JSON.stringify(invoke));
     }
 
     /**
@@ -238,15 +238,15 @@ export class WorkerConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data instanceof Object)
-            this.replyData(evt.data);
-        else if (evt.data === "READY")
+        if (evt.data === "READY")
         {
             this.state_ = WorkerConnector.State.OPEN;
             this.connector_!();
         }
         else if (evt.data === "CLOSE")
             this._Handle_close();
+        else
+            this.replyData(JSON.parse(evt.data));
     }
 
     /**

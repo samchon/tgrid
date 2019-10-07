@@ -182,7 +182,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
      */
     protected sendData(invoke: Invoke): void
     {
-        this.port_!.postMessage(invoke);
+        this.port_!.postMessage(JSON.stringify(invoke));
     }
 
     /**
@@ -198,17 +198,8 @@ export class SharedWorkerConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        // RFC
-        if (evt.data instanceof Object)
-        {
-            if ((evt.data as Invoke).uid !== undefined)
-                this.replyData(evt.data);
-            else if ((evt.data as IReject).name === "reject")
-                this._Handle_reject((evt.data as IReject).message);
-        }
-
         // PROCESSES
-        else if (evt.data === "READY")
+        if (evt.data === "READY")
             this.port_!.postMessage(this.args_!);
         else if (evt.data === "ACCEPT")
         {
@@ -219,6 +210,17 @@ export class SharedWorkerConnector<Provider extends object = {}>
             this._Handle_close();
         else if (evt.data === "REJECT")
             this._Handle_reject("Rejected by server.");
+
+        // RFC OR REJECT
+        else
+        {
+            
+            let data: Invoke | IReject = JSON.parse(evt.data);
+            if ((data as Invoke).uid !== undefined)
+                this.replyData(data as Invoke);
+            else
+                this._Handle_reject((data as IReject).message);
+        }
     }
 
     /**

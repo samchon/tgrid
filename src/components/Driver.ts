@@ -17,49 +17,116 @@
  * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Driver<Controller extends object> = Readonly<Promisify<Controller>>;
-export var Driver = Proxy;
+export type Driver<Controller extends object> = Driver.Promisifier<Controller>;
+export namespace Driver
+{
+    /* ----------------------------------------------------------------
+        PROMISIFIERS
+    ---------------------------------------------------------------- */
+    /**
+     * Promisify an object type.
+     * 
+     * It promisifies all member types. When a member type is:
+     * 
+     *   - function: returns `Promise` (`R` -> `Promise<R>`).
+     *   - object: promisifies recursively (`O` -> `Promisify<O>`).
+     *   - atomic value: be ignored (be `never` type).
+     * 
+     * @typeParam Instance An object type to be promised.
+     */
+    export type Promisifier<Instance extends object> = 
+    {
+        readonly [P in keyof Instance]: Instance[P] extends Function
+            ? Functor<Instance[P]>
+            : Instance[P] extends object
+                ? Promisifier<Instance[P]>
+                : never
+    } & IRemoteObject;
 
-/**
- * Promisify an object type.
- * 
- * It promisifies all member types. When a member type is:
- * 
- *   - function: returns `Promise` (`R` -> `Promise<R>`).
- *   - object: promisifies recursively (`O` -> `Promisify<O>`).
- *   - atomic value: be ignored (be `never` type).
- * 
- * @typeParam Instance An object type to be promisied.
- * @author Jeongho Nam <http://samchon.org>
- */
-export type Promisify<Instance extends object> = 
-    // IS FUNCTION?
-    Instance extends Function
-        ? Instance extends (...args: infer Params) => infer Ret
-            ? Ret extends Promise<any>
-                ? Ret extends Promise<infer PromiseRet>
-                    ? (...args: Params) => Promise<Primitify<PromiseRet>>
-                    : (...args: Params) => Promise<any>
-                : (...args: Params) => Promise<Primitify<Ret>>
+    /**
+     * Promisify a function type.
+     * 
+     * Return type of the target function would be promisified and primitified.
+     * 
+     *   - `T`: `Promise<Primitifier<T>>`
+     *   - `Promise<T>`: `Promise<Primitifer<T>>`
+     * 
+     * @typeParam Method A function type to be promisified.
+     */
+    export type Functor<Method extends Function> = 
+    (
+        Method extends (...args: infer Params) => infer Ret
+            ? Ret extends Promise<infer PromiseRet>
+                ? (...args: Params) => Promise<Primitifier<PromiseRet>>
+                : (...args: Params) => Promise<Primitifier<Ret>>
             : (...args: any[]) => Promise<any>
-    : 
-    { // IS OBJECT?
-        [P in keyof Instance]: Instance[P] extends object
-            ? Promisify<Instance[P]>
-            : never;
+    ) & IRemoteFunction; // protector
+
+    /* ----------------------------------------------------------------
+        PRIMITIFIERS
+    ---------------------------------------------------------------- */
+    /**
+     * Primitify a type.
+     * 
+     * If target type is an object, all methods defined in the object would be 
+     * removed. Also, if the target type has a `toJSON()` method, its return type 
+     * would be chosen.
+     * 
+     * @typeParam T A type to be primitive
+     */
+    export type Primitifier<Instance> = Instance extends object
+        ? Instance extends IJsonable<infer Raw>
+            ? Raw extends object
+                ? _ObjectPrimitifier<Raw>
+                : Raw
+            : _ObjectPrimitifier<Instance>
+        : Instance;
+
+    /**
+     * @hidden
+     */
+    type _ObjectPrimitifier<Instance extends object> =
+    {
+        [P in keyof Instance]: Instance[P] extends Function
+            ? never
+            : Primitifier<Instance[P]>
     };
 
-/**
- * Primitify a type.
- * 
- * If target type is an object, all methods defined in the object would be removed.
- * 
- * @typeParam A type to be primitive
- * @author Jeongho Nam <http://samchon.org>
- */
-export type Primitify<T> = T extends object
-    ? {
-        [P in keyof T]: T[P] extends Function
-            ? never
-            : Primitify<T[P]>
-    } : T;
+    /**
+     * @hidden
+     */
+    interface IJsonable<T>
+    {
+        toJSON(): T;
+    }
+
+    /* ----------------------------------------------------------------
+        PROTECTORS
+    ---------------------------------------------------------------- */
+    /**
+     * Restrictions for Remote Object
+     */
+    export interface IRemoteObject
+    {
+        /**
+         * Remote Object does not allow access to the `constructor`.
+         */
+        constructor: never;
+
+        /**
+         * Remote Object does not allow access to the `prototype`.
+         */
+        prototype: never;
+    }
+
+    /**
+     * Restrictions for Remote Function
+     */
+    export type IRemoteFunction = 
+    {
+        /**
+         * Remote Function does not allow it.
+         */
+        [P in keyof Function | "Symbol"]: never;
+    };
+}

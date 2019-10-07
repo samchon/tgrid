@@ -13,7 +13,7 @@ Note that, the bug you're reporting may have registered in the [Issues](https://
 When same error occurs with the `@next` version, then please fill the below template:
 
 ### Summary
-  - **TSTL Version**: 0.1.0@dev-20181205
+  - **TGrid Version**: 0.1.0@dev-20181205
   - **Expected behavior**: 
   - **Actual behavior**
 
