@@ -1,6 +1,8 @@
 //================================================================ 
 /** @module tgrid.components */
 //================================================================
+import { IJsonable } from "../utils/IJsonable";
+
 /**
  * Driver RFC (Remote Function Call).
  * 
@@ -17,7 +19,7 @@
  * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Driver<Controller extends object> = Driver.Promisifier<Controller>;
+export type Driver<Controller extends object> = Driver.Promisive<Controller>;
 export namespace Driver
 {
     /* ----------------------------------------------------------------
@@ -34,12 +36,12 @@ export namespace Driver
      * 
      * @typeParam Instance An object type to be promised.
      */
-    export type Promisifier<Instance extends object> = 
+    export type Promisive<Instance> = 
     {
         readonly [P in keyof Instance]: Instance[P] extends Function
-            ? Functor<Instance[P]>
-            : Instance[P] extends object
-                ? Promisifier<Instance[P]>
+            ? Functional<Instance[P]>
+            : value_of<Instance[P]> extends object
+                ? Promisive<Instance[P]>
                 : never
     } & IRemoteObject;
 
@@ -53,14 +55,14 @@ export namespace Driver
      * 
      * @typeParam Method A function type to be promisified.
      */
-    export type Functor<Method extends Function> = 
+    export type Functional<Method extends Function> = 
     (
         Method extends (...args: infer Params) => infer Ret
             ? Ret extends Promise<infer PromiseRet>
-                ? (...args: Params) => Promise<Primitifier<PromiseRet>>
-                : (...args: Params) => Promise<Primitifier<Ret>>
+                ? (...args: Parametric<Params>) => Promise<Primitive<PromiseRet>>
+                : (...args: Parametric<Params>) => Promise<Primitive<Ret>>
             : (...args: any[]) => Promise<any>
-    ) & IRemoteFunction; // protector
+    ) & IRemoteFunction;
 
     /* ----------------------------------------------------------------
         PRIMITIFIERS
@@ -74,31 +76,50 @@ export namespace Driver
      * 
      * @typeParam T A type to be primitive
      */
-    export type Primitifier<Instance> = Instance extends object
+    export type Primitive<Instance> = value_of<Instance> extends object
         ? Instance extends IJsonable<infer Raw>
-            ? Raw extends object
-                ? _ObjectPrimitifier<Raw>
-                : Raw
-            : _ObjectPrimitifier<Instance>
-        : Instance;
+            ? value_of<Raw> extends object
+                ? PrimitiveObject<Raw>
+                : value_of<Raw>
+            : PrimitiveObject<Instance>
+        : value_of<Instance>;
 
     /**
      * @hidden
      */
-    type _ObjectPrimitifier<Instance extends object> =
+    type PrimitiveObject<Instance> =
     {
         [P in keyof Instance]: Instance[P] extends Function
             ? never
-            : Primitifier<Instance[P]>
+            : Primitive<Instance[P]>
+    };
+
+    /**
+     * Convert parameters to be compatible with primitive.
+     * 
+     * @type Arguments List of parameters
+     */
+    type Parametric<Arguments extends any[]> = 
+    {
+        [P in keyof Arguments]: value_of<Arguments[P]> extends object
+            ? ParametricObject<Arguments[P]>
+            : Primitive<Arguments[P]>
     };
 
     /**
      * @hidden
      */
-    interface IJsonable<T>
-    {
-        toJSON(): T;
-    }
+    type ParametricObject<Instance> = value_of<Instance> | Primitive<Instance> | IJsonable<Primitive<Instance>>;
+
+    /**
+     * @hidden
+     */
+    type value_of<Instance> = 
+        Instance extends Boolean ? boolean
+        : Instance extends Number ? number
+        : Instance extends String ? string
+        : Instance extends BigInt ? bigint
+        : Instance;
 
     /* ----------------------------------------------------------------
         PROTECTORS
@@ -106,7 +127,7 @@ export namespace Driver
     /**
      * Restrictions for Remote Object
      */
-    export interface IRemoteObject
+    interface IRemoteObject
     {
         /**
          * Remote Object does not allow access to the `constructor`.
@@ -122,7 +143,7 @@ export namespace Driver
     /**
      * Restrictions for Remote Function
      */
-    export type IRemoteFunction = 
+    type IRemoteFunction = 
     {
         /**
          * Remote Function does not allow it.
