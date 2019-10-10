@@ -17,9 +17,10 @@ import { IJsonable } from "../utils/IJsonable";
  *   - `Driver`: Remote Function Call
  * 
  * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
+ * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Driver<Controller extends object> = Driver.Promisive<Controller>;
+export type Driver<Controller extends object, Parametric extends boolean = false> = Driver.Promisive<Controller, Parametric>;
 export namespace Driver
 {
     /* ----------------------------------------------------------------
@@ -35,14 +36,17 @@ export namespace Driver
      *   - atomic value: be ignored (be `never` type).
      * 
      * @typeParam Instance An object type to be promised.
+     * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      */
-    export type Promisive<Instance> = 
+    export type Promisive<Instance extends object, UseParametric extends boolean = false> = 
     {
         readonly [P in keyof Instance]: Instance[P] extends Function
-            ? Functional<Instance[P]>
+            ? Functional<Instance[P], UseParametric> // function, its return type would be capsuled in the Promise
             : value_of<Instance[P]> extends object
-                ? Promisive<Instance[P]>
-                : never
+                ? Instance[P] extends object
+                   ? Promisive<Instance[P], UseParametric> // object would be promisified
+                   : never // cannot be
+                : never // atomic value
     } & IRemoteObject;
 
     /**
@@ -54,15 +58,22 @@ export namespace Driver
      *   - `Promise<T>`: `Promise<Primitifer<T>>`
      * 
      * @typeParam Method A function type to be promisified.
+     * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      */
-    export type Functional<Method extends Function> = 
+    export type Functional<Method extends Function, UseParametric extends boolean = false> = 
     (
         Method extends (...args: infer Params) => infer Ret
             ? Ret extends Promise<infer PromiseRet>
-                ? (...args: Parametric<Params>) => Promise<Primitive<PromiseRet>>
-                : (...args: Parametric<Params>) => Promise<Primitive<Ret>>
+                ? (...args: FunctionalParams<Params, UseParametric>) => Promise<Primitive<PromiseRet>>
+                : (...args: FunctionalParams<Params, UseParametric>) => Promise<Primitive<Ret>>
             : (...args: any[]) => Promise<any>
     ) & IRemoteFunction;
+
+    /**
+     * @hidden
+     */
+    type FunctionalParams<Params extends any[], UseParametric extends boolean> = 
+        UseParametric extends true ? Parametric<Params> : Params;
 
     /* ----------------------------------------------------------------
         PRIMITIFIERS
@@ -77,17 +88,21 @@ export namespace Driver
      * @typeParam T A type to be primitive
      */
     export type Primitive<Instance> = value_of<Instance> extends object
-        ? Instance extends IJsonable<infer Raw>
-            ? value_of<Raw> extends object
-                ? PrimitiveObject<Raw>
-                : value_of<Raw>
-            : PrimitiveObject<Instance>
+        ? Instance extends object
+            ? Instance extends IJsonable<infer Raw>
+                ? value_of<Raw> extends object
+                    ? Raw extends object
+                        ? PrimitiveObject<Raw> // object would be primitified
+                        : never // cannot be
+                    : value_of<Raw> // atomic value
+                : PrimitiveObject<Instance> // object would be primitified
+            : never // cannot be
         : value_of<Instance>;
 
     /**
      * @hidden
      */
-    type PrimitiveObject<Instance> =
+    type PrimitiveObject<Instance extends object> =
     {
         [P in keyof Instance]: Instance[P] extends Function
             ? never
@@ -98,18 +113,17 @@ export namespace Driver
      * Convert parameters to be compatible with primitive.
      * 
      * @type Arguments List of parameters
+     * @todo Considering whether this type is an over-spec or not.
      */
-    type Parametric<Arguments extends any[]> = 
-    {
-        [P in keyof Arguments]: value_of<Arguments[P]> extends object
-            ? ParametricObject<Arguments[P]>
-            : Primitive<Arguments[P]>
+    export type Parametric<Arguments extends any[]> = 
+    { 
+        [P in keyof Arguments]: ParametricValue<Arguments[P]>; 
     };
 
     /**
      * @hidden
      */
-    type ParametricObject<Instance> = value_of<Instance> | Primitive<Instance> | IJsonable<Primitive<Instance>>;
+    type ParametricValue<Instance> = value_of<Instance> | Primitive<Instance> | IJsonable<Primitive<Instance>>;
 
     /**
      * @hidden

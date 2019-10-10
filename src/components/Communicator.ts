@@ -43,7 +43,7 @@ export abstract class Communicator<Provider>
     /**
      * @hidden
      */
-    private driver_: Driver<object>;
+    private driver_: Driver<object, true|false>;
 
     /**
      * @hidden
@@ -215,11 +215,12 @@ export abstract class Communicator<Provider>
      *   - `Driver`: Remote Function Call
      * 
      * @typeParam Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
+     * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      * @return A Driver for the RFC.
      */
-    public getDriver<Controller extends object>(): Driver<Controller>
+    public getDriver<Controller extends object, UseParametric extends boolean = false>(): Driver<Controller, UseParametric>
     {
-        return this.driver_ as Driver<Controller>;
+        return this.driver_ as Driver<Controller, UseParametric>;
     }
 
     /**
