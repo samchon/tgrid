@@ -145,8 +145,10 @@ Anyone can easily make a network system.
 
 It's difficult to make network system because many of computers are interacting together to accomplish a common task. Therefore, the word 'perfect' is inserted on every development processes; requirements must be analyzed perfectly, use-cases must be identified perfectly, data and network architectures must be designed, perfectly and mutual interaction test must be perfectly.
 
-  - Something to Read
-    - [Blockchain's Network System, Steps to Hell](https://tgrid.dev/en/appendix/blockchain.html#steps-to-hell)
+> #### Something to Read
+> [Blockchain's Network System, Steps to Hell](https://tgrid.dev/en/appendix/blockchain.html#steps-to-hell)
+> 
+> ![Difficulty Level Graph](https://tgrid.dev/assets/images/appendix/difficulty_level_graph.png)
 
 However, with TGrid and [Remote Function Call](#13-remote-function-call), you can come true the true [Grid Computing](#12-grid-computing). Many computers interacting with network communication are replaced by only <u>one virtual computer</u>. Even *Business Logic* code of the virtual computer is same with another *Business Logic* code running on a single physical computer.
 
