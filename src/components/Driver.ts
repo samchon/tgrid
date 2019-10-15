@@ -129,10 +129,22 @@ export namespace Driver
      * @hidden
      */
     type value_of<Instance> = 
-        Instance extends Boolean ? boolean
-        : Instance extends Number ? number
-        : Instance extends String ? string
+        is_value_of<Instance, Boolean> extends true ? boolean
+        : is_value_of<Instance, Number> extends true ? number
+        : is_value_of<Instance, String> extends true ? string
         : Instance;
+
+    /**
+     * @hidden
+     */
+    type is_value_of<Instance, Object extends IValueOf<any>> = 
+        Instance extends Object
+            ? Object extends IValueOf<infer Primitive>
+                ? Instance extends Primitive
+                    ? false
+                    : true // not Primitive, but Object
+                : false // cannot be
+            : false;
 
     /* ----------------------------------------------------------------
         PROTECTORS
@@ -163,4 +175,12 @@ export namespace Driver
          */
         [P in keyof Function | "Symbol"]: never;
     };
+
+    /**
+     * @hidden
+     */
+    interface IValueOf<T>
+    {
+        valueOf(): T;
+    }
 }
