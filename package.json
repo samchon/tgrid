@@ -22,7 +22,7 @@
   "dependencies": {
     "serialize-error": "^4.1.0",
     "tstl": "^2.3.0",
-    "websocket": "^1.0.28"
+    "websocket": "^1.0.30"
   },
   "devDependencies": {
     "@types/browserify": "^12.0.36",
