@@ -132,7 +132,6 @@ export namespace Driver
         Instance extends Boolean ? boolean
         : Instance extends Number ? number
         : Instance extends String ? string
-        : Instance extends BigInt ? bigint
         : Instance;
 
     /* ----------------------------------------------------------------
