@@ -13,7 +13,7 @@ Full name of **TGrid** is <u>TypeScript Grid Computing Framework</u>.
 
 As its name suggests, **TGrid** is a useful framework for implementating [Grid Computing](#12-grid-computing) in the TypeScript. With **TGrid** and its core concept [Remote Funtion Call](#13-remote-function-call), you can make many computers to be <u>a virtual computer</u>.
 
-To know more, refer below links. If you are the first comer to the **TGrid**, I strongly recommend you to read the [Guide Documents](https://tgrid.dev). In article level, I [Basic Concepts](https://tgrid.dev/english/tutorial/concepts.html) and [Learn from Examples](https://tgrid.dev/english/tutorial/examples.html) sections would be good choices.
+To know more, refer below links. If you are the first comer to the **TGrid**, I strongly recommend you to read the [Guide Documents](https://tgrid.dev). In article level, I [Basic Concepts](https://tgrid.dev/en/tutorial/concepts.html) and [Learn from Examples](https://tgrid.dev/en/tutorial/examples.html) sections would be good choices.
 
   - Repositories
     - [GitHub Repository](https://github.com/samchon/tgrid)
@@ -45,7 +45,7 @@ Do you agree with me?
 
 With **TGrid** and *Remote Function Call*, it's possible to handle remote system's objects and functions as if they're mine from the beginning. Do you think what that sentence means? Right, being able to call objects and functions of the remote system, it means that current and remote system are integrated into a <u>single virtual computer</u>.
 
-However, whatever [Grid Computing](#12-grid-computing) and *Remote Function Call* are, you've only heard theoretical stories. Now, it's time to see the real program code. Let's see the demonstration code and feel the *Remote Function Call*. If you want to know more about the below demonstration code, read a section [Learn from Examples](https://tgrid.dev/english/tutorial/examples.html) wrote into the [Guide Documents](https://tgrid.dev).
+However, whatever [Grid Computing](#12-grid-computing) and *Remote Function Call* are, you've only heard theoretical stories. Now, it's time to see the real program code. Let's see the demonstration code and feel the *Remote Function Call*. If you want to know more about the below demonstration code, read a section [Learn from Examples](https://tgrid.dev/en/tutorial/examples.html) wrote into the [Guide Documents](https://tgrid.dev).
 
 #### [`composite-calculator/server.ts`](https://github.com/samchon/tgrid.examples/blob/master/src/projects/composite-calculator/server.ts)
 ```typescript
