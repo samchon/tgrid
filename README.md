@@ -21,8 +21,8 @@ To know more, refer below links. If you are the first comer to the **TGrid**, I 
   - Documents
     - [API Documents](https://tgrid.dev/api)
     - **Guide Documents**
-      - [English](https://tgrid.dev/english)
-      - [한국어](https://tgrid.dev/korean)
+      - [English](https://tgrid.dev/en)
+      - [한국어](https://tgrid.dev/ko)
     - [Release Notes](https://github.com/samchon/tgrid/releases)
 
 
