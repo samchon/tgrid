@@ -4,6 +4,7 @@ import { Driver } from "../../components/Driver";
 import { Calculator } from "../providers/Calculator";
 import { ICalculator } from "../controllers/ICalculator";
 import { Invoke } from "../../components/Invoke";
+import { InvalidArgument } from "tstl/exception/LogicError";
 
 class PseudoCommunicator<Provider> extends Communicator<Provider>
 {
@@ -38,6 +39,8 @@ export async function test_pseudo(): Promise<void>
     //----
     // GET DRIVER
     let driver: Driver<ICalculator> = client.getDriver<ICalculator>();
+    if (driver instanceof Driver !== true)
+        throw new InvalidArgument("Error on Driver type checking");
 
     // DO TEST
     await ICalculator.main(driver);

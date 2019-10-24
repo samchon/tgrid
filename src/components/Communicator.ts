@@ -67,7 +67,7 @@ export abstract class Communicator<Provider>
     {
         // PROVIDER & DRIVER
         this.provider_ = provider;
-        this.driver_ = new Proxy<object>({},
+        this.driver_ = new Proxy<object>(new Driver(),
         {
             get: ({}, name: string) =>
             {

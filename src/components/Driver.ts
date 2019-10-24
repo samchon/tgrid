@@ -21,6 +21,8 @@ import { IJsonable } from "../utils/IJsonable";
  * @author Jeongho Nam <http://samchon.org>
  */
 export type Driver<Controller extends object, Parametric extends boolean = false> = Driver.Promisive<Controller, Parametric>;
+export var Driver = class {};
+
 export namespace Driver
 {
     /* ----------------------------------------------------------------
