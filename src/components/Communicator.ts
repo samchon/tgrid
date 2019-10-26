@@ -314,10 +314,14 @@ export abstract class Communicator<Provider>
                 func = thisArg[name];
 
                 // SECURITY-ERRORS
-                if (name === "toString" && func === Function.toString)
-                    throw new RuntimeError("RFC on Function.toString() is not allowed.");
+                if (name[0] === "_")
+                    throw new RuntimeError(`RFC does not allow access to a member starting with the underscore: Provider.${invoke.listener}()`);
+                else if (name[name.length - 1] === "_")
+                    throw new RuntimeError(`RFC does not allow access to a member ending with the underscore: Provider.${invoke.listener}().`);
+                else if (name === "toString" && func === Function.toString)
+                    throw new RuntimeError(`RFC on Function.toString() is not allowed: Provider.${invoke.listener}().`);
                 else if (name === "constructor" || name === "prototype")
-                    throw new RuntimeError(`RFC does not allow access to ${name}.`);
+                    throw new RuntimeError(`RFC does not allow access to ${name}: Provider.${invoke.listener}().`);
             }
             func = func.bind(thisArg);
 

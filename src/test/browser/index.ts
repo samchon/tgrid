@@ -32,7 +32,7 @@ async function main(): Promise<void>
     let server = new HttpServer();
     server = server.listen
     ({
-        directory: __dirname + "/../bundle",
+        directory: __dirname + "/../../bundle",
         port: 37792
     });
     let browser = await puppeteer.launch({ devtools: true });
@@ -41,7 +41,7 @@ async function main(): Promise<void>
     // TEST PAGES
     //----
     // WEB
-    await import(__dirname + "/browser/web-server.js");
+    await import(__dirname + "/web-server.js");
     await _Paginate(browser, "web.html");
 
     // WORKERS
