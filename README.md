@@ -1,6 +1,6 @@
 # TGrid
 ## Introduction
-![Flag](https://tgrid.dev/assets/images/flag.png)
+![Flag](https://tgrid.com/assets/images/flag.png)
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/samchon/tgrid/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/tgrid.svg)](https://www.npmjs.com/package/tgrid)
@@ -13,23 +13,23 @@ Full name of **TGrid** is <u>TypeScript Grid Computing Framework</u>.
 
 As its name suggests, **TGrid** is a useful framework for implementating [Grid Computing](#12-grid-computing) in the TypeScript. With **TGrid** and its core concept [Remote Funtion Call](#13-remote-function-call), you can make many computers to be <u>a virtual computer</u>.
 
-To know more, refer below links. If you are the first comer to the **TGrid**, I strongly recommend you to read the [Guide Documents](https://tgrid.dev). In article level, I [Basic Concepts](https://tgrid.dev/en/tutorial/concepts.html) and [Learn from Examples](https://tgrid.dev/en/tutorial/examples.html) sections would be good choices.
+To know more, refer below links. If you are the first comer to the **TGrid**, I strongly recommend you to read the [Guide Documents](https://tgrid.com). In article level, I [Basic Concepts](https://tgrid.com/en/tutorial/concepts.html) and [Learn from Examples](https://tgrid.com/en/tutorial/examples.html) sections would be good choices.
 
   - Repositories
     - [GitHub Repository](https://github.com/samchon/tgrid)
     - [NPM Repository](https://www.npmjs.com/package/tgrid)
   - Documents
-    - [API Documents](https://tgrid.dev/api)
+    - [API Documents](https://tgrid.com/api)
     - **Guide Documents**
-      - [English](https://tgrid.dev/en)
-      - [한국어](https://tgrid.dev/ko)
+      - [English](https://tgrid.com/en)
+      - [한국어](https://tgrid.com/ko)
     - [Release Notes](https://github.com/samchon/tgrid/releases)
 
 
 
 
 ### 1.2. Grid Computing
-![Grid Computing](https://tgrid.dev/assets/images/concepts/grid-computing.png)
+![Grid Computing](https://tgrid.com/assets/images/concepts/grid-computing.png)
 
 > Computers be a (virtual) computer
 
@@ -45,7 +45,7 @@ Do you agree with me?
 
 With **TGrid** and *Remote Function Call*, it's possible to handle remote system's objects and functions as if they're mine from the beginning. Do you think what that sentence means? Right, being able to call objects and functions of the remote system, it means that current and remote system are integrated into a <u>single virtual computer</u>.
 
-However, whatever [Grid Computing](#12-grid-computing) and *Remote Function Call* are, you've only heard theoretical stories. Now, it's time to see the real program code. Let's see the demonstration code and feel the *Remote Function Call*. If you want to know more about the below demonstration code, read a section [Learn from Examples](https://tgrid.dev/en/tutorial/examples.html) wrote into the [Guide Documents](https://tgrid.dev).
+However, whatever [Grid Computing](#12-grid-computing) and *Remote Function Call* are, you've only heard theoretical stories. Now, it's time to see the real program code. Let's see the demonstration code and feel the *Remote Function Call*. If you want to know more about the below demonstration code, read a section [Learn from Examples](https://tgrid.com/en/tutorial/examples.html) wrote into the [Guide Documents](https://tgrid.com).
 
 #### [`composite-calculator/server.ts`](https://github.com/samchon/tgrid.examples/blob/master/src/projects/composite-calculator/server.ts)
 ```typescript
@@ -146,9 +146,9 @@ Anyone can easily make a network system.
 It's difficult to make network system because many of computers are interacting together to accomplish a common task. Therefore, the word 'perfect' is inserted on every development processes; requirements must be analyzed perfectly, use-cases must be identified perfectly, data and network architectures must be designed, perfectly and mutual interaction test must be perfectly.
 
 > #### Something to Read
-> [Blockchain's Network System, Steps to Hell](https://tgrid.dev/en/appendix/blockchain.html#steps-to-hell)
+> [Blockchain's Network System, Steps to Hell](https://tgrid.com/en/appendix/blockchain.html#steps-to-hell)
 > 
-> ![Difficulty Level Graph](https://tgrid.dev/assets/images/appendix/difficulty_level_graph.png)
+> ![Difficulty Level Graph](https://tgrid.com/assets/images/appendix/difficulty_level_graph.png)
 
 However, with TGrid and [Remote Function Call](#13-remote-function-call), you can come true the true [Grid Computing](#12-grid-computing). Many computers interacting with network communication are replaced by only <u>one virtual computer</u>. Even *Business Logic* code of the virtual computer is same with another *Business Logic* code running on a single physical computer.
 
@@ -227,16 +227,16 @@ In most case of developing network distributed processing system, there can be a
 
 The most representative of that is the *performance* issue. For an example, there is a task and you estimated that the task can be done by one computer. However, when you actually started the service, the computation was so large that one computer was not enough. Thus, you should distribute the task to multiple computers. On contrary, you prepared multiple computers for a task. However, when you actually started the service, the computation was so small that just one computer is sufficient for the task. Sometimes, assigning a computer is even excessive, so you might need to merge the task into another computer.
 
-![Diagram of Composite Calculator](https://tgrid.dev/assets/images/examples/composite-calculator.png) | ![Diagram of Hierarchical Calculator](https://tgrid.dev/assets/images/examples/hierarchical-calculator.png)
+![Diagram of Composite Calculator](https://tgrid.com/assets/images/examples/composite-calculator.png) | ![Diagram of Hierarchical Calculator](https://tgrid.com/assets/images/examples/hierarchical-calculator.png)
 :-------------------:|:-----------------------:
-[Composite Calculator](https://tgrid.dev/en/tutorial/examples.html#22-remote-object-call) | [Hierarchical Calculator](https://tgrid.dev/en/tutorial/examples.html#23-object-oriented-network)
+[Composite Calculator](https://tgrid.com/en/tutorial/examples.html#22-remote-object-call) | [Hierarchical Calculator](https://tgrid.com/en/tutorial/examples.html#23-object-oriented-network)
 
 I'll explain this *Network Refactoring*, caused by performance issue, through an example case that is very simple and clear. In a distributed processing system, there was a computer that providing a calculator. However, when this system was actually started, amount of the computations was so enormous that the single computer couldn't afford the computations. Thus, decided to separate the computer to three computers.
 
 
-  - [`scientific`](https://tgrid.dev/en/tutorial/examples.html#hierarchical-calculatorscientificts): scientific calculator server
-  - [`statistics`](https://tgrid.dev/en/tutorial/examples.html#hierarchical-calculatorstatisticsts): statistics calculator server
-  - [`calculator`](https://tgrid.dev/en/tutorial/examples.html#hierarchical-calculatorcalculatorts): mainframe server
+  - [`scientific`](https://tgrid.com/en/tutorial/examples.html#hierarchical-calculatorscientificts): scientific calculator server
+  - [`statistics`](https://tgrid.com/en/tutorial/examples.html#hierarchical-calculatorstatisticsts): statistics calculator server
+  - [`calculator`](https://tgrid.com/en/tutorial/examples.html#hierarchical-calculatorcalculatorts): mainframe server
     - four arithmetic operations are computed by itself
     - scientific and statistics operations are shifted to another computers
     - and intermediates the computation results to client
@@ -253,8 +253,8 @@ However, if you use the **TGrid** and [Remote Function Call](#13-remote-function
 
 I also provide you the best example for this *performance* issue causing the *Network Refactoring*. The first demonstration code is an implementation of a single calculator server and the second demonstration code is an implementation of a system distributing operations to three servers. As you can see, although principle structure of network system has been changed, you don't need to worry about it if you're using the **TGrid** and [Remote Function Call](#13-remote-function-call).
 
-  - [Demonstration - Remote Object Call](https://tgrid.dev/en/tutorial/examples.html#22-remote-object-call)
-  - [Demonstration - Object Oriented Network](https://tgrid.dev/en/tutorial/examples.html#23-object-oriented-network)
+  - [Demonstration - Remote Object Call](https://tgrid.com/en/tutorial/examples.html#22-remote-object-call)
+  - [Demonstration - Object Oriented Network](https://tgrid.com/en/tutorial/examples.html#23-object-oriented-network)
 
 
 
@@ -262,22 +262,22 @@ I also provide you the best example for this *performance* issue causing the *Ne
 
 ## 3. Opportunities
 ### 3.1. Blockchain
-> Detailed Content: [**Appendix** > **Blockchain**](https://tgrid.dev/en/appendix/blockchain.html)
+> Detailed Content: [**Appendix** > **Blockchain**](https://tgrid.com/en/appendix/blockchain.html)
 
 With **TGrid**, you can develop *Blockchain* easily.
 
 It's a famous story that difficulty of developing blockchain is very high. Not only because of the high wages of the blockchain developers, but also from a technical point of view, blockchain is actually very difficult to implement. But, if you ask me what is such difficult, I will answer that not Business Logic* but *Network System*.
 
-The [Network System](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) used by blockchain is a type of great distributed processing system, conostructed by millions of computers interacting with network communication. The great distributed processing systems like the blockchain always present us the tremendous difficulties. The word 'perfect' is inserted on every development processes; requirements must be analyzed perfectly, use-cases must be identified perfectly, data and network architectures must be designed, perfectly and mutual interaction test must be perfectly.
+The [Network System](https://tgrid.com/en/appendix/blockchain.html#2-network-system) used by blockchain is a type of great distributed processing system, conostructed by millions of computers interacting with network communication. The great distributed processing systems like the blockchain always present us the tremendous difficulties. The word 'perfect' is inserted on every development processes; requirements must be analyzed perfectly, use-cases must be identified perfectly, data and network architectures must be designed, perfectly and mutual interaction test must be perfectly.
 
-On contrary, [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#3-business-logic) of the blockchain is not such difficult. Core elements of the blockchain are, as the name suggest, the first is 'Block' and the second is 'Chain'. The 'Block' is about defining and storing data and the 'Chain' is about policy that how to reach to an agreement when writing data to the 'Block'.
+On contrary, [Business Logic](https://tgrid.com/en/appendix/blockchain.html#3-business-logic) of the blockchain is not such difficult. Core elements of the blockchain are, as the name suggest, the first is 'Block' and the second is 'Chain'. The 'Block' is about defining and storing data and the 'Chain' is about policy that how to reach to an agreement when writing data to the 'Block'.
 
  Component | Conception     | Description
 -----------|----------------|---------------------------------------
  Block     | Data Structure | Way to defining and storing data
  Chain     | Requirements   | A policy for reaching to an agreement
 
-Let's assume that you are developing the 'Block' and 'Chain' as a program running only on a single computer. In this case, you just need to design the data structure and implement code storing the data on disk. Also, you would analyze the requirements (policy) and implement them. Those skills are just the essentials for programmers. In other word, [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#3-business-logic) of blockchain is something that any skilled programmers can implement.
+Let's assume that you are developing the 'Block' and 'Chain' as a program running only on a single computer. In this case, you just need to design the data structure and implement code storing the data on disk. Also, you would analyze the requirements (policy) and implement them. Those skills are just the essentials for programmers. In other word, [Business Logic](https://tgrid.com/en/appendix/blockchain.html#3-business-logic) of blockchain is something that any skilled programmers can implement.
 
   - To develop the *Block* and *Chain*:
     - Ability to design Data Structure
@@ -285,12 +285,12 @@ Let's assume that you are developing the 'Block' and 'Chain' as a program runnin
     - Ability to analyze policy (requirements)
     - Ability to implement them
 
-Do you remember? With **TGrid** and [Remote Function Call](#13-remote-function-call), you can come true the true [Grid Computing](#12-grid-computing). Many computers interacting with network communication are replaced by only <u>one virtual computer</u>. Even [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) code of the virtual computer is same with another [Business Logic](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) code running on a single physical computer.
+Do you remember? With **TGrid** and [Remote Function Call](#13-remote-function-call), you can come true the true [Grid Computing](#12-grid-computing). Many computers interacting with network communication are replaced by only <u>one virtual computer</u>. Even [Business Logic](https://tgrid.com/en/appendix/blockchain.html#2-network-system) code of the virtual computer is same with another [Business Logic](https://tgrid.com/en/appendix/blockchain.html#2-network-system) code running on a single physical computer.
 
-Thus, if you adapt the **TGrid** and [Remote Function Call](#13-remote-function-call), difficulty of the blockchain development would be dropped to the level of [Business Logic](https://tgrid.dev/en/appendix/blockchain.html rather than [Network System](https://tgrid.dev/en/appendix/blockchain.html#2-network-system). Forget complex [Network System](https://tgrid.dev/en/appendix/blockchain.html#2-network-system) and just focus on the essence of what you want to develop; the [Business Logic](https://tgrid.dev/en/appendix/blockchain.html.
+Thus, if you adapt the **TGrid** and [Remote Function Call](#13-remote-function-call), difficulty of the blockchain development would be dropped to the level of [Business Logic](https://tgrid.com/en/appendix/blockchain.html rather than [Network System](https://tgrid.com/en/appendix/blockchain.html#2-network-system). Forget complex [Network System](https://tgrid.com/en/appendix/blockchain.html#2-network-system) and just focus on the essence of what you want to develop; the [Business Logic](https://tgrid.com/en/appendix/blockchain.html.
 
 ### 3.2. Public Grid
-> Related Project: [**Tutorial** > **Projects** > **Grid Market**](https://tgrid.dev/en/tutorial/projects/market.html)
+> Related Project: [**Tutorial** > **Projects** > **Grid Market**](https://tgrid.com/en/tutorial/projects/market.html)
 
 With **TGrid**, you can procure resources for [Grid Computing](#12-grid-computing) from unspecified crowds, very easily and inexpensively.
 
@@ -308,11 +308,11 @@ The program that each *Supplier* should run is provided by the *Consumer* as Jav
 
 > Base language of the **TGrid** is *TypeScript* and compilation result of the TypeScript is the *JavaScript* file. As *JavaScript* is a type of script language, it can be executed dinamiccaly. Therefore, the *Supplier* can execute the program by script code delivered by the *Consumer*.
 
-![Grid Market](https://tgrid.dev/assets/images/projects/market/actors.png)
+![Grid Market](https://tgrid.com/assets/images/projects/market/actors.png)
 
-[Grid Market](https://tgrid.dev/en/tutorial/projects/market.html) is one of the most typical example case for the *Public Grid*, a demo project for tutorial learning. In this demo project, *Consumer* also procures resources from the *Suppliers* for composing the [Grid Computing](#12-grid-computing) system. *Supplier* also provides its resources just by connecting to the special URL by Internet Browser, too. Of course, in the [Grid Market](https://tgrid.dev/en/tutorial/projects/market.html), the program that *Supplier* would run still comes from the *Consumer*.
+[Grid Market](https://tgrid.com/en/tutorial/projects/market.html) is one of the most typical example case for the *Public Grid*, a demo project for tutorial learning. In this demo project, *Consumer* also procures resources from the *Suppliers* for composing the [Grid Computing](#12-grid-computing) system. *Supplier* also provides its resources just by connecting to the special URL by Internet Browser, too. Of course, in the [Grid Market](https://tgrid.com/en/tutorial/projects/market.html), the program that *Supplier* would run still comes from the *Consumer*.
 
-However, there's a special thing about the [Grid Market](https://tgrid.dev/en/tutorial/projects/market.html), it is that there is a *cost* for the *Consumer* to procure the *Suppliers*' resources. Also, intermediary *Market* exists and it charges fee for mediation between the *Consumer* and *Supplier*.
+However, there's a special thing about the [Grid Market](https://tgrid.com/en/tutorial/projects/market.html), it is that there is a *cost* for the *Consumer* to procure the *Suppliers*' resources. Also, intermediary *Market* exists and it charges fee for mediation between the *Consumer* and *Supplier*.
 
   - `Market`: Intermediary market for the *Suppliers* and *Consumers*.
   - `Consumer`: Purchase resources from the *Suppliers.
