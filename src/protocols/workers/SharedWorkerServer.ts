@@ -117,7 +117,7 @@ export class SharedWorkerServer<Provider extends object = {}>
                 return;
 
             // ARGUMENTS
-            let args: string[] = evt.data;
+            let args: string[] = JSON.parse(evt.data);
 
             // CREATE ACCEPTOR
             acceptor = new AcceptorFactory<Provider>(port, args, () =>
@@ -129,7 +129,7 @@ export class SharedWorkerServer<Provider extends object = {}>
             // SHIFT TO THE CALLBACK
             handler(acceptor);
         };
-        port.postMessage("READY");
+        port.postMessage(SharedWorkerServer.State.OPENING);
     }
 
     /* ----------------------------------------------------------------

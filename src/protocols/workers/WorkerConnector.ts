@@ -197,7 +197,7 @@ export class WorkerConnector<Provider extends object = {}>
 
         // REQUEST CLOSE TO SERVER
         this.state_ = WorkerConnector.State.CLOSING;
-        this.worker_!.postMessage("CLOSE");
+        this.worker_!.postMessage(WorkerConnector.State.CLOSING);
 
         // LAZY RETURN
         await ret;
@@ -238,12 +238,12 @@ export class WorkerConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === "READY")
+        if (evt.data === WorkerConnector.State.OPEN)
         {
             this.state_ = WorkerConnector.State.OPEN;
             this.connector_!();
         }
-        else if (evt.data === "CLOSE")
+        else if (evt.data === WorkerConnector.State.CLOSING)
             this._Handle_close();
         else
             this.replyData(JSON.parse(evt.data));

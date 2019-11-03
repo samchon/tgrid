@@ -38,7 +38,7 @@ export async function test_pseudo(): Promise<void>
     // INTERACTS
     //----
     // GET DRIVER
-    let driver: Driver<ICalculator> = client.getDriver<ICalculator>();
+    let driver: Driver<ICalculator> = client.getDriver();
     if (driver instanceof Driver !== true)
         throw new InvalidArgument("Error on Driver type checking");
 

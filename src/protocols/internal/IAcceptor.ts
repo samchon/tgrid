@@ -24,10 +24,10 @@ export namespace Acceptor
 {
     export enum State
     {
-        NONE = -1,
+        REJECTING = -2,
+        NONE,
         ACCEPTING,
         OPEN,
-        REJECTING,
         CLOSING,
         CLOSED
     }

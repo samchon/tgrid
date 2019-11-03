@@ -92,13 +92,13 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 
         // CLOSE CONNECTION
         this.state_ = SharedWorkerAcceptor.State.CLOSING;
-        await this._Close("CLOSE");
+        await this._Close();
     }
 
     /**
      * @hidden
      */
-    private async _Close(message: "CLOSE" | IReject): Promise<void>
+    private async _Close(reason?: IReject): Promise<void>
     {
         // DESTRUCTOR
         this.eraser_();
@@ -107,7 +107,9 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
         // DO CLOSE
         setTimeout(() =>
         {
-            this.port_.postMessage(message);
+            this.port_.postMessage(reason === undefined
+                ? SharedWorkerAcceptor.State.CLOSING
+                : JSON.stringify(reason));
             this.port_.close();
         });
 
@@ -159,7 +161,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
             this.port_.start();
 
             // INFORM ACCEPTANCE
-            this.port_.postMessage("ACCEPT");
+            this.port_.postMessage(SharedWorkerAcceptor.State.OPEN);
         }
         this.state_ = SharedWorkerAcceptor.State.OPEN;
     }
@@ -208,7 +210,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === "CLOSE")
+        if (evt.data === SharedWorkerAcceptor.State.CLOSING)
             this.close();
         else
             this.replyData(JSON.parse(evt.data));

@@ -85,7 +85,7 @@ export class WorkerServer<Provider extends object = {}>
         {
             this.provider_ = provider;
             g.onmessage = this._Handle_message.bind(this);
-            g.postMessage("READY");
+            g.postMessage(WorkerServer.State.OPEN);
         }
         this.state_ = WorkerServer.State.OPEN;
     }
@@ -111,7 +111,7 @@ export class WorkerServer<Provider extends object = {}>
             // DO CLOSE
             setTimeout(() =>
             {
-                g.postMessage("CLOSE");
+                g.postMessage(WorkerServer.State.CLOSING);
                 g.close();
             });
         }
@@ -187,7 +187,7 @@ export class WorkerServer<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === "CLOSE")
+        if (evt.data === WorkerServer.State.CLOSING)
             this.close();
         else
             this.replyData(JSON.parse(evt.data));

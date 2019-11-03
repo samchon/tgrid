@@ -1,8 +1,6 @@
 //================================================================ 
 /** @module tgrid.components */
 //================================================================
-import { IJsonable } from "../utils/IJsonable";
-
 /**
  * Driver RFC (Remote Function Call).
  * 
@@ -184,5 +182,13 @@ export declare namespace Driver
     interface IValueOf<T>
     {
         valueOf(): T;
+    }
+
+    /**
+     * @hidden
+     */
+    interface IJsonable<T>
+    {
+        toJSON(): T;
     }
 }

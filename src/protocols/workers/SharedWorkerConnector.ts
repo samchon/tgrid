@@ -157,7 +157,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
 
         // REQUEST CLOSE TO SERVER
         this.state_ = SharedWorkerConnector.State.CLOSING;
-        this.port_!.postMessage("CLOSE");
+        this.port_!.postMessage(SharedWorkerConnector.State.CLOSING);
 
         // LAZY RETURN
         await ret;
@@ -199,17 +199,15 @@ export class SharedWorkerConnector<Provider extends object = {}>
     private _Handle_message(evt: MessageEvent): void
     {
         // PROCESSES
-        if (evt.data === "READY")
-            this.port_!.postMessage(this.args_!);
-        else if (evt.data === "ACCEPT")
+        if (evt.data === SharedWorkerConnector.State.CONNECTING)
+            this.port_!.postMessage(JSON.stringify(this.args_!));
+        else if (evt.data === SharedWorkerConnector.State.OPEN)
         {
             this.state_ = SharedWorkerConnector.State.OPEN;
             this.connector_!.first();
         }
-        else if (evt.data === "CLOSE")
+        else if (evt.data === SharedWorkerConnector.State.CLOSING)
             this._Handle_close();
-        else if (evt.data === "REJECT")
-            this._Handle_reject("Rejected by server.");
 
         // RFC OR REJECT
         else
