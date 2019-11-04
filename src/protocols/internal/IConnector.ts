@@ -14,7 +14,7 @@ export interface IConnector<State extends Connector.State>
  */
 export namespace Connector
 {
-    export enum State
+    export const enum State
     {
         NONE = -1,
         CONNECTING,

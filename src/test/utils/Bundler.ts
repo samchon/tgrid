@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as browserify from "browserify";
+import fs = require("fs");
+import browserify = require("browserify");
 
 export namespace Bundler
 {

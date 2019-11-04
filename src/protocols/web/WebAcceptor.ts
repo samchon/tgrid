@@ -1,7 +1,7 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import * as ws from "websocket";
+import ws = require("websocket");
 
 import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";

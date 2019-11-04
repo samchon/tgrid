@@ -5,7 +5,9 @@ import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
+import { ServerState } from "../internal/ServerState";
 import { URLVariables } from "../../utils/URLVariables";
+
 import { DomainError, RuntimeError } from "tstl/exception";
 import { is_node } from "tstl/utility/node";
 
@@ -196,14 +198,7 @@ export class WorkerServer<Provider extends object = {}>
 
 export namespace WorkerServer
 {
-    export const enum State
-    {
-        NONE = -1,
-        OPENING = 0,
-        OPEN = 1,
-        CLOSING = 2,
-        CLOSED = 3
-    }
+    export import State = ServerState;
 }
 
 //----

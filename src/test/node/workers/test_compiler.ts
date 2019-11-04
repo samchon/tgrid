@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as cp from "child_process";
+import fs = require("fs");
+import cp = require("child_process");
 
 import { WorkerConnector } from "../../../protocols/workers/WorkerConnector";
 import { ICalculator } from "../../controllers/ICalculator";

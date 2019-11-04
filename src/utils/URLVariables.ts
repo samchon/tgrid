@@ -2,7 +2,7 @@
 /** @module tgrid.utils */
 //================================================================
 import { HashMap } from "tstl/container/HashMap";
-import { not_equal_to } from "tstl/functional";
+import { not_equal_to } from "tstl/functional/comparators";
 
 /**
  * URLVariables class is for representing variables of HTTP.

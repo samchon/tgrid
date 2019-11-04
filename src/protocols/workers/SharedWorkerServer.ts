@@ -3,6 +3,7 @@
 //================================================================
 import { IState } from "../internal/IState";
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
+import { ServerState } from "../internal/ServerState";
 
 import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
@@ -146,14 +147,7 @@ export class SharedWorkerServer<Provider extends object = {}>
 
 export namespace SharedWorkerServer
 {
-    export const enum State
-    {
-        NONE = -1,
-        OPENING = 0,
-        OPEN = 1,
-        CLOSING = 2,
-        CLOSED = 3
-    }
+    export import State = ServerState;
 }
 
 /**

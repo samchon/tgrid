@@ -22,7 +22,7 @@ export interface IAcceptor<State extends Acceptor.State, Provider extends object
  */
 export namespace Acceptor
 {
-    export enum State
+    export const enum State
     {
         REJECTING = -2,
         NONE,

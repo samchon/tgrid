@@ -1,12 +1,13 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import * as ws from "websocket";
-import * as http from "http";
-import * as https from "https";
+import ws = require("websocket");
+import http = require("http");
+import https = require("https");
 
 import { IState } from "../internal/IState";
 import { WebAcceptor } from "./WebAcceptor";
+import { ServerState } from "../internal/ServerState";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 /**
@@ -206,14 +207,7 @@ export class WebServer<Provider extends object = {}>
 
 export namespace WebServer
 {
-    export enum State
-    {
-        NONE = -1,
-        OPENING = 0,
-        OPEN = 1,
-        CLOSING = 2,
-        CLOSED = 3
-    }
+    export import State = ServerState;
 }
 
 const KB = 1024 * 1024;

@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import fs = require("fs");
 import { StringUtil } from "../utils/StringUtil";
 
 interface IModule
