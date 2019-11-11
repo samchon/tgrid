@@ -5,7 +5,7 @@ import ws = require("websocket");
 
 import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
-import { IAcceptor, Acceptor } from "../internal/IAcceptor";
+import { IAcceptor } from "../internal/IAcceptor";
 
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
@@ -214,7 +214,7 @@ export class WebAcceptor<Provider extends object = {}>
      */
     protected inspectReady(): Error | null
     {
-        return Acceptor.inspect(this.state_);
+        return IAcceptor.inspect(this.state_);
     }
 
     /**
@@ -244,5 +244,5 @@ export class WebAcceptor<Provider extends object = {}>
 
 export namespace WebAcceptor
 {
-    export import State = Acceptor.State;
+    export import State = IAcceptor.State;
 }

@@ -4,7 +4,7 @@
 import { IState } from "./IState";
 import { DomainError, RuntimeError } from "tstl/exception";
 
-export interface IAcceptor<State extends Acceptor.State, Provider extends object>
+export interface IAcceptor<State extends IAcceptor.State, Provider extends object>
     extends IState<State>
 {
     /**
@@ -17,10 +17,7 @@ export interface IAcceptor<State extends Acceptor.State, Provider extends object
     accept(provider: Provider | null): Promise<void>;
 }
 
-/**
- * @hidden
- */
-export namespace Acceptor
+export namespace IAcceptor
 {
     export const enum State
     {
@@ -31,7 +28,7 @@ export namespace Acceptor
         CLOSING,
         CLOSED
     }
-
+    
     export function inspect(state: State): Error | null
     {
         // NO ERROR

@@ -3,7 +3,7 @@
 //================================================================
 import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IConnector, Connector } from "../internal/IConnector";
+import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
 
@@ -230,7 +230,7 @@ export class WorkerConnector<Provider extends object = {}>
      */
     protected inspectReady(): Error | null
     {
-        return Connector.inspect(this.state_);
+        return IConnector.inspect(this.state_);
     }
 
     /**
@@ -262,7 +262,7 @@ export class WorkerConnector<Provider extends object = {}>
 
 export namespace WorkerConnector
 {
-    export import State = Connector.State;
+    export import State = IConnector.State;
 }
 
 //----

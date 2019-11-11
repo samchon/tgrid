@@ -3,7 +3,7 @@
 //================================================================
 import { Communicator } from "../../components/Communicator";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IAcceptor, Acceptor } from "../internal/IAcceptor";
+import { IAcceptor } from "../internal/IAcceptor";
 
 import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
@@ -202,7 +202,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
      */
     protected inspectReady(): Error | null
     {
-        return Acceptor.inspect(this.state_);
+        return IAcceptor.inspect(this.state_);
     }
 
     /**
@@ -219,5 +219,5 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
 
 export namespace SharedWorkerAcceptor
 {
-    export import State = Acceptor.State;
+    export import State = IAcceptor.State;
 }

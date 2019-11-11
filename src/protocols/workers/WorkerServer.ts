@@ -2,10 +2,10 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { Communicator } from "../../components/Communicator";
+import { IServer } from "../internal/IServer";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
-import { ServerState } from "../internal/ServerState";
 import { URLVariables } from "../../utils/URLVariables";
 
 import { DomainError, RuntimeError } from "tstl/exception";
@@ -33,7 +33,8 @@ import { is_node } from "tstl/utility/node";
  */
 export class WorkerServer<Provider extends object = {}>
     extends Communicator<Provider | null | undefined>
-    implements IWorkerSystem
+    implements IWorkerSystem, 
+        IServer<WorkerServer.State>
 {
     /**
      * @hidden
@@ -198,7 +199,7 @@ export class WorkerServer<Provider extends object = {}>
 
 export namespace WorkerServer
 {
-    export import State = ServerState;
+    export import State = IServer.State;
 }
 
 //----

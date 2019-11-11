@@ -3,7 +3,7 @@
 //================================================================
 import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
-import { IConnector, Connector } from "../internal/IConnector";
+import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
@@ -167,7 +167,7 @@ export class WebConnector<Provider extends object = {}>
      */
     protected inspectReady(): Error | null
     {
-        return Connector.inspect(this.state);
+        return IConnector.inspect(this.state);
     }
 
     /**
@@ -202,7 +202,7 @@ export class WebConnector<Provider extends object = {}>
 
 export namespace WebConnector
 {
-    export import State = Connector.State;
+    export import State = IConnector.State;
 }
 
 //----

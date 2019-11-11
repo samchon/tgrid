@@ -18,7 +18,10 @@
             "es2015"
         ]
     },
-    "exclude": ["**/*.d.ts"],
+    "exclude": [
+        "**/*.d.ts",
+        "node_modules/typedoc-plugin-external-module-name"
+    ],
     "include": [
         "node_modules",
         "src"

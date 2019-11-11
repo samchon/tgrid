@@ -4,7 +4,7 @@
 import { IState } from "./IState";
 import { DomainError, RuntimeError } from "tstl/exception";
 
-export interface IConnector<State extends Connector.State>
+export interface IConnector<State extends IConnector.State>
     extends IState<State>
 {
 }
@@ -12,7 +12,7 @@ export interface IConnector<State extends Connector.State>
 /**
  * @hidden
  */
-export namespace Connector
+export namespace IConnector
 {
     export const enum State
     {

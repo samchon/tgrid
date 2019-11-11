@@ -5,9 +5,8 @@ import ws = require("websocket");
 import http = require("http");
 import https = require("https");
 
-import { IState } from "../internal/IState";
+import { IServer } from "../internal/IServer";
 import { WebAcceptor } from "./WebAcceptor";
-import { ServerState } from "../internal/ServerState";
 import { DomainError, RuntimeError } from "tstl/exception";
 
 /**
@@ -25,7 +24,7 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class WebServer<Provider extends object = {}>
-    implements IState<WebServer.State>
+    implements IServer<WebServer.State>
 {
     /**
      * @hidden
@@ -207,8 +206,15 @@ export class WebServer<Provider extends object = {}>
 
 export namespace WebServer
 {
-    export import State = ServerState;
+    export import State = IServer.State;
 }
 
+/**
+ * @hidden
+ */
 const KB = 1024 * 1024;
+
+/**
+ * @hidden
+ */
 const MB = KB * 1024;

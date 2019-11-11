@@ -1,9 +1,8 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import { IState } from "../internal/IState";
+import { IServer } from "../internal/IServer";
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
-import { ServerState } from "../internal/ServerState";
 
 import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
@@ -30,7 +29,7 @@ import { DomainError } from "tstl/exception";
  * @author Jeongho Nam <http://samchon.org>
  */
 export class SharedWorkerServer<Provider extends object = {}>
-    implements IState<SharedWorkerServer.State>
+    implements IServer<SharedWorkerServer.State>
 {
     /**
      * @hidden
@@ -147,7 +146,7 @@ export class SharedWorkerServer<Provider extends object = {}>
 
 export namespace SharedWorkerServer
 {
-    export import State = ServerState;
+    export import State = IServer.State;
 }
 
 /**

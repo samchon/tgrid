@@ -10,14 +10,15 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "compile": "tsc",
-    "bundle": "node build/bundle",
+    "api": "typedoc src --plugin typedoc-plugin-external-module-name --exclude \"src/test/**\" --out ",
     "build": "npm run compile && npm run bundle && npm run test",
+    "bundle": "node build/bundle",
+    "compile": "tsc",
     "clean": "node build/clean",
+    "dev": "tsc --watch",
     "test": "npm run test-node && npm run test-browser",
-    "test-node": "node test/node",
     "test-browser": "node test/browser",
-    "api": "node build/api"
+    "test-node": "node test/node"
   },
   "dependencies": {
     "serialize-error": "^4.1.0",
@@ -34,6 +35,9 @@
     "local-web-server": "^2.6.0",
     "mv": "^2.1.1",
     "puppeteer": "^1.20.0",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-external-module-name": "^2.0.0",
+    "typescript": "^3.7.2",
     "whatwg-fetch": "^3.0.0"
   },
   "homepage": "https://github.com/samchon/tgrid#readme",
