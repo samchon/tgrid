@@ -16,7 +16,7 @@ window.onload = async () =>
         if (driver instanceof Driver === false)
             throw new InvalidArgument("Error on Driver type checking");
 
-        await ICalculator.main(driver, true);
+        await ICalculator.main(driver);
         await connector.close();
     }
     complete();

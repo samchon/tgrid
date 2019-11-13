@@ -21,7 +21,7 @@ window.onload = async () =>
     {
         await worker.compile(await get_source());
 
-        await ICalculator.main(worker.getDriver<ICalculator>(), true);
+        await ICalculator.main(worker.getDriver<ICalculator>());
         await worker.close();
     }
     complete();

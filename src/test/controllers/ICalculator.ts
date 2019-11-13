@@ -32,36 +32,33 @@ export interface IStatistics
 
 export namespace ICalculator
 {
-    export async function main(driver: Driver<ICalculator>, talk: boolean = false): Promise<void>
+    export async function main(driver: Driver<ICalculator>): Promise<void>
     {
         // VALIDATOR
         let validator: Calculator = new Calculator();
 
         // CALL FUNCTIONS IN SERVER FROM CLIENT
         for (let i: number = 0; i < 100; ++i)
-            await validate(driver, validator, talk);
+            await validate(driver, validator);
 
         // EXCEPTION THROWN BY THE SERVER
         if (await get_exception(driver) === null)
             throw new DomainError("Throwing exception doesn't work.");
     }
 
-    async function validate(driver: Driver<ICalculator>, validator: Calculator, talk: boolean): Promise<void>
+    async function validate(driver: Driver<ICalculator>, validator: Calculator): Promise<void>
     {
         if (driver === <any>validator)
             throw new InvalidArgument("Mistaken arguments.");
 
         // SPECIFY METHODS
-        let method: string = METHODS[randint(0, METHODS.length - 1)];
+        let method: IMethod = METHODS[randint(0, METHODS.length - 1)];
         let x: number = randint(2, 10);
         let y: number = randint(2, 10);
 
         // CALL FUNCTION & GET ANSWER
-        let ret: number = await eval(`driver.${method}`)(x, y);
-        let answer: number = eval(`validator.${method}(x, y)`);
-
-        if (talk === true)
-            console.log(method, x, y, ret, answer);
+        let ret: number = await method(driver, x, y);
+        let answer: number = method(validator, x, y) as number;
         
         // VALIDATE
         if (ret !== answer)
@@ -81,10 +78,21 @@ export namespace ICalculator
         return null;
     }
 
-    const METHODS: string[] = [
-        "plus", "minus", "multiplies", "divides",
-        "scientific.pow", "scientific.log", "scientific.sqrt",
-        "statistics.mean", "statistics.stdev"
+    const METHODS: IMethod[] = [
+        (calc, x, y) => calc.plus(x, y),
+        (calc, x, y) => calc.minus(x, y),
+        (calc, x, y) => calc.multiplies(x, y),
+        (calc, x, y) => calc.divides(x, y),
+        (calc, x, y) => calc.scientific.pow(x, y),
+        (calc, x, y) => calc.scientific.log(x, y),
+        (calc, x) => calc.scientific.sqrt(x),
+        (calc, x, y) => calc.statistics.mean(x, y),
+        (calc, x, y) => calc.statistics.stdev(x, y)
     ];
+
+    interface IMethod
+    {
+        (calculator: Calculator | Driver<ICalculator>, x: number, y: number): number | Promise<number>;
+    }
 }
 

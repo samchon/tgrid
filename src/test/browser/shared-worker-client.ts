@@ -11,7 +11,7 @@ window.onload = async () =>
     {
         await worker.connect("shared-worker-server.js", "first", "second", "third");
 
-        await ICalculator.main(worker.getDriver<ICalculator>(), true);
+        await ICalculator.main(worker.getDriver<ICalculator>());
         await worker.close();
     }
     complete();

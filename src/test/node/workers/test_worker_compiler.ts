@@ -24,7 +24,7 @@ export async function test_worker_compile(): Promise<void>
     });
 }
 
-async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>, talk: boolean = false): Promise<void>
+async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>): Promise<void>
 {
     let worker = new WorkerConnector();
 
@@ -32,7 +32,7 @@ async function _Test_worker(connect: (obj: WorkerConnector)=>Promise<void>, talk
     for (let i: number = 0; i < 5; ++i)
     {
         await connect(worker);
-        await ICalculator.main(worker.getDriver<ICalculator>(), talk)
+        await ICalculator.main(worker.getDriver<ICalculator>());
         await worker.close();
     }
 }

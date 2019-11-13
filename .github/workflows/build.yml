@@ -13,10 +13,7 @@ jobs:
       - run: npm run compile
       - run: npm run test-node
   Browser:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest]
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
