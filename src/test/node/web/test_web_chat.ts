@@ -6,7 +6,7 @@ import { IChatPrinter } from "../../controllers/IChatPrinter";
 import { IChatService } from "../../controllers/IChatService";
 import { ChatService } from "../../providers/ChatService";
 
-import { sleep_for } from "tstl/thread";
+import { sleep_for } from "tstl/thread/global";
 
 const PORT = 10101;
 

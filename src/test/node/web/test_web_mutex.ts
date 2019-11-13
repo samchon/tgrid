@@ -50,7 +50,7 @@ async function _Test_client(): Promise<void>
     await connector.close();
 }
 
-export async function test_mutex(): Promise<void>
+export async function test_web_mutex(): Promise<void>
 {
     //----
     // PREPARES

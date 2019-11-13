@@ -2,7 +2,7 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  Linux:
+  NodeJS:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -12,8 +12,11 @@ jobs:
       - run: npm install
       - run: npm run compile
       - run: npm run test-node
-  Windows:
-    runs-on: windows-latest
+  Browser:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
@@ -22,4 +25,4 @@ jobs:
       - run: npm install
       - run: npm run compile
       - run: npm run bundle
-      - run: npm run test
+      - run: npm run test-browser
