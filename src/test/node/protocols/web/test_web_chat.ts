@@ -1,10 +1,10 @@
-import { WebServer, WebConnector } from "../../../protocols/web";
-import { Driver } from "../../../components";
+import { WebServer, WebConnector } from "../../../../protocols/web";
+import { Driver } from "../../../../components/Driver";
 
-import { IScript } from "../../controllers/IScript";
-import { IChatPrinter } from "../../controllers/IChatPrinter";
-import { IChatService } from "../../controllers/IChatService";
-import { ChatService } from "../../providers/ChatService";
+import { IScript } from "../../../controllers/IScript";
+import { IChatPrinter } from "../../../controllers/IChatPrinter";
+import { IChatService } from "../../../controllers/IChatService";
+import { ChatService } from "../../../providers/ChatService";
 
 import { sleep_for } from "tstl/thread/global";
 

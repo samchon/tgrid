@@ -1,5 +1,5 @@
-import { WebServer } from "../../../protocols/web/WebServer";
-import { WebConnector } from "../../../protocols/web/WebConnector";
+import { WebServer } from "../../../../protocols/web/WebServer";
+import { WebConnector } from "../../../../protocols/web/WebConnector";
 
 const PORT = 10101;
 

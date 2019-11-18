@@ -1,6 +1,8 @@
 //================================================================ 
 /** @module tgrid.utils */
 //================================================================
+import { Dictionary } from "./internal/Dictionary";
+
 import { HashMap } from "tstl/container/HashMap";
 import { not_equal_to } from "tstl/functional/comparators";
 
@@ -15,7 +17,7 @@ import { not_equal_to } from "tstl/functional/comparators";
  * @reference http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/URLVariables.html
  * @author Migrated by Jeongho Nam <http://samchon.org>
  */
-export class URLVariables extends HashMap<string, string>
+export class URLVariables extends Dictionary<string>
 {
     /**
      * Default Constructor.
@@ -92,6 +94,11 @@ export class URLVariables extends HashMap<string, string>
                 str+= "=" + encodeURIComponent(it.second);
         }
         return str;
+    }
+
+    public toJSON(): string
+    {
+        return this.toString();
     }
 }
 

@@ -1,6 +1,6 @@
-import { WorkerConnector } from "../../../protocols/workers";
+import { WorkerConnector } from "../../../../protocols/workers";
 
-import { FileSystem } from "../../../protocols/workers/internal/FileSystem";
+import { FileSystem } from "../../../../protocols/workers/internal/FileSystem";
 import { sleep_for } from "tstl/thread";
 
 const FILE_PATH = __dirname + "/log.dat";
@@ -17,8 +17,7 @@ export async function test_worker_join(): Promise<void>
 
     let content: string = await FileSystem.read(FILE_PATH, "utf8");
     await FileSystem.unlink(FILE_PATH);
-
-    console.log(content);
+    
     if (content !== "WorkerServer.join()")
         throw new Error("Error on WorkerServer.join()");
 }

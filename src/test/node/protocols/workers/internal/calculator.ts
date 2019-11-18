@@ -1,8 +1,9 @@
-import { WorkerServer, WorkerConnector } from "../../../../protocols/workers";
-import { Driver } from "../../../../components";
+import { WorkerServer } from "../../../../../protocols/workers/WorkerServer";
+import { WorkerConnector } from "../../../../../protocols/workers/WorkerConnector";
+import { Driver } from "../../../../../components/Driver";
 
-import { Simple } from "../../../providers/Calculator";
-import { IScientific, IStatistics } from "../../../controllers/ICalculator";
+import { Simple } from "../../../../providers/Calculator";
+import { IScientific, IStatistics } from "../../../../controllers/ICalculator";
 
 class HierarchicalCalculator extends Simple
 {

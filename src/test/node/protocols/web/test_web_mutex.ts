@@ -1,5 +1,5 @@
-import { WebServer, WebConnector } from "../../../protocols/web";
-import { Driver } from "../../../components/Driver";
+import { WebServer, WebConnector } from "../../../../protocols/web";
+import { Driver } from "../../../../components/Driver";
 
 import { Vector } from "tstl/container/Vector";
 import { Mutex } from "tstl/thread/Mutex";
@@ -86,10 +86,7 @@ export async function test_web_mutex(): Promise<void>
 
     // ELEMENTS MUST BE SORTED BY THE CRITICAL SECTION
     if (is_sorted(vector.begin(), vector.end()) === false)
-    {
-        console.log(vector.data());
         throw new DomainError("remote mutex lock does not ensure the critical section.");
-    }
 
     // CLOSE THE SERVER
     await server.close();

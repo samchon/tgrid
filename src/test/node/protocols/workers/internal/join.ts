@@ -1,5 +1,5 @@
 import fs = require("fs");
-import { WorkerServer } from "../../../../protocols/workers";
+import { WorkerServer } from "../../../../../protocols/workers/WorkerServer";
 
 const FILE_PATH = __dirname + "/../log.dat";
 

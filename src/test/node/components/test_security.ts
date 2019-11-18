@@ -1,8 +1,8 @@
-import { WebServer } from "../../protocols/web/WebServer";
-import { WebConnector } from "../../protocols/web/WebConnector";
+import { WebServer } from "../../../protocols/web/WebServer";
+import { WebConnector } from "../../../protocols/web/WebConnector";
 
-import { Driver } from "../../components/Driver";
-import { Calculator, Scientific } from "../providers/Calculator";
+import { Driver } from "../../../components/Driver";
+import { Calculator, Scientific } from "../../providers/Calculator";
 
 class CustomCalculator extends Calculator
 {

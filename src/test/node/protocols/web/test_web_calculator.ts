@@ -1,9 +1,10 @@
-import { WebServer, WebConnector } from "../../../protocols/web";
-import { Driver } from "../../../components"
+import { WebServer } from "../../../../protocols/web/WebServer";
+import { WebConnector } from "../../../../protocols/web/WebConnector";
+import { Driver } from "../../../../components/Driver"
 
-import { Calculator } from "../../providers/Calculator";
-import { ICalculator } from "../../controllers/ICalculator";
-import { IVector } from "../../controllers/IVector";
+import { Calculator } from "../../../providers/Calculator";
+import { ICalculator } from "../../../controllers/ICalculator";
+import { IVector } from "../../../controllers/IVector";
 
 import { Vector } from "tstl/container/Vector";
 
