@@ -6,7 +6,9 @@ import { DomainError, OutOfRange } from "tstl/exception";
 import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
 
-export class XML extends Dictionary<XMLList>
+export class XML
+	extends Dictionary<XMLList>
+	implements Omit<HashMap<string, XMLList>, "toJSON">
 {
 	/**
 	 * @hidden
@@ -211,12 +213,12 @@ export class XML extends Dictionary<XMLList>
 			}
 			else if
 				(
-				inQuote === true &&
-				(
-					(quoteType === 1 && line.charAt(i) === "'") ||
-					(quoteType === 2 && line.charAt(i) === "\"")
-				)
-			) 
+					inQuote === true &&
+					(
+						(quoteType === 1 && line.charAt(i) === "'") ||
+						(quoteType === 2 && line.charAt(i) === "\"")
+					)
+				) 
 			{
 				helpers.push({ type: quoteType, start: start, end: i });
 				inQuote = false;
@@ -425,6 +427,9 @@ export class XML extends Dictionary<XMLList>
 		return this.size();
 	}
 
+	/**
+	 * @hidden
+	 */
 	protected _Handle_insert(first: HashMap.Iterator<string, XMLList>, last: HashMap.Iterator<string, XMLList>): void
 	{
 		for (let it = first; !it.equals(last); it = it.next())

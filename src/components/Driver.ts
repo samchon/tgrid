@@ -38,24 +38,24 @@ export declare namespace Driver
      * @typeParam Instance An object type to be promised.
      * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      */
-    export type Promisive<Instance extends object, UseParametric extends boolean = false> = 
+    export type Promisive<Instance extends object, UseParametric extends boolean = false> = Readonly<
     {
-        readonly [P in keyof Instance]: Instance[P] extends Function
+        [P in keyof Instance]: Instance[P] extends Function
             ? Functional<Instance[P], UseParametric> // function, its return type would be capsuled in the Promise
             : value_of<Instance[P]> extends object
                 ? Instance[P] extends object
                    ? Promisive<Instance[P], UseParametric> // object would be promisified
                    : never // cannot be
                 : never // atomic value
-    } & IRemoteObject;
+    } & IRemoteObject>;
 
     /**
      * Promisify a function type.
      * 
      * Return type of the target function would be promisified and primitified.
      * 
-     *   - `T`: `Promise<Primitifier<T>>`
-     *   - `Promise<T>`: `Promise<Primitifer<T>>`
+     *   - `Ret`: `Promise<Primitive<Ret>>`
+     *   - `Promise<Ret>`: `Promise<Primitive<Ret>>`
      * 
      * @typeParam Method A function type to be promisified.
      * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
@@ -85,7 +85,7 @@ export declare namespace Driver
      * removed. Also, if the target type has a `toJSON()` method, its return type 
      * would be chosen.
      * 
-     * @typeParam T A type to be primitive
+     * @typeParam Instance An instance type to be primitive
      */
     export type Primitive<Instance> = value_of<Instance> extends object
         ? Instance extends object

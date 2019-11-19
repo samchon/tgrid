@@ -17,7 +17,9 @@ import { not_equal_to } from "tstl/functional/comparators";
  * @reference http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/URLVariables.html
  * @author Migrated by Jeongho Nam <http://samchon.org>
  */
-export class URLVariables extends Dictionary<string>
+export class URLVariables 
+    extends Dictionary<string>
+    implements Omit<HashMap<string, string>, "toJSON">
 {
     /**
      * Default Constructor.
@@ -37,7 +39,7 @@ export class URLVariables extends Dictionary<string>
     {
         super();
 
-        if (str != "")
+        if (str !== "")
             this._Parse(str);
     }
 
@@ -47,12 +49,12 @@ export class URLVariables extends Dictionary<string>
     private _Parse(str: string): void
     {
         this.clear();
-        if (str.trim() == "")
+        if (str.trim() === "")
             return;
             
-        if (str.indexOf("?") != -1)
+        if (str.indexOf("?") !== -1)
             str = str.substr(str.indexOf("?") + 1);
-        if (str.indexOf("#") != -1)
+        if (str.indexOf("#") !== -1)
             str = str.substr(0, str.indexOf("#"));
 
         var elements: string[] = str.split("&");
@@ -62,7 +64,7 @@ export class URLVariables extends Dictionary<string>
             let key: string;
             let value: string;
 
-            if (equal_index == -1)
+            if (equal_index === -1)
             {
                 key = pair;
                 value = "";
@@ -90,12 +92,12 @@ export class URLVariables extends Dictionary<string>
                 str += "&";
 
             str += it.first;
-            if (it.second != "") 
+            if (it.second !== "") 
                 str+= "=" + encodeURIComponent(it.second);
         }
         return str;
     }
-
+    
     public toJSON(): string
     {
         return this.toString();
@@ -114,7 +116,7 @@ export namespace URLVariables
 
         for (let entry of variables)
         {
-            if (!autoCase || entry.second == "")
+            if (!autoCase || entry.second === "")
             {
                 ret[entry.first] = entry.second;
                 continue;
@@ -122,9 +124,9 @@ export namespace URLVariables
 
             if (entry.second.length === 0)
                 ret[entry.first] = true;
-            else if (entry.second == "true" || entry.second == "false")
-                ret[entry.first] = (entry.second == "true");
-            else if (Number.isNaN(Number(entry.second)) == false)
+            else if (entry.second === "true" || entry.second === "false")
+                ret[entry.first] = (entry.second === "true");
+            else if (Number.isNaN(Number(entry.second)) === false)
                 ret[entry.first] = Number(entry.second);
             else
                 ret[entry.first] = entry.second;
@@ -134,9 +136,9 @@ export namespace URLVariables
     
     export function stringify<T = any>(obj: T): string
     {
-        if (typeof obj == "boolean" || typeof obj == "number")
+        if (typeof obj === "boolean" || typeof obj === "number")
             return String(obj);
-        else if (typeof obj == "string")
+        else if (typeof obj === "string")
             return obj;
         else if (obj instanceof URLVariables)
             return obj.toString();
