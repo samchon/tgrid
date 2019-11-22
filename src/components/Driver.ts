@@ -21,7 +21,7 @@
 export type Driver<Controller extends object, Parametric extends boolean = false> = Driver.Promisive<Controller, Parametric>;
 export const Driver = class {};
 
-export declare namespace Driver
+export namespace Driver
 {
     /* ----------------------------------------------------------------
         PROMISIFIERS
