@@ -1,9 +1,12 @@
-import { Entry } from "tstl/utility/Entry";
-import { URLVariables } from "../../../utils/URLVariables";
-import { DomainError, LengthError, InvalidArgument } from "tstl/exception/LogicError";
+import { DomainError } from "tstl/exception/DomainError";
+import { LengthError } from "tstl/exception/LengthError";
+import { InvalidArgument } from "tstl/exception/InvalidArgument";
+import { Pair } from "tstl/utility/Pair";
 import { equal } from "tstl/algorithm/iterations";
 
-type Element = Entry<string, string>;
+import { URLVariables } from "../../../utils/URLVariables";
+
+type Element = Pair<string, string>;
 interface IAuthor
 {
     name: string;

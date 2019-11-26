@@ -1,6 +1,6 @@
 import { Driver } from "../../components";
 
-import { DomainError } from "tstl/exception/LogicError";
+import { DomainError } from "tstl/exception/DomainError";
 import { randint } from "tstl/algorithm/random";
 
 export interface IVector<T>

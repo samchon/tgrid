@@ -1,8 +1,9 @@
+import { DomainError } from "tstl/exception/DomainError";
+import { InvalidArgument } from "tstl/exception/InvalidArgument";
+import { randint } from "tstl/algorithm/random";
+
 import { Driver } from "../../components/Driver";
 import { Calculator } from "../providers/Calculator";
-import { DomainError, InvalidArgument } from "tstl/exception/LogicError";
-
-import { randint } from "tstl/algorithm/random";
 
 export interface ICalculator 
     extends ISimple

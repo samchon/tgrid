@@ -4,7 +4,7 @@ import { Driver } from "../../../components/Driver";
 import { Calculator } from "../../providers/Calculator";
 import { ICalculator } from "../../controllers/ICalculator";
 import { Invoke } from "../../../components/Invoke";
-import { InvalidArgument } from "tstl/exception/LogicError";
+import { InvalidArgument } from "tstl/exception/InvalidArgument";
 
 class PseudoCommunicator<Provider> extends Communicator<Provider>
 {

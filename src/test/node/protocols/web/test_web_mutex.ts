@@ -3,7 +3,7 @@ import { Driver } from "../../../../components/Driver";
 
 import { Vector } from "tstl/container/Vector";
 import { Mutex } from "tstl/thread/Mutex";
-import { DomainError } from "tstl/exception/LogicError";
+import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
 
 import { is_sorted } from "tstl/algorithm/sorting";
