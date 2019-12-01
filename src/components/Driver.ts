@@ -18,7 +18,7 @@
  * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
  * @author Jeongho Nam <http://samchon.org>
  */
-export type Driver<Controller extends object, Parametric extends boolean = false> = Driver.Promisive<Controller, Parametric>;
+export type Driver<Controller extends object, Parametric extends boolean = false> = typeof Driver & Driver.Promisive<Controller, Parametric>;
 export const Driver = class {};
 
 export namespace Driver
