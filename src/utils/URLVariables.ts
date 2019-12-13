@@ -5,6 +5,7 @@ import { Dictionary } from "./internal/Dictionary";
 
 import { HashMap } from "tstl/container/HashMap";
 import { not_equal_to } from "tstl/functional/comparators";
+import { ValueOf } from "./ValueOf";
 
 /**
  * URLVariables class is for representing variables of HTTP.
@@ -109,10 +110,17 @@ export namespace URLVariables
     export type Iterator = HashMap.Iterator<string, string>;
     export type ReverseIterator = HashMap.ReverseIterator<string, string>;
     
-    export function parse<T = any>(str: string, autoCase: boolean = true): T
+    export type Serialize<Instance extends object> = 
+    {
+        [P in keyof Instance]: ValueOf<Instance[P]> extends object
+            ? never
+            : ValueOf<Instance[P]>;
+    };
+
+    export function parse<T extends object>(str: string, autoCase: boolean = true): Serialize<T>
     {
         let variables: URLVariables = new URLVariables(str);
-        let ret: any = new Object() as T;
+        let ret: any = {};
 
         for (let entry of variables)
         {
@@ -131,10 +139,10 @@ export namespace URLVariables
             else
                 ret[entry.first] = entry.second;
         }
-        return ret as T;
+        return ret as Serialize<T>;
     }
     
-    export function stringify<T = any>(obj: T): string
+    export function stringify<T extends object>(obj: T): string
     {
         if (typeof obj === "boolean" || typeof obj === "number")
             return String(obj);

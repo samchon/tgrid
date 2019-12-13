@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.3.0-dev.20191201",
+  "version": "0.3.0-dev.20191213",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "serialize-error": "^4.1.0",
-    "tstl": "^2.4.0-dev.20191130",
+    "tstl": "^2.4.0-dev.20191213",
     "websocket": "^1.0.30"
   },
   "devDependencies": {
