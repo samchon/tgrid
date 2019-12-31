@@ -1,5 +1,3 @@
-import { ValueOf } from "../utils/ValueOf";
-
 //================================================================ 
 /** @module tgrid.components */
 //================================================================
@@ -44,7 +42,7 @@ export namespace Driver
     {
         [P in keyof Instance]: Instance[P] extends Function
             ? Functional<Instance[P], UseParametric> // function, its return type would be capsuled in the Promise
-            : ValueOf<Instance[P]> extends object
+            : value_of<Instance[P]> extends object
                 ? Instance[P] extends object
                    ? Promisive<Instance[P], UseParametric> // object would be promisified
                    : never // cannot be
@@ -89,17 +87,17 @@ export namespace Driver
      * 
      * @typeParam Instance An instance type to be primitive
      */
-    export type Primitive<Instance> = ValueOf<Instance> extends object
+    export type Primitive<Instance> = value_of<Instance> extends object
         ? Instance extends object
             ? Instance extends IJsonable<infer Raw>
-                ? ValueOf<Raw> extends object
+                ? value_of<Raw> extends object
                     ? Raw extends object
                         ? PrimitiveObject<Raw> // object would be primitified
                         : never // cannot be
-                    : ValueOf<Raw> // atomic value
+                    : value_of<Raw> // atomic value
                 : PrimitiveObject<Instance> // object would be primitified
             : never // cannot be
-        : ValueOf<Instance>;
+        : value_of<Instance>;
 
     /**
      * @hidden
@@ -125,7 +123,28 @@ export namespace Driver
     /**
      * @hidden
      */
-    type ParametricValue<Instance> = ValueOf<Instance> | Primitive<Instance> | IJsonable<Primitive<Instance>>;
+    type ParametricValue<Instance> = value_of<Instance> | Primitive<Instance> | IJsonable<Primitive<Instance>>;
+
+    /**
+     * @hidden
+     */
+    type value_of<Instance> = 
+        is_value_of<Instance, Boolean> extends true ? boolean
+        : is_value_of<Instance, Number> extends true ? number
+        : is_value_of<Instance, String> extends true ? string
+        : Instance;
+
+    /**
+     * @hidden
+     */
+    type is_value_of<Instance, Object extends IValueOf<any>> = 
+        Instance extends Object
+            ? Object extends IValueOf<infer Primitive>
+                ? Instance extends Primitive
+                    ? false
+                    : true // not Primitive, but Object
+                : false // cannot be
+            : false;
 
     /* ----------------------------------------------------------------
         PROTECTORS
@@ -156,6 +175,14 @@ export namespace Driver
          */
         [P in keyof Function | "Symbol"]: never;
     };
+
+    /**
+     * @hidden
+     */
+    interface IValueOf<T>
+    {
+        valueOf(): T;
+    }
 
     /**
      * @hidden
