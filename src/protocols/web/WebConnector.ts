@@ -26,7 +26,7 @@ import { is_node } from "tstl/utility/node";
  * close the connection in time, it may waste vulnerable resources of the server.
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebConnector<Provider extends object = {}>
     extends Communicator<Provider | null>

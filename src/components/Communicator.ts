@@ -26,7 +26,7 @@ import serializeError = require("serialize-error");
  *   - {@link sendData}
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export abstract class Communicator<Provider>
 {

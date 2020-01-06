@@ -16,7 +16,7 @@ import { not_equal_to } from "tstl/functional/comparators";
  * - URI: Uniform Resource Identifier
  * 
  * @reference http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/URLVariables.html
- * @author Migrated by Jeongho Nam <http://samchon.org>
+ * @author Migrated by Jeongho Nam - https://github.com/samchon
  */
 export class URLVariables 
     extends Dictionary<string>

@@ -17,7 +17,7 @@
  * `Worker` as a remote system and supports RFC (Remote Function Call) in such worker 
  * environments.
  * 
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export interface IWorkerSystem
 {

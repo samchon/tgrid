@@ -26,7 +26,7 @@ import { is_node } from "tstl/utility/node";
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export class WorkerConnector<Provider extends object = {}>
     extends Communicator<Provider | null>

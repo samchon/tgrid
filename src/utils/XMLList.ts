@@ -1,6 +1,11 @@
 import { Vector } from "tstl/container/Vector";
 import { XML } from "./XML";
 
+/**
+ * List of {@link XML}.
+ * 
+ * @author Jeongho Nam - https://github.com/samchon
+ */
 export class XMLList extends Vector<XML>
 {
 	public getTag(): string

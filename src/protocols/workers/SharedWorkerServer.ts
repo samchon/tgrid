@@ -26,7 +26,7 @@ import { DomainError } from "tstl/exception";
  *  - {@link SharedWorkerConnector.close}()
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerServer<Provider extends object = {}>
     implements IServer<SharedWorkerServer.State>

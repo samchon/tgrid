@@ -25,7 +25,7 @@ import { DomainError } from "tstl/exception";
  * busines has been completed.
  * 
  * @typeParam Provider Type of features provided for remote system.
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebAcceptor<Provider extends object = {}>
     extends Communicator<Provider | null | undefined>

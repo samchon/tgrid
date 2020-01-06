@@ -21,7 +21,7 @@ import { DomainError, RuntimeError } from "tstl/exception";
  * called whenever a client has been connected.
  * 
  * @typeParam Provider Type of features provided for remote systems.
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebServer<Provider extends object = {}>
     implements IServer<WebServer.State>

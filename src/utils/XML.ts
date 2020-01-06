@@ -2,10 +2,17 @@ import { Dictionary } from "./internal/Dictionary";
 import { XMLList } from "./XMLList";
 
 import { IPair } from "tstl/utility/IPair";
-import { DomainError, OutOfRange } from "tstl/exception";
-import { HashMap } from "tstl/container/HashMap";
 import { Pair } from "tstl/utility/Pair";
+import { HashMap } from "tstl/container/HashMap";
 
+import { DomainError } from "tstl/exception/DomainError";
+import { OutOfRange } from "tstl/exception/OutOfRange";
+
+/**
+ * The XML parser
+ * 
+ * @author Jeongho Nam - https://github.com/samchon
+ */
 export class XML
 	extends Dictionary<XMLList>
 	implements Omit<HashMap<string, XMLList>, "toJSON">

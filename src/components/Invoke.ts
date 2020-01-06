@@ -4,7 +4,7 @@
 /**
  * Message structure for RFC (Remote Function Call).
  * 
- * @author Jeongho Nam <http://samchon.org>
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export type Invoke = Invoke.IFunction | Invoke.IReturn;
 
