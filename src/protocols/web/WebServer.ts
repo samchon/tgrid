@@ -5,9 +5,11 @@ import ws = require("websocket");
 import http = require("http");
 import https = require("https");
 
+import { DomainError } from "tstl/exception/DomainError";
+import { RuntimeError } from "tstl/exception/RuntimeError";
+
 import { IServer } from "../internal/IServer";
 import { WebAcceptor } from "./WebAcceptor";
-import { DomainError, RuntimeError } from "tstl/exception";
 
 /**
  * Web Socket Server.

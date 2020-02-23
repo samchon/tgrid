@@ -7,7 +7,10 @@ import { Invoke } from "./Invoke";
 import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
-import { Exception, DomainError, RuntimeError } from "tstl/exception";
+
+import { Exception } from "tstl/exception/Exception";
+import { DomainError } from "tstl/exception/DomainError";
+import { RuntimeError } from "tstl/exception/RuntimeError";
 
 import serializeError = require("serialize-error");
 

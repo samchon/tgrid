@@ -8,7 +8,8 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { Invoke } from "../../components/Invoke";
 import { URLVariables } from "../../utils/URLVariables";
 
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
+import { RuntimeError } from "tstl/exception/RuntimeError";
 import { is_node } from "tstl/utility/node";
 
 /**

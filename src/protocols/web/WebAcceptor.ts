@@ -10,7 +10,7 @@ import { IAcceptor } from "../internal/IAcceptor";
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
 
 /**
  * Web Socket Acceptor.

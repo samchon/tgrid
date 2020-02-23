@@ -7,7 +7,7 @@ import { IAcceptor } from "../internal/IAcceptor";
 
 import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
 
 /**
  * SharedWorker acceptor for client.

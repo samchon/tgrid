@@ -2,7 +2,8 @@
 /** @module tgrid.protocols */
 //================================================================
 import { IState } from "./IState";
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
+import { RuntimeError } from "tstl/exception/RuntimeError";
 
 export interface IConnector<State extends IConnector.State>
     extends IState<State>

@@ -1,4 +1,4 @@
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
 import { Pair } from "tstl/utility/Pair";
 import { Vector } from "tstl/container/Vector";
 

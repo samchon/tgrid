@@ -6,7 +6,7 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
 
 /**
  * SharedWorker server.

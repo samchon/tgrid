@@ -5,7 +5,7 @@ import { HashMap } from "tstl/container/HashMap";
 import { IChatPrinter } from "../controllers/IChatPrinter";
 
 import { IScript } from "../controllers/IScript";
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
 
 export class ChatService implements IChatService
 {

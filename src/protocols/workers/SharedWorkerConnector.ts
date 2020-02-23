@@ -9,7 +9,8 @@ import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
 import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
 
-import { DomainError, RuntimeError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
+import { RuntimeError } from "tstl/exception/RuntimeError";
 import { Pair } from "tstl/utility/Pair";
 
 /**

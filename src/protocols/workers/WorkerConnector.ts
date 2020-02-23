@@ -7,7 +7,7 @@ import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
 
-import { DomainError } from "tstl/exception";
+import { DomainError } from "tstl/exception/DomainError";
 import { is_node } from "tstl/utility/node";
 
 /**
