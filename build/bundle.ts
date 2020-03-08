@@ -1,7 +1,7 @@
-const fs = require("fs");
-const browserify = require('browserify');
+import fs = require("fs");
+import browserify = require('browserify');
 
-function bundle(path, output)
+function bundle(path: string, output: string): Promise<void>
 {
     return new Promise((resolve, reject) =>
     {
@@ -24,7 +24,7 @@ function bundle(path, output)
     });
 }
 
-async function main()
+async function main(): Promise<void>
 {
     const INSTANCES = 
     [
@@ -35,6 +35,6 @@ async function main()
         "web-client"
     ];
     for (let instance of INSTANCES)
-        await bundle(`test/browser/${instance}.js`, `bundle/${instance}.js`);
+        await bundle(`${__dirname}/../dist/test/browser/${instance}.js`, `${__dirname}/../bundle/${instance}.js`);
 }
 main();

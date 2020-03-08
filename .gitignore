@@ -2,7 +2,7 @@
 #    CUSTOM IGNORE
 # ======================================================
 node_modules/
-lib/
+dist/
 .cache/
 
 package-lock.json

@@ -11,7 +11,7 @@ jobs:
           node-version: 10.x
       - run: npm install
       - run: npm run compile
-      - run: npm run test-node
+      - run: npm run test:node
   Browser:
     runs-on: windows-latest
     steps:
@@ -22,4 +22,4 @@ jobs:
       - run: npm install
       - run: npm run compile
       - run: npm run bundle
-      - run: npm run test-browser
+      - run: npm run test:browser

@@ -14,7 +14,7 @@ export function test_worker_connect(): Promise<void>
 
 export async function test_worker_compile(): Promise<void>
 {
-    const PATH = __dirname + "/../../../../bundle/worker-server.js";
+    const PATH = __dirname + "/../../../../../bundle/worker-server.js";
     if (fs.existsSync(PATH) === false)
         cp.execSync("npm run bundle");
 

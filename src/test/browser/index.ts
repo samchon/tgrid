@@ -36,7 +36,7 @@ async function main(): Promise<void>
     let server = new HttpServer();
     server = server.listen
     ({
-        directory: __dirname + "/../../bundle",
+        directory: __dirname + "/../../../bundle",
         port: 37792
     });
     let browser = await puppeteer.launch({ devtools: true });
