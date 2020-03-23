@@ -62,11 +62,11 @@ export class SharedWorkerServer<Provider extends object = {}>
     {
         // TEST CONDITION
         if (is_node() === true)
-            throw new DomainError("SharedWorker is not supported in the NodeJS.");
+            throw new DomainError("Error on SharedWorkerServer.open(): SharedWorker is not supported in the NodeJS.");
         else if (self.document !== undefined)
-            throw new DomainError("This is not SharedWorker.");
+            throw new DomainError("Error on SharedWorkerServer.open(): this is not the SharedWorker.");
         else if (this.state_ !== SharedWorkerServer.State.NONE)
-            throw new DomainError("Server has opened yet.");
+            throw new DomainError("Error on SharedWorkerServer.open(): the server has been opened yet.");
 
         //----
         // OPE SHARED-WORKER
@@ -95,7 +95,7 @@ export class SharedWorkerServer<Provider extends object = {}>
     {
         // TEST VALIDATION
         if (this.state_ !== SharedWorkerServer.State.OPEN)
-            throw new DomainError("Server is not opened.");
+            throw new DomainError("Error on SharedWorkerServer.close(): the server is not opened.");
         
         // CLOSE ALL CONNECTIONS
         for (let acceptor of this.acceptors_)

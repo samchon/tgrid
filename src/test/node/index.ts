@@ -1,3 +1,7 @@
+﻿const EXTENSION = __filename.substr(-2);
+if (EXTENSION === "js")
+    require("source-map-support").install();
+
 import fs = require("fs");
 import { StringUtil } from "../utils/StringUtil";
 

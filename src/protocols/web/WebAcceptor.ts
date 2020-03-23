@@ -1,7 +1,8 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import ws = require("websocket");
+import http = require("http");
+import WebSocket = require("ws");
 
 import { Communicator } from "../../components/Communicator";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
@@ -39,12 +40,12 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    private request_: ws.request;
+    private request_: http.IncomingMessage;
 
     /**
      * @hidden
      */
-    private connection_?: ws.connection;
+    private socket_: WebSocket;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -52,20 +53,22 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @internal
      */
-    public static create<Provider extends object>(request: ws.request): WebAcceptor<Provider>
+    public static create<Provider extends object>
+        (request: http.IncomingMessage, socket: WebSocket): WebAcceptor<Provider>
     {
-        return new WebAcceptor<Provider>(request);
+        return new WebAcceptor<Provider>(request, socket);
     }
 
     /**
      * @hidden
      */
-    private constructor(request: ws.request)
+    private constructor(request: http.IncomingMessage, socket: WebSocket)
     {
         super(undefined);
         
-        this.request_ = request;
         this.state_ = WebAcceptor.State.NONE;
+        this.request_ = request;
+        this.socket_ = socket;
     }
 
     /**
@@ -74,7 +77,7 @@ export class WebAcceptor<Provider extends object = {}>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady();
+        let error: Error | null = this.inspectReady("WebAcceptor.close");
         if (error)
             throw error;
         
@@ -87,9 +90,9 @@ export class WebAcceptor<Provider extends object = {}>
         // DO CLOSE
         this.state_ = WebAcceptor.State.CLOSING;
         if (code === 1000)
-            this.connection_!.close();
+            this.socket_!.close();
         else
-            this.connection_!.sendCloseFrame(code!, reason!, true);
+            this.socket_!.close(code!, reason!);
         
         // state would be closed in destructor() via _Handle_close()
         await ret;
@@ -110,43 +113,23 @@ export class WebAcceptor<Provider extends object = {}>
     /**
      * @inheritDoc
      */
-    public accept(provider: Provider | null = null): Promise<void>
+    public async accept(provider: Provider | null = null): Promise<void>
     {
-        return new Promise((resolve, reject) =>
-        {
-            // TEST CONDITION
-            if (this.state_ !== WebAcceptor.State.NONE)
-            {
-                reject(new DomainError("You've already accepted (or rejected) the connectino."));
-                return;
-            }
+        // VALIDATION
+        if (this.state_ !== WebAcceptor.State.NONE)
+            throw new DomainError("Error on WebAcceptor.accept(): you've already accepted (or rejected) the connection.");
 
-            // PREPARE EVENT LISTENERS
-            this.state_ = WebAcceptor.State.ACCEPTING;
-            this.request_.on("requestAccepted", connection =>
-            {
-                this.connection_ = connection;
-                this.connection_.on("close", this._Handle_close.bind(this));
-                this.connection_.on("message", this._Handle_message.bind(this));
+        // PREPARE ASSETS
+        this.state_ = WebAcceptor.State.ACCEPTING;
+        this.provider_ = provider;
 
-                this.state_ = WebAcceptor.State.OPEN;
-                resolve();
-            });
+        // REGISTER EVENTS
+        this.socket_.on("message", this._Handle_message.bind(this));
+        this.socket_.on("close", this._Handle_close.bind(this));
+        this.socket_.send(WebAcceptor.State.OPEN.toString());
 
-            // DO ACCEPT
-            try
-            {
-                this.provider_ = provider;
-                this.request_.accept();
-            }
-            catch (exp)
-            {
-                this.provider_ = undefined;
-                this.state_ = WebAcceptor.State.CLOSED;
-
-                reject(exp);
-            }
-        });
+        // FINISHED
+        this.state_ = WebAcceptor.State.OPEN;
     }
 
     /**
@@ -156,30 +139,19 @@ export class WebAcceptor<Provider extends object = {}>
      *
      * @param status Status code.
      * @param reason Detailed reason to reject.
-     * @param extraHeaders Extra headers if required.
      */
-    public reject(status?: number, reason?: string, extraHeaders?: object): Promise<void>
+    public async reject(status?: number, reason?: string): Promise<void>
     {
-        return new Promise((resolve, reject) =>
-        {
-            // TEST CONDITION
-            if (this.state_ !== WebAcceptor.State.NONE)
-            {
-                reject(new DomainError("You've already accepted (or rejected) the connection."));
-                return;
-            }
+        // VALIDATION
+        if (this.state_ !== WebAcceptor.State.NONE)
+            new DomainError("You've already accepted (or rejected) the connection.");
 
-            // PREPARE HANDLER
-            this.request_.on("requestRejected", async () =>
-            {
-                await this.destructor();
-                resolve();
-            });
-
-            // DO REJECT
-            this.state_ = WebAcceptor.State.REJECTING;
-            this.request_.reject(status, reason, extraHeaders);
-        });
+        // SEND CLOSING FRAME
+        this.state_ = WebAcceptor.State.REJECTING;
+        this.socket_.close(status, reason);
+        
+        // FINALIZATION
+        await this.destructor();
     }
 
     /* ----------------------------------------------------------------
@@ -187,7 +159,7 @@ export class WebAcceptor<Provider extends object = {}>
     ---------------------------------------------------------------- */
     public get path(): string
     {
-        return this.request_.resource;
+        return this.request_.url!;
     }
 
     /**
@@ -206,25 +178,25 @@ export class WebAcceptor<Provider extends object = {}>
      */
     protected sendData(invoke: Invoke): void
     {
-        this.connection_!.sendUTF(JSON.stringify(invoke));
+        this.socket_.send(JSON.stringify(invoke));
     }
 
     /**
      * @hidden
      */
-    protected inspectReady(): Error | null
+    protected inspectReady(method: string): Error | null
     {
-        return IAcceptor.inspect(this.state_);
+        return IAcceptor.inspect(this.state_, method);
     }
 
     /**
      * @hidden
      */
-    private _Handle_message(message: ws.IMessage): void
+    private _Handle_message(data: WebSocket.Data): void
     {
-        if (message.utf8Data)
+        if (typeof data === "string")
         {
-            let invoke: Invoke = JSON.parse(message.utf8Data);
+            let invoke: Invoke = JSON.parse(data);
             this.replyData(invoke);
         }
     }

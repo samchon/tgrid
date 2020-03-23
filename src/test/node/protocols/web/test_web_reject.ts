@@ -12,7 +12,7 @@ export async function test_web_reject(): Promise<void>
     {
         await server.open(PORT, async acceptor =>
         {
-            await acceptor.reject(404, "Unable to find the matched record.");
+            await acceptor.reject(1001, "The endpoint is going away.");
         });
 
         let connector = new WebConnector();

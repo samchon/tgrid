@@ -30,7 +30,7 @@ export namespace IAcceptor
         CLOSED
     }
     
-    export function inspect(state: State): Error | null
+    export function inspect(state: State, method: string): Error | null
     {
         // NO ERROR
         if (state === State.OPEN)
@@ -38,16 +38,16 @@ export namespace IAcceptor
 
         // ERROR, ONE OF THEM
         else if (state === State.NONE)
-            return new DomainError("Not accepted yet.");
+            return new DomainError(`Error on ${method}(): not accepted yet.`);
         else if (state === State.ACCEPTING)
-            return new DomainError("On accepting; wait for a sec.");
+            return new DomainError(`Error on ${method}(): it's on accepting, wait for a second.`);
         else if (state === State.REJECTING || State.CLOSING)
-            return new RuntimeError("The connection is on closing.");
+            return new RuntimeError(`Error on ${method}(): the connection is on closing.`);
         else if (state === State.CLOSED)
-            return new RuntimeError("The connection has been closed.");
+            return new RuntimeError(`Error on ${method}(): the connection has been closed.`);
 
         // UNKNOWN ERROR, IT MAY NOT OCCURED
         else
-            return new RuntimeError("Unknown error, but not connected.");
+            return new RuntimeError(`Error on ${method}(): unknown error, but not connected.`);
     }
 }

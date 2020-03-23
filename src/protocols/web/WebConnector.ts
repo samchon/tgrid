@@ -9,6 +9,7 @@ import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 
 import { DomainError } from "tstl/exception/DomainError";
+import { Pair } from "tstl/utility/Pair";
 import { is_node } from "tstl/utility/node";
 
 /**
@@ -37,6 +38,16 @@ export class WebConnector<Provider extends object = {}>
      */
     private socket_?: WebSocket;
 
+    /**
+     * @hidden
+     */
+    private connector_?: Pair<()=>void, (error: Error)=>void>;
+
+    /**
+     * @hidden
+     */
+    private state_: WebConnector.State;
+
     /* ----------------------------------------------------------------
         CONSTRUCTOR
     ---------------------------------------------------------------- */
@@ -48,6 +59,7 @@ export class WebConnector<Provider extends object = {}>
     public constructor(provider: Provider | null = null)
     {
         super(provider);
+        this.state_ = WebConnector.State.NONE;
     }
 
     /**
@@ -63,55 +75,23 @@ export class WebConnector<Provider extends object = {}>
      * @param url URL address to connect.
      * @param protocols Protocols to use.
      */
-    public connect(url: string, protocols?: string | string[]): Promise<void>
+    public async connect(url: string, protocols?: string | string[]): Promise<void>
     {
-        return new Promise((resolve, reject) =>
-        {
-            // TEST CONDITION
-            if (this.socket_ && this.state !== WebConnector.State.CLOSED)
-            {
-                let err: Error;
-                if (this.socket_.readyState === WebConnector.State.CONNECTING)
-                    err = new DomainError("On connection.");
-                else if (this.socket_.readyState === WebConnector.State.OPEN)
-                    err = new DomainError("Already connected.");
-                else
-                    err = new DomainError("Closing.");
+        // TEST CONDITION
+        if (this.socket_ && this.state !== WebConnector.State.CLOSED)
+            if (this.socket_.readyState === WebConnector.State.CONNECTING)
+                throw new DomainError("Error on WebConnector.connect(): already connecting.");
+            else if (this.socket_.readyState === WebConnector.State.OPEN)
+                throw new DomainError("Error on WebConnector.connect(): already connected.");
+            else
+                throw new DomainError("Error on WebConnector.connecotr(): already closing.");
 
-                reject(err);
-                return;
-            }
+        // PREPARE ASSETS
+        this.state_ = WebConnector.State.CONNECTING;
+        this.socket_ = new g.WebSocket(url, protocols);
 
-            //----
-            // CONNECTOR
-            //----
-            // OPEN A SOCKET
-            try
-            {
-                this.socket_ = new g.WebSocket(url, protocols);
-            }
-            catch (exp)
-            {
-                reject(exp);
-                return;
-            }
-
-            // SET EVENT HANDLERS
-            this.socket_.onopen = () =>
-            {
-                // RE-DEFINE HANDLERS
-                this.socket_!.onerror = this._Handle_error.bind(this);
-                this.socket_!.onmessage = this._Handle_message.bind(this);
-                
-                // RETURNS
-                resolve();
-            };
-            this.socket_.onclose = this._Handle_close.bind(this);
-            this.socket_.onerror = () =>
-            {
-                reject(new WebError(1006, "Connection refused."));
-            };
-        });
+        // FINALIZATION
+        await this._Connect();
     }
 
     /**
@@ -120,19 +100,45 @@ export class WebConnector<Provider extends object = {}>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady();
+        let error: Error | null = this.inspectReady("WebConnector.close");
         if (error)
             throw error;
         
         //----
         // CLOSE WITH JOIN
         //----
-        // DO CLOSE
+        // PREPARE JOINER
         let ret: Promise<void> = this.join();
+        
+        // DO CLOSE
+        this.state_ = WebConnector.State.CLOSING;
         this.socket_!.close(code, reason);
 
         // LAZY RETURN
         await ret;
+    }
+
+    /**
+     * @hidden
+     */
+    private _Connect(): Promise<void>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            this.socket_!.onclose = this._Handle_close.bind(this);
+            this.socket_!.onerror = () => 
+            {
+                this.state_ = WebConnector.State.NONE;
+                reject(new WebError(1006, "Connection refused."));
+            }
+
+            this.socket_!.onopen = () =>
+            {
+                this.connector_ = new Pair(resolve, reject);
+                this.socket_!.onmessage = this._Handle_message.bind(this);
+                this.socket_!.onerror = () => {};
+            };
+        });
     }
 
     /* ----------------------------------------------------------------
@@ -148,7 +154,7 @@ export class WebConnector<Provider extends object = {}>
      */
     public get state(): WebConnector.State
     {
-        return this.socket_ ? this.socket_.readyState : WebConnector.State.NONE;
+        return this.state_;
     }
 
     /* ----------------------------------------------------------------
@@ -165,9 +171,9 @@ export class WebConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspectReady(): Error | null
+    protected inspectReady(method: string): Error | null
     {
-        return IConnector.inspect(this.state);
+        return IConnector.inspect(this.state, method);
     }
 
     /**
@@ -175,16 +181,13 @@ export class WebConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        this.replyData(JSON.parse(evt.data));
-    }
-
-    /**
-     * @hidden
-     */
-    private _Handle_error({}: Event): void
-    {
-        // HANDLING ERRORS ON CONNECTION, 
-        // THAT'S NOT IMPLEMENTED YET
+        if (this.state_ === WebConnector.State.CONNECTING && evt.data === WebConnector.State.OPEN.toString())
+        {
+            this.state_ = WebConnector.State.OPEN;
+            this.connector_!.first();
+        }
+        else
+            this.replyData(JSON.parse(evt.data));
     }
 
     /**
@@ -196,7 +199,13 @@ export class WebConnector<Provider extends object = {}>
             ? new WebError(event.code, event.reason)
             : undefined;
         
-        await this.destructor(error);
+        let prevState: WebConnector.State = this.state_;
+        this.state_ = WebConnector.State.CLOSED;
+
+        if (prevState === WebConnector.State.CONNECTING)
+            this.connector_!.second(error!);
+        else
+            await this.destructor(error);
     }
 }
 

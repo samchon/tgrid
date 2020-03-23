@@ -85,7 +85,7 @@ export class WorkerConnector<Provider extends object = {}>
         // PRELIMINIARIES
         //----
         // TEST CONDITION
-        this._Test_connection();
+        this._Test_connection("compile");
 
         // COMPILATION
         let path: string = await Compiler.compile(content);
@@ -130,7 +130,7 @@ export class WorkerConnector<Provider extends object = {}>
     public async connect(jsFile: string, ...args: string[]): Promise<void>
     {
         // TEST CONDITION
-        this._Test_connection();
+        this._Test_connection("connect");
 
         // DO CONNECT
         await this._Connect(jsFile, ...args);
@@ -139,16 +139,16 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private _Test_connection(): void
+    private _Test_connection(method: string): void
     {
         if (this.worker_ && this.state !== WorkerConnector.State.CLOSED)
         {
             if (this.state_ === WorkerConnector.State.CONNECTING)
-                throw new DomainError("On connecting.");
+                throw new DomainError(`Error on WorkerConnector.${method}(): on connecting.`);
             else if (this.state_ === WorkerConnector.State.OPEN)
-                throw new DomainError("Already connected.");
+                throw new DomainError(`Error on WorkerConnector.${method}(): already connected.`);
             else
-                throw new DomainError("Closing.");
+                throw new DomainError(`Error on WorkerConnector.${method}(): closing.`);
         }
     }
 
@@ -185,7 +185,7 @@ export class WorkerConnector<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady();
+        let error: Error | null = this.inspectReady("WorkerConnector.close");
         if (error)
             throw error;
 
@@ -228,9 +228,9 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspectReady(): Error | null
+    protected inspectReady(method: string): Error | null
     {
-        return IConnector.inspect(this.state_);
+        return IConnector.inspect(this.state_, `WorkerConnector.${method}()`);
     }
 
     /**

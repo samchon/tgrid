@@ -120,8 +120,10 @@ export abstract class Communicator<Provider>
 
     /**
      * A predicator inspects whether the *network communication* is on ready.
+     * 
+     * @param method The method name for tracing.
      */
-    protected abstract inspectReady(): Error | null;
+    protected abstract inspectReady(method: string): Error | null;
 
     /**
      * @hidden
@@ -154,7 +156,7 @@ export abstract class Communicator<Provider>
         return new Promise((resolve, reject) =>
         {
             // READY TO SEND ?
-            let error: Error | null = this.inspectReady();
+            let error: Error | null = this.inspectReady("Communicator._Call_fuction");
             if (error)
             {
                 reject(error);
@@ -250,7 +252,7 @@ export abstract class Communicator<Provider>
     public async join(param?: number | Date): Promise<void|boolean>
     {
         // IS JOINABLE ?
-        let error: Error | null = this.inspectReady();
+        let error: Error | null = this.inspectReady(`${this.constructor.name}.join`);
         if (error)
             throw error;
 
@@ -302,9 +304,9 @@ export abstract class Communicator<Provider>
             // FIND FUNCTION
             //----
             if (this.provider_ === undefined) // PROVIDER MUST BE
-                throw new RuntimeError("Provider is not specified yet.");
+                throw new RuntimeError(`Error on Communicator._Handle_function(): the provider is not specified yet.`);
             else if (this.provider_ === null)
-                throw new DomainError("No provider.");
+                throw new DomainError("Error on Communicator._Handle_function(): the provider would not be.");
 
             // FIND FUNCTION (WITH THIS-ARG)
             let func: Function = this.provider_ as any;
@@ -318,13 +320,13 @@ export abstract class Communicator<Provider>
 
                 // SECURITY-ERRORS
                 if (name[0] === "_")
-                    throw new RuntimeError(`RFC does not allow access to a member starting with the underscore: Provider.${invoke.listener}()`);
+                    throw new RuntimeError(`Error on Communicator._Handle_function(): RFC does not allow access to a member starting with the underscore: Provider.${invoke.listener}()`);
                 else if (name[name.length - 1] === "_")
-                    throw new RuntimeError(`RFC does not allow access to a member ending with the underscore: Provider.${invoke.listener}().`);
+                    throw new RuntimeError(`Error on Communicator._Handle_function(): RFC does not allow access to a member ending with the underscore: Provider.${invoke.listener}().`);
                 else if (name === "toString" && func === Function.toString)
-                    throw new RuntimeError(`RFC on Function.toString() is not allowed: Provider.${invoke.listener}().`);
+                    throw new RuntimeError(`Error on Communicator._Handle_function(): RFC on Function.toString() is not allowed: Provider.${invoke.listener}().`);
                 else if (name === "constructor" || name === "prototype")
-                    throw new RuntimeError(`RFC does not allow access to ${name}: Provider.${invoke.listener}().`);
+                    throw new RuntimeError(`Error on Communicator._Handle_function(): RFC does not allow access to ${name}: Provider.${invoke.listener}().`);
             }
             func = func.bind(thisArg);
 

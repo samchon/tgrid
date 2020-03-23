@@ -77,12 +77,12 @@ export class WorkerServer<Provider extends object = {}>
         if (is_node() === false)
         {
             if (self.document !== undefined)
-                throw new DomainError("This is not Worker.");    
+                throw new DomainError("Error on WorkerServer.open(): this is not Worker.");    
         }
         else if (global.process.send === undefined)
-            throw new DomainError("This is not Child Process.");    
+            throw new DomainError("Error on WorkerServer.open(): this is not Child Process.");    
         else if (this.state_ !== WorkerServer.State.NONE)
-            throw new DomainError("Server has opened yet.");
+            throw new DomainError("Error on WorkerServer.open(): the server has been opened yet.");
         
         // OPEN WORKER
         this.state_ = WorkerServer.State.OPENING;

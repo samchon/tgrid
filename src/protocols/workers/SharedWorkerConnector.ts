@@ -146,7 +146,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady();
+        let error: Error | null = this.inspectReady("SharedWorkerConnector.close");
         if (error)
             throw error;
 
@@ -189,9 +189,9 @@ export class SharedWorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspectReady(): Error | null
+    protected inspectReady(method: string): Error | null
     {
-        return IConnector.inspect(this.state_);
+        return IConnector.inspect(this.state_, method);
     }
 
     /**

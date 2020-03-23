@@ -86,7 +86,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady();
+        let error: Error | null = this.inspectReady("SharedWorkerAcceptor.close");
         if (error)
             throw error;
 
@@ -146,7 +146,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
-            throw new DomainError("You've already accepted (or rejected) the connection.");
+            throw new DomainError("Error on SharedWorkerAcceptor.accept(): you've already accepted (or rejected) the connection.");
 
         //----
         // ACCEPT CONNECTION
@@ -177,7 +177,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     {
         // TEST CONDITION
         if (this.state_ !== SharedWorkerAcceptor.State.NONE)
-            throw new DomainError("You've already accepted (or rejected) the connection.");
+            throw new DomainError("Error on SharedWorkerAcceptor.reject(): you've already accepted (or rejected) the connection.");
 
         //----
         // REJECT CONNECTION (CLOSE)
@@ -200,9 +200,9 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    protected inspectReady(): Error | null
+    protected inspectReady(method: string): Error | null
     {
-        return IAcceptor.inspect(this.state_);
+        return IAcceptor.inspect(this.state_, method);
     }
 
     /**

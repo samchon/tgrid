@@ -1,9 +1,10 @@
 //================================================================ 
 /** @module tgrid.protocols.web */
 //================================================================
-import ws = require("websocket");
 import http = require("http");
 import https = require("https");
+import net = require("net");
+import ws = require("ws");
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
@@ -46,7 +47,7 @@ export class WebServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private protocol_?: ws.server;
+    private protocol_: ws.Server;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -79,8 +80,9 @@ export class WebServer<Provider extends object = {}>
         else
             this.server_ = http.createServer();
 
-        // STATUS AND SOCKET ARE YET
+        // INITIALIZE STATUS & PROTOCOL
         this.state_ = WebServer.State.NONE;
+        this.protocol_ = new ws.Server({ noServer: true });
     }
 
     /**
@@ -89,63 +91,73 @@ export class WebServer<Provider extends object = {}>
      * @param port Port number to listen.
      * @param handler Callback function for client connection.
      */
-    public open(port: number, handler: (acceptor: WebAcceptor<Provider>) => any): Promise<void>
+    public async open(port: number, handler: (acceptor: WebAcceptor<Provider>) => any): Promise<void>
+    {
+        //----
+        // PRELIMINARIES
+        //----
+        // POSSIBLE TO OPEN?
+        if (this.state_ === WebServer.State.OPEN)
+            throw new DomainError("Error on WebServer.open(): it has already been opened.");
+        else if (this.state_ === WebServer.State.OPENING)
+            throw new DomainError("Error on WebServer.open(): it's on opening, wait for a second.");
+        else if (this.state_ === WebServer.State.CLOSING)
+            throw new RuntimeError("Error on WebServer.open(): it's on closing.");
+        
+        // RE-OPEN ?
+        else if (this.state_ === WebServer.State.CLOSED)
+            this.server_ = this.server_ instanceof http.Server
+                ? http.createServer()
+                : https.createServer(this.options_!);
+
+        // SET STATE
+        this.state_ = WebServer.State.OPENING;
+
+        //----
+        // OPEN SERVER
+        //----
+        // PROTOCOL - ADAPTOR & ACCEPTOR
+        this.server_.on("upgrade", (request: http.IncomingMessage, socket: net.Socket, header: Buffer) =>
+        {
+            this.protocol_.handleUpgrade(request, socket, header, client =>
+            {
+                let acceptor: WebAcceptor<Provider> = WebAcceptor.create(request, client);
+                handler(acceptor);
+            });
+        });
+
+        // FINALIZATION
+        await this._Open(port);
+    }
+
+    /**
+     * Close server.
+     * 
+     * Close all connections between its remote clients ({@link WebConnector}s). 
+     * 
+     * It destories all RFCs (remote function calls) between this server and remote clients 
+     * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+     * causes all incompleted RFCs to throw exceptions.
+     */
+    public async close(): Promise<void>
+    {
+        // VALIDATION
+        if (this.state_ !== WebServer.State.OPEN)
+            throw new DomainError("Error on WebServer.close(): server is not opened.");
+
+        // DO CLOSE
+        this.state_ = WebServer.State.CLOSING;
+        await this._Close();
+        this.state_ = WebServer.State.CLOSED;
+    }
+
+    /**
+     * @hidden
+     */
+    private _Open(port: number): Promise<void>
     {
         return new Promise((resolve, reject) =>
         {
-            //----
-            // PRELIMINARIES
-            //----
-            // POSSIBLE TO OPEN?
-            if (!(this.state_ === WebServer.State.NONE || this.state_ === WebServer.State.CLOSED))
-            {
-                let exp!: Error;
-                if (this.state_ === WebServer.State.OPEN)
-                    exp = new DomainError("Server has already opened.");
-                else if (this.state_ === WebServer.State.OPENING)
-                    exp = new DomainError("Server is on openeing; wait for a sec.");
-                else if (this.state_ === WebServer.State.CLOSING)
-                    exp = new RuntimeError("Server is on closing.");
-
-                reject(exp);
-                return;
-            }
-            
-            // RE-OPEN ?
-            if (this.state_ === WebServer.State.CLOSED)
-                this.server_ = this.server_ instanceof http.Server
-                    ? http.createServer()
-                    : https.createServer(this.options_!);
-
-            // SET STATE
-            this.state_ = WebServer.State.OPENING;
-
-            //----
-            // OPEN SERVER
-            //----
-            // PROTOCOL - ADAPTOR & ACCEPTOR
-            try
-            {
-                this.protocol_ = new ws.server({ 
-                    httpServer: this.server_, 
-                    maxReceivedFrameSize: 100 * MB,
-                    maxReceivedMessageSize: 100 * MB 
-                });
-                this.protocol_.on("request", request =>
-                {
-                    let acceptor: WebAcceptor<Provider> = WebAcceptor.create<Provider>(request);
-                    handler(acceptor);
-                });
-            }
-            catch (exp)
-            {
-                // FAILED TO OPEN
-                this.state_ = WebServer.State.NONE;
-                reject(exp);
-
-                return;    
-            }
-
             // PREPARE RETURNS
             this.server_.on("listening", () =>
             {
@@ -164,27 +176,12 @@ export class WebServer<Provider extends object = {}>
     }
 
     /**
-     * Close server.
-     * 
-     * Close all connections between its remote clients ({@link WebConnector}s). 
-     * 
-     * It destories all RFCs (remote function calls) between this server and remote clients 
-     * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
-     * causes all incompleted RFCs to throw exceptions.
+     * @hidden
      */
-    public close(): Promise<void>
+    private _Close(): Promise<void>
     {
-        return new Promise((resolve, reject) =>
+        return new Promise(resolve =>
         {
-            if (this.state_ !== WebServer.State.OPEN)
-            {
-                // SERVER IS NOT OPENED, OR CLOSED.
-                reject(new DomainError("Server is not opened."));
-                return;
-            }
-            
-            // START CLOSING
-            this.state_ = WebServer.State.CLOSING;
             this.server_.close(() =>
             {
                 // BE CLOSED
@@ -210,13 +207,3 @@ export namespace WebServer
 {
     export import State = IServer.State;
 }
-
-/**
- * @hidden
- */
-const KB = 1024 * 1024;
-
-/**
- * @hidden
- */
-const MB = KB * 1024;
