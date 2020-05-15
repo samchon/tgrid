@@ -18,7 +18,7 @@
  * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export type Driver<Controller extends object, Parametric extends boolean = false> = typeof Driver & Driver.Promisive<Controller, Parametric>;
+export type Driver<Controller extends object, Parametric extends boolean = false> = typeof Driver & Readonly<Driver.Promisive<Controller, Parametric>>;
 export const Driver = class {};
 
 export namespace Driver
@@ -38,7 +38,7 @@ export namespace Driver
      * @typeParam Instance An object type to be promised.
      * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      */
-    export type Promisive<Instance extends object, UseParametric extends boolean = false> = Readonly<
+    export type Promisive<Instance extends object, UseParametric extends boolean = false> = 
     {
         [P in keyof Instance]: Instance[P] extends Function
             ? Functional<Instance[P], UseParametric> // function, its return type would be capsuled in the Promise
@@ -47,7 +47,7 @@ export namespace Driver
                    ? Promisive<Instance[P], UseParametric> // object would be promisified
                    : never // cannot be
                 : never // atomic value
-    } & IRemoteObject>;
+    } & IRemoteObject;
 
     /**
      * Promisify a function type.
