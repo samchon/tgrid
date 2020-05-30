@@ -28,7 +28,7 @@ import { DomainError } from "tstl/exception/DomainError";
  * @typeParam Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebAcceptor<Provider extends object = {}>
+export class WebAcceptor<Provider extends object = {}, Headers extends object = {}>
     extends Communicator<Provider | null | undefined>
     implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
@@ -47,28 +47,34 @@ export class WebAcceptor<Provider extends object = {}>
      */
     private socket_: WebSocket;
 
+    /**
+     * @hidden
+     */
+    private headers_: Headers;
+
     /* ----------------------------------------------------------------
         CONSTRUCTORS
     ---------------------------------------------------------------- */
     /**
      * @internal
      */
-    public static create<Provider extends object>
-        (request: http.IncomingMessage, socket: WebSocket): WebAcceptor<Provider>
+    public static create<Provider extends object, Headers extends object>
+        (request: http.IncomingMessage, socket: WebSocket, headers: Headers): WebAcceptor<Provider, Headers>
     {
-        return new WebAcceptor<Provider>(request, socket);
+        return new WebAcceptor(request, socket, headers);
     }
 
     /**
      * @hidden
      */
-    private constructor(request: http.IncomingMessage, socket: WebSocket)
+    private constructor(request: http.IncomingMessage, socket: WebSocket, headers: Headers)
     {
         super(undefined);
         
         this.state_ = WebAcceptor.State.NONE;
         this.request_ = request;
         this.socket_ = socket;
+        this.headers_ = headers;
     }
 
     /**
@@ -105,6 +111,27 @@ export class WebAcceptor<Provider extends object = {}>
     {
         await super.destructor(error);
         this.state_ = WebAcceptor.State.CLOSED;
+    }
+
+    /* ----------------------------------------------------------------
+        ACCESSORS
+    ---------------------------------------------------------------- */
+    public get path(): string
+    {
+        return this.request_.url!;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public get state(): WebAcceptor.State
+    {
+        return this.state_;
+    }
+
+    public get headers(): Headers
+    {
+        return this.headers_;
     }
 
     /* ----------------------------------------------------------------
@@ -152,22 +179,6 @@ export class WebAcceptor<Provider extends object = {}>
         
         // FINALIZATION
         await this.destructor();
-    }
-
-    /* ----------------------------------------------------------------
-        ACCESSORS
-    ---------------------------------------------------------------- */
-    public get path(): string
-    {
-        return this.request_.url!;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public get state(): WebAcceptor.State
-    {
-        return this.state_;
     }
 
     /* ----------------------------------------------------------------

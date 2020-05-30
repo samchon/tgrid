@@ -7,16 +7,16 @@ export async function test_web_reject(): Promise<void>
 {
     let server = new WebServer();
 
-    // TEST RE-USABILITY
+    // TEST RE-USABILITY TOO
     for (let i: number = 0; i < 5; ++i)
     {
         await server.open(PORT, async acceptor =>
         {
-            await acceptor.reject(1001, "The endpoint is going away.");
+            await acceptor.reject(1001, "Rejected by test automation program.");
         });
 
         let connector = new WebConnector();
-        let error: Error | undefined;
+        let error: Error | null = null;
 
         try
         {
@@ -28,7 +28,7 @@ export async function test_web_reject(): Promise<void>
         }
         await server.close();
         
-        if (!error)
+        if (error === null)
             throw new Error("Catching reject has failed.");
     }
 }

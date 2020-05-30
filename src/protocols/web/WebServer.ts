@@ -4,7 +4,7 @@
 import http = require("http");
 import https = require("https");
 import net = require("net");
-import ws = require("ws");
+import WebSocket = require("ws");
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
@@ -47,7 +47,7 @@ export class WebServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private protocol_: ws.Server;
+    private protocol_: WebSocket.Server;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -82,7 +82,7 @@ export class WebServer<Provider extends object = {}>
 
         // INITIALIZE STATUS & PROTOCOL
         this.state_ = WebServer.State.NONE;
-        this.protocol_ = new ws.Server({ noServer: true });
+        this.protocol_ = new WebSocket.Server({ noServer: true });
     }
 
     /**
@@ -90,8 +90,14 @@ export class WebServer<Provider extends object = {}>
      * 
      * @param port Port number to listen.
      * @param handler Callback function for client connection.
+     * 
+     * @todo should be normalized
      */
-    public async open(port: number, handler: (acceptor: WebAcceptor<Provider>) => any): Promise<void>
+    public async open<Headers extends object = {}>
+        (
+            port: number, 
+            handler: WebServer.ConnectionHandler<Provider, Headers>
+        ): Promise<void>
     {
         //----
         // PRELIMINARIES
@@ -117,12 +123,28 @@ export class WebServer<Provider extends object = {}>
         // OPEN SERVER
         //----
         // PROTOCOL - ADAPTOR & ACCEPTOR
-        this.server_.on("upgrade", (request: http.IncomingMessage, socket: net.Socket, header: Buffer) =>
+        this.server_.on("upgrade", (request: http.IncomingMessage, netSocket: net.Socket, header: Buffer) =>
         {
-            this.protocol_.handleUpgrade(request, socket, header, client =>
+            this.protocol_.handleUpgrade(request, netSocket, header, webSocket =>
             {
-                let acceptor: WebAcceptor<Provider> = WebAcceptor.create(request, client);
-                handler(acceptor);
+                webSocket.once("message", async (data: WebSocket.Data) =>
+                {
+                    // @todo: custom code is required
+                    if (typeof data !== "string")
+                        webSocket.close();
+
+                    try
+                    {
+                        let headers: Headers = JSON.parse(data as string);
+                        let acceptor: WebAcceptor<Provider, Headers> =  WebAcceptor.create(request, webSocket, headers);
+                        
+                        await handler(acceptor);
+                    }
+                    catch (exp)
+                    {
+                        webSocket.close();
+                    }
+                });
             });
         });
 
@@ -206,4 +228,9 @@ export class WebServer<Provider extends object = {}>
 export namespace WebServer
 {
     export import State = IServer.State;
+
+    export interface ConnectionHandler<Provider extends object, Headers extends object>
+    {
+        (acceptor: WebAcceptor<Provider, Headers>): Promise<void>;
+    }
 }

@@ -73,10 +73,14 @@ export class WebConnector<Provider extends object = {}>
      * connection in time to prevent waste of the server resource.
      * 
      * @param url URL address to connect.
-     * @param protocols Protocols to use.
+     * @param headers Headers for additional info like activation.
      */
-    public async connect(url: string, protocols?: string | string[]): Promise<void>
+    public async connect<Headers extends object = {}>
+        (url: string, headers: Headers = {} as Headers): Promise<void>
     {
+        // @todo: not implemented yet
+        headers;
+
         // TEST CONDITION
         if (this.socket_ && this.state !== WebConnector.State.CLOSED)
             if (this.socket_.readyState === WebConnector.State.CONNECTING)
@@ -88,10 +92,10 @@ export class WebConnector<Provider extends object = {}>
 
         // PREPARE ASSETS
         this.state_ = WebConnector.State.CONNECTING;
-        this.socket_ = new g.WebSocket(url, protocols);
+        this.socket_ = new g.WebSocket(url);
 
         // FINALIZATION
-        await this._Connect();
+        await this._Connect(headers);
     }
 
     /**
@@ -121,7 +125,7 @@ export class WebConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private _Connect(): Promise<void>
+    private _Connect<Headers extends object>(headers: Headers): Promise<void>
     {
         return new Promise((resolve, reject) =>
         {
@@ -137,6 +141,8 @@ export class WebConnector<Provider extends object = {}>
                 this.connector_ = new Pair(resolve, reject);
                 this.socket_!.onmessage = this._Handle_message.bind(this);
                 this.socket_!.onerror = () => {};
+
+                this.socket_!.send(JSON.stringify(headers));
             };
         });
     }
