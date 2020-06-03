@@ -9,7 +9,7 @@ import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 
 import { DomainError } from "tstl/exception/DomainError";
-import { Pair } from "tstl/utility/Pair";
+import { Latch } from "tstl/thread/Latch";
 import { is_node } from "tstl/utility/node";
 
 /**
@@ -37,11 +37,6 @@ export class WebConnector<Provider extends object = {}>
      * @hidden
      */
     private socket_?: WebSocket;
-
-    /**
-     * @hidden
-     */
-    private connector_?: Pair<()=>void, (error: Error)=>void>;
 
     /**
      * @hidden
@@ -78,9 +73,6 @@ export class WebConnector<Provider extends object = {}>
     public async connect<Headers extends object = {}>
         (url: string, headers: Headers = {} as Headers): Promise<void>
     {
-        // @todo: not implemented yet
-        headers;
-
         // TEST CONDITION
         if (this.socket_ && this.state !== WebConnector.State.CLOSED)
             if (this.socket_.readyState === WebConnector.State.CONNECTING)
@@ -129,20 +121,80 @@ export class WebConnector<Provider extends object = {}>
     {
         return new Promise((resolve, reject) =>
         {
-            this.socket_!.onclose = this._Handle_close.bind(this);
+            // WHEN FAILED TO CONNECT
             this.socket_!.onerror = () => 
             {
                 this.state_ = WebConnector.State.NONE;
-                reject(new WebError(1006, "Connection refused."));
-            }
+                reject( new WebError(1006, "Connection refused.") );
+            };
 
-            this.socket_!.onopen = () =>
+            // SUCCEEDED TO CONNECT
+            this.socket_!.onopen = async () =>
             {
-                this.connector_ = new Pair(resolve, reject);
-                this.socket_!.onmessage = this._Handle_message.bind(this);
+                // PREPARE CONDITION-VARIABLE FOR JOINING
+                let latch: Latch = new Latch(1);
+                let error: WebError | null = null;
+                
+                //----
+                // CONFIGURE EVENTS
+                //----
+                // IGNORE ERROR
                 this.socket_!.onerror = () => {};
 
+                // HANDSHAKE MESSAGE
+                this.socket_!.onmessage = async evt =>
+                {
+                    if (evt.data !== WebConnector.State.OPEN.toString())
+                        error = new WebError(1008, "Error on WebConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.");
+                    await latch.count_down();
+                };
+
+                // CLOSED DURING HANDSHAKE
+                this.socket_!.onclose = async evt => 
+                {
+                    error = new WebError(evt.code, evt.reason);
+                    await latch.count_down();
+                };
+
+                //----
+                // FINALIZATION
+                //----
+                // SEND HANDSHAKE MESSAGE
                 this.socket_!.send(JSON.stringify(headers));
+
+                // JOIN RESPONSE
+                if (await latch.wait_for(WebConnector.HANDSHAKE_TIMEOUT) === false)
+                    error = new WebError(1008, `Error on WebConnector.connect(): target server is not sending handshake data over ${WebConnector.HANDSHAKE_TIMEOUT} milliseconds.`);
+                
+                if (error === null)
+                {
+                    // SUCCESS
+                    this.socket_!.onmessage = this._Handle_message.bind(this);
+                    this.socket_!.onclose = this._Handle_close.bind(this);
+
+                    // SUCCESS
+                    this.state_ = WebConnector.State.OPEN;
+                    resolve();
+                }
+                else
+                {
+                    // FAILURE
+                    if (this.socket_!.readyState === g.WebSocket.OPEN)
+                    {
+                        this.state_ = WebConnector.State.CLOSING;
+                        this.socket_!.onclose = () => 
+                        {
+                            this.state_ = WebConnector.State.CLOSED;
+                            reject(error);
+                        };
+                        this.socket_!.close(error.status, error.message);
+                    }
+                    else
+                    {
+                        this.state_ = WebConnector.State.CLOSED;
+                        reject(error);
+                    }
+                }
             };
         });
     }
@@ -187,13 +239,11 @@ export class WebConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (this.state_ === WebConnector.State.CONNECTING && evt.data === WebConnector.State.OPEN.toString())
+        if (typeof evt.data === "string")
         {
-            this.state_ = WebConnector.State.OPEN;
-            this.connector_!.first();
+            let invoke: Invoke = JSON.parse(evt.data);
+            this.replyData(invoke);
         }
-        else
-            this.replyData(JSON.parse(evt.data));
     }
 
     /**
@@ -205,19 +255,16 @@ export class WebConnector<Provider extends object = {}>
             ? new WebError(event.code, event.reason)
             : undefined;
         
-        let prevState: WebConnector.State = this.state_;
         this.state_ = WebConnector.State.CLOSED;
-
-        if (prevState === WebConnector.State.CONNECTING)
-            this.connector_!.second(error!);
-        else
-            await this.destructor(error);
+        await this.destructor(error);
     }
 }
 
 export namespace WebConnector
 {
     export import State = IConnector.State;
+
+    export var HANDSHAKE_TIMEOUT: number = 5000;
 }
 
 //----

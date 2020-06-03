@@ -116,6 +116,11 @@ export class WebAcceptor<Provider extends object = {}, Headers extends object = 
     /* ----------------------------------------------------------------
         ACCESSORS
     ---------------------------------------------------------------- */
+    public get ip(): string
+    {
+        return this.request_.connection.remoteAddress!;
+    }
+
     public get path(): string
     {
         return this.request_.url!;

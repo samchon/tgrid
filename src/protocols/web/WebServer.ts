@@ -184,6 +184,7 @@ export class WebServer<Provider extends object = {}>
             this.server_.on("listening", () =>
             {
                 this.state_ = WebServer.State.OPEN;
+                this.server_.on("error", () => {});
                 resolve();
             });
             this.server_.on("error", error =>
