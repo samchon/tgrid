@@ -4,52 +4,50 @@
 import { tmpdir } from "os";
 import { sep } from "path";
 
+import { IWorkerCompiler } from "./IWebCompiler";
 import { FileSystem } from "./FileSystem";
 import { Worker as _Worker } from "./Worker";
 
-/* ----------------------------------------------------------------
-    GLOBAL FUNCTIONS
----------------------------------------------------------------- */
 /**
  * @hidden
  */
-export async function compile(content: string): Promise<string>
+class _NodeWorkerCompiler implements IWorkerCompiler
 {
-    let path: string = tmpdir() + sep + "tgrid";
-    if (await FileSystem.exists(path) === false)
-        await FileSystem.mkdir(path);
-
-    while (true)
+    public async compile(content: string): Promise<string>
     {
-        let myPath: string = path + sep + `${new Date().getTime()}_${Math.random()}_${Math.random()}.js`; 
-        if (await FileSystem.exists(myPath) === false)
+        let path: string = tmpdir() + sep + "tgrid";
+        if (await FileSystem.exists(path) === false)
+            await FileSystem.mkdir(path);
+
+        while (true)
         {
-            path = myPath;
-            break;
+            let myPath: string = path + sep + `${new Date().getTime()}_${Math.random()}_${Math.random()}.js`; 
+            if (await FileSystem.exists(myPath) === false)
+            {
+                path = myPath;
+                break;
+            }
         }
+
+        await FileSystem.write(path, content);
+        return path;
     }
 
-    await FileSystem.write(path, content);
-    return path;
-}
-
-/**
- * @hidden
- */
-export function execute(jsFile: string, ...args: string[]): Worker
-{
-    return new _Worker(jsFile, ...args) as any;
-}
-
-/**
- * @hidden
- */
-export async function remove(path: string): Promise<void>
-{
-    // THE FILE CAN BE REMOVED BY OS AUTOMATICALLY
-    try
+    public execute<Headers extends object>
+        (jsFile: string, headers: Headers): Worker
     {
-        await FileSystem.unlink(path);
+        return new _Worker(jsFile, JSON.stringify(headers)) as any;
     }
-    catch {}
+
+    public async remove(path: string): Promise<void>
+    {
+        // THE FILE CAN BE REMOVED BY OS AUTOMATICALLY
+        try
+        {
+            await FileSystem.unlink(path);
+        }
+        catch {}
+    }
 }
+
+export = new _NodeWorkerCompiler();

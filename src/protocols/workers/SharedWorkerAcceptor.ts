@@ -25,7 +25,7 @@ import { DomainError } from "tstl/exception/DomainError";
  * @typeParam Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerAcceptor<Provider extends object = {}>
+export class SharedWorkerAcceptor<Provider extends object = {}, Headers extends object = {}>
     extends Communicator<Provider | null | undefined>
     implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
@@ -47,7 +47,7 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @hidden
      */
-    private arguments_: string[];
+    private headers_: Headers;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -55,26 +55,26 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * @internal
      */
-    public static create<Provider extends object>(
+    public static create<Provider extends object, Headers extends object>(
             port: MessagePort, 
-            args: string[], 
+            headers: Headers, 
             eraser: ()=>void
         ): SharedWorkerAcceptor<Provider>
     {
-        return new SharedWorkerAcceptor(port, args, eraser);
+        return new SharedWorkerAcceptor(port, headers, eraser);
     }
 
     /**
      * @hidden
      */
-    private constructor(port: MessagePort, args: string[], eraser: ()=>void)
+    private constructor(port: MessagePort, headers: Headers, eraser: ()=>void)
     {
         super(undefined);
 
         // ASSIGN MEMBER
         this.port_ = port;
         this.eraser_ = eraser;
-        this.arguments_ = args;
+        this.headers_ = headers;
 
         // PROPERTIES
         this.state_ = SharedWorkerAcceptor.State.NONE;
@@ -131,9 +131,9 @@ export class SharedWorkerAcceptor<Provider extends object = {}>
     /**
      * Arguments delivered from the connector.
      */
-    public get arguments(): string[]
+    public get headers(): Headers
     {
-        return this.arguments_;
+        return this.headers_;
     }
 
     /* ----------------------------------------------------------------

@@ -1,41 +1,39 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
+import { IWorkerCompiler } from "./IWebCompiler";
 import { URLVariables } from "../../../utils/URLVariables";
 
 /**
  * @hidden
  */
-export function compile(content: string): string
+class _WebWorkerCompiler implements IWorkerCompiler
 {
-    let blob: Blob = new Blob([content], { type: "application/javascript" });
-    return URL.createObjectURL(blob);
-}
-
-/**
- * @hidden
- */
-export function remove(url: string): void
-{
-    // THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
-    try
+    public async compile(content: string): Promise<string>
     {
-        URL.revokeObjectURL(url);
+        let blob: Blob = new Blob([content], { type: "application/javascript" });
+        return window.URL.createObjectURL(blob);
     }
-    catch {}
-}
 
-/**
- * @hidden
- */
-export function execute(jsFile: string, ...args: string[]): Worker
-{
-    if (args.length)
+    public async remove(url: string): Promise<void>
+    {
+        // THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
+        try
+        {
+            window.URL.revokeObjectURL(url);
+        }
+        catch {}
+    }
+
+    public execute<Headers extends object>
+        (jsFile: string, headers: Headers): Worker
     {
         let vars: URLVariables = new URLVariables();
-        vars.set("__m_pArgs", JSON.stringify(args));
-
+        vars.set("__m_stHeaders", JSON.stringify(headers));
+    
         jsFile += "?" + vars.toString();
+        return new Worker(jsFile);
     }
-    return new Worker(jsFile);
 }
+
+export = new _WebWorkerCompiler();

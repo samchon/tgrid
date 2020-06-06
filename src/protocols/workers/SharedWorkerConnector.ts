@@ -7,7 +7,7 @@ import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
-import { compile as _Compile, remove as _Remove } from "./internal/web-worker";
+import WebCompiler from "./internal/web-worker";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
@@ -55,7 +55,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private args_?: string[];
+    private headers_?: object;
     
     /**
      * @hidden
@@ -96,7 +96,8 @@ export class SharedWorkerConnector<Provider extends object = {}>
      * @param jsFile JS File to be {@link SharedWorkerServer}.
      * @param args Arguments to deliver.
      */
-    public connect(jsFile: string, ...args: string[]): Promise<void>
+    public connect<Headers extends object>
+        (jsFile: string, headers: Headers = {} as Headers): Promise<void>
     {
         return new Promise((resolve, reject) => 
         {
@@ -122,7 +123,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
             {
                 // PREPARE MEMBERS
                 this.state_ = SharedWorkerConnector.State.CONNECTING;
-                this.args_ = args;
+                this.headers_ = headers;
                 this.connector_ = new Pair(resolve, reject);
 
                 // DO CONNECT
@@ -201,7 +202,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
     {
         // PROCESSES
         if (evt.data === SharedWorkerConnector.State.CONNECTING)
-            this.port_!.postMessage(JSON.stringify(this.args_!));
+            this.port_!.postMessage(JSON.stringify(this.headers_!));
         else if (evt.data === SharedWorkerConnector.State.OPEN)
         {
             this.state_ = SharedWorkerConnector.State.OPEN;
@@ -253,9 +254,9 @@ export namespace SharedWorkerConnector
      * @param content Source code
      * @return Temporary URL.
      */
-    export function compile(content: string): string
+    export function compile(content: string): Promise<string>
     {
-        return _Compile(content);
+        return WebCompiler.compile(content);
     }
 
     /**
@@ -263,8 +264,8 @@ export namespace SharedWorkerConnector
      * 
      * @param url Temporary URL.
      */
-    export function remove(url: string): void
+    export function remove(url: string): Promise<void>
     {
-        _Remove(url);
+        return WebCompiler.remove(url);
     }
 }

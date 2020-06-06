@@ -11,11 +11,11 @@ async function main(): Promise<void>
     // PREPARATIONS
     //----
     // OPEN SERVER
-    let server: WorkerServer = new WorkerServer();
+    let server: WorkerServer<object, { name: string }> = new WorkerServer();
     let scripts: IScript[] = [];
 
     // PREPARE ASSETS
-    let myName: string = server.arguments[0];
+    let myName: string = server.headers.name;
     let service: Driver<IChatService> = server.getDriver<IChatService>();
 
     await server.open

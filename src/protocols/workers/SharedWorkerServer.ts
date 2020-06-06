@@ -117,10 +117,10 @@ export class SharedWorkerServer<Provider extends object = {}>
                 return;
 
             // ARGUMENTS
-            let args: string[] = JSON.parse(evt.data);
+            let headers: object = JSON.parse(evt.data);
 
             // CREATE ACCEPTOR
-            acceptor = new AcceptorFactory<Provider>(port, args, () =>
+            acceptor = SharedWorkerAcceptor.create(port, headers, () =>
             {
                 this.acceptors_.erase(acceptor!);
             });
@@ -153,16 +153,3 @@ export namespace SharedWorkerServer
  * @hidden
  */
 type OpenEvent = Event & {ports: MessagePort[]};
-
-/**
- * @hidden
- */
-const AcceptorFactory:
-{
-    new<Provider extends object>
-    (
-        port: MessagePort, 
-        args: string[],
-        eraser: ()=>void
-    ): SharedWorkerAcceptor<Provider>;
-} = <any>SharedWorkerAcceptor;

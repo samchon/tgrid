@@ -2,9 +2,10 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { Communicator } from "../../components/Communicator";
-import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IConnector } from "../internal/IConnector";
 
+import { IWorkerSystem } from "./internal/IWorkerSystem";
+import { IWorkerCompiler } from "./internal/IWebCompiler";
 import { Invoke } from "../../components/Invoke";
 
 import { DomainError } from "tstl/exception/DomainError";
@@ -77,9 +78,10 @@ export class WorkerConnector<Provider extends object = {}>
      * memory leak.
      * 
      * @param content JS Source code to compile.
-     * @param args Arguments to deliver.
+     * @param headers Headers containing additional info like activation.
      */
-    public async compile(content: string, ...args: string[]): Promise<void>
+    public async compile<Headers extends object>
+        (content: string, headers: Headers = {} as Headers): Promise<void>
     {
         //----
         // PRELIMINIARIES
@@ -97,7 +99,7 @@ export class WorkerConnector<Provider extends object = {}>
         // TRY CONNECTION
         try
         {
-            await this._Connect(path, ...args);
+            await this._Connect(path, headers);
         }
         catch (exp)
         {
@@ -125,15 +127,16 @@ export class WorkerConnector<Provider extends object = {}>
      * memory leak.
      * 
      * @param jsFile JS File to be {@link WorkerServer}.
-     * @param args Arguments to deliver.
+     * @param args Headers containing additional info like activation.
      */
-    public async connect(jsFile: string, ...args: string[]): Promise<void>
+    public async connect<Headers extends object>
+        (jsFile: string, headers: Headers = {} as Headers): Promise<void>
     {
         // TEST CONDITION
         this._Test_connection("connect");
 
         // DO CONNECT
-        await this._Connect(jsFile, ...args);
+        await this._Connect(jsFile, headers);
     }
 
     /**
@@ -155,7 +158,7 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private _Connect(jsFile: string, ...args: string[]): Promise<void>
+    private _Connect<Headers extends object>(jsFile: string, headers: Headers): Promise<void>
     {
         return new Promise<void>((resolve, reject) =>
         {
@@ -165,7 +168,7 @@ export class WorkerConnector<Provider extends object = {}>
                 this.state_ = WorkerConnector.State.CONNECTING;
 
                 // DO CONNECT
-                this.worker_ = Compiler.execute(jsFile, ...args);
+                this.worker_ = Compiler.execute(jsFile, headers);
                 this.worker_.onmessage = this._Handle_message.bind(this);
 
                 // GO RETURN
@@ -271,16 +274,6 @@ export namespace WorkerConnector
 /**
  * @hidden
  */
-const Compiler: CompilerScope = is_node()
+const Compiler: IWorkerCompiler = is_node()
     ? require("./internal/node-worker")
     : require("./internal/web-worker");
-
-/**
- * @hidden
- */
-interface CompilerScope
-{
-    compile(content: string): string | Promise<string>;
-    remove(path: string): void | Promise<void>;
-    execute(jsFile: string, ...args: string[]): Worker;
-}

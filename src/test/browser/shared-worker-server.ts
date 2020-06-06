@@ -7,7 +7,7 @@ async function main(): Promise<void>
     let server = new SharedWorkerServer();
     await server.open(async acceptor =>
     {
-        console.log(acceptor.arguments);
+        console.log(acceptor.headers);
         await acceptor.accept(new Calculator());
     });
 }

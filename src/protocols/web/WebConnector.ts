@@ -68,7 +68,7 @@ export class WebConnector<Provider extends object = {}>
      * connection in time to prevent waste of the server resource.
      * 
      * @param url URL address to connect.
-     * @param headers Headers for additional info like activation.
+     * @param headers Headers containing additional info like activation.
      */
     public async connect<Headers extends object = {}>
         (url: string, headers: Headers = {} as Headers): Promise<void>

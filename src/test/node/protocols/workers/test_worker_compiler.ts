@@ -8,7 +8,7 @@ export function test_worker_connect(): Promise<void>
 {
     return _Test_worker(worker =>
     {
-        return worker.connect(__dirname + "/../../../browser/worker-server.js", "first", "second");
+        return worker.connect(__dirname + "/../../../browser/worker-server.js", ["first", "second"]);
     });
 }
 
@@ -20,7 +20,7 @@ export async function test_worker_compile(): Promise<void>
 
     await _Test_worker(worker =>
     {
-        return worker.compile(fs.readFileSync(PATH, "utf8"), "first", "second");
+        return worker.compile(fs.readFileSync(PATH, "utf8"), ["first", "second"]);
     });
 }
 

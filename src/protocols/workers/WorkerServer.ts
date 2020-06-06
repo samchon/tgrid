@@ -32,7 +32,7 @@ import { is_node } from "tstl/utility/node";
  * @typeParam Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerServer<Provider extends object = {}>
+export class WorkerServer<Provider extends object = {}, Headers extends object = {}>
     extends Communicator<Provider | null | undefined>
     implements IWorkerSystem, 
         IServer<WorkerServer.State>
@@ -45,7 +45,7 @@ export class WorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private args_?: string[];
+    private headers_?: Headers;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -136,19 +136,17 @@ export class WorkerServer<Provider extends object = {}>
     /**
      * Arguments delivered from the connector.
      */
-    public get arguments(): string[]
+    public get headers(): Headers
     {
-        if (this.args_ === undefined)
+        if (this.headers_ === undefined)
             if (is_node())
-                this.args_ = global.process.argv.slice(2);
+                this.headers_ = JSON.parse(global.process.argv[2]);
             else
             {
                 let vars: URLVariables = new URLVariables(self.location.href);
-                this.args_ = vars.has("__m_pArgs")
-                    ? JSON.parse(vars.get("__m_pArgs"))
-                    : [];
+                this.headers_ = JSON.parse(vars.get("__m_pArgs"))
             }
-        return this.args_!;
+        return this.headers_!;
     }
 
     /* ----------------------------------------------------------------
