@@ -4,7 +4,7 @@ import { Calculator } from "../providers/Calculator";
 /// chrome://inspect/#workers
 async function main(): Promise<void>
 {
-    let server = new SharedWorkerServer();
+    let server: SharedWorkerServer<{}, Calculator> = new SharedWorkerServer();
     await server.open(async acceptor =>
     {
         console.log(acceptor.headers);

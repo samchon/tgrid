@@ -8,5 +8,5 @@ export interface IWorkerCompiler
 {
     compile(content: string): Promise<string>;
     remove(path: string): Promise<void>;
-    execute<Headers extends object>(jsFile: string, headers: Headers): Worker;
+    execute(jsFile: string): Worker;
 }

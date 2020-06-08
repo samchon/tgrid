@@ -33,10 +33,9 @@ class _NodeWorkerCompiler implements IWorkerCompiler
         return path;
     }
 
-    public execute<Headers extends object>
-        (jsFile: string, headers: Headers): Worker
+    public execute(jsFile: string): Worker
     {
-        return new _Worker(jsFile, JSON.stringify(headers)) as any;
+        return new _Worker(jsFile) as any;
     }
 
     public async remove(path: string): Promise<void>

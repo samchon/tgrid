@@ -20,7 +20,7 @@ class WorkerServerPolyfill
     {
         global.process.on("message", msg =>
         {
-            listener({data: msg} as MessageEvent);
+            listener({ data: msg } as MessageEvent);
         });
     }
 }

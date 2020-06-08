@@ -2,7 +2,6 @@
 /** @module tgrid.protocols.workers */
 //================================================================
 import { IWorkerCompiler } from "./IWebCompiler";
-import { URLVariables } from "../../../utils/URLVariables";
 
 /**
  * @hidden
@@ -25,13 +24,8 @@ class _WebWorkerCompiler implements IWorkerCompiler
         catch {}
     }
 
-    public execute<Headers extends object>
-        (jsFile: string, headers: Headers): Worker
+    public execute(jsFile: string): Worker
     {
-        let vars: URLVariables = new URLVariables();
-        vars.set("__m_stHeaders", JSON.stringify(headers));
-    
-        jsFile += "?" + vars.toString();
         return new Worker(jsFile);
     }
 }

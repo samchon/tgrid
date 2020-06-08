@@ -5,11 +5,11 @@ import { ICalculator } from "../../../controllers/ICalculator";
 
 export async function test_hierarchical_workers(): Promise<void>
 {
-    let connector: WorkerConnector = new WorkerConnector();
+    let connector: WorkerConnector<{}, null> = new WorkerConnector(null);
     for (let i: number = 0; i < 5; ++i)
     {
         // DO CONNECT
-        await connector.connect(__dirname + "/internal/calculator.js");
+        await connector.connect(__dirname + "/internal/calculator.js", {});
 
         // DO TEST
         let driver: Driver<ICalculator> = connector.getDriver<ICalculator>();

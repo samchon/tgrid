@@ -1,4 +1,5 @@
-import { WebServer, WebConnector } from "../../../../protocols/web";
+import { WebServer } from "../../../../protocols/web/WebServer";
+import { WebConnector } from "../../../../protocols/web/WebConnector";
 import { Driver } from "../../../../components/Driver";
 
 import { Vector } from "tstl/container/Vector";
@@ -34,8 +35,8 @@ class Provider
 
 async function _Test_client(): Promise<void>
 {
-    let connector = new WebConnector();
-    await connector.connect(`ws://127.0.0.1:${PORT}`);
+    let connector: WebConnector<{}, null> = new WebConnector(null);
+    await connector.connect(`ws://127.0.0.1:${PORT}`, {});
 
     let driver: Driver<Provider> = connector.getDriver<Provider>();
     await driver.mutex.lock();
@@ -56,7 +57,7 @@ export async function test_web_mutex(): Promise<void>
     // PREPARES
     //----
     // OPEN SERVER
-    let server: WebServer = new WebServer();
+    let server: WebServer<{}, Provider> = new WebServer();
     let mutex: Mutex = new Mutex();
     let vector: Vector<number> = new Vector();
     let index: number = 0;

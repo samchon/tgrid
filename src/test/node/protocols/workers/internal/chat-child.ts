@@ -11,7 +11,7 @@ async function main(): Promise<void>
     // PREPARATIONS
     //----
     // OPEN SERVER
-    let server: WorkerServer<object, { name: string }> = new WorkerServer();
+    let server: WorkerServer<{ name: string }, object> = new WorkerServer();
     let scripts: IScript[] = [];
 
     // PREPARE ASSETS

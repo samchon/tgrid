@@ -23,10 +23,10 @@ import { WebAcceptor } from "./WebAcceptor";
  * To open the server, call the {@link open}() method with a callback function which would be
  * called whenever a client has been connected.
  * 
- * @typeParam Provider Type of features provided for remote systems.
+ * @type Provider Type of features provided for remote systems.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebServer<Provider extends object = {}>
+export class WebServer<Headers extends object, Provider extends object | null>
     implements IServer<WebServer.State>
 {
     /**
@@ -93,10 +93,10 @@ export class WebServer<Provider extends object = {}>
      * 
      * @todo should be normalized
      */
-    public async open<Headers extends object = {}>
+    public async open
         (
             port: number, 
-            handler: WebServer.ConnectionHandler<Provider, Headers>
+            handler: WebServer.ConnectionHandler<Headers, Provider>
         ): Promise<void>
     {
         //----
@@ -136,7 +136,7 @@ export class WebServer<Provider extends object = {}>
                     try
                     {
                         let headers: Headers = JSON.parse(data as string);
-                        let acceptor: WebAcceptor<Provider, Headers> =  WebAcceptor.create(request, webSocket, headers);
+                        let acceptor: WebAcceptor<Headers, Provider> =  WebAcceptor.create(request, webSocket, headers);
                         
                         await handler(acceptor);
                     }
@@ -230,8 +230,8 @@ export namespace WebServer
 {
     export import State = IServer.State;
 
-    export interface ConnectionHandler<Provider extends object, Headers extends object>
+    export interface ConnectionHandler<Headers extends object, Provider extends object | null>
     {
-        (acceptor: WebAcceptor<Provider, Headers>): Promise<void>;
+        (acceptor: WebAcceptor<Headers, Provider>): Promise<void>;
     }
 }

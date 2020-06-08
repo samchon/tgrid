@@ -16,8 +16,8 @@ async function get<Controller extends object>
     (path: string): Promise<Driver<Controller>>
 {
     // DO CONNECT
-    let connector = new WorkerConnector();
-    await connector.connect(path);
+    let connector: WorkerConnector<{}, null> = new WorkerConnector(null);
+    await connector.connect(path, {});
 
     // RETURN DRIVER
     return connector.getDriver<Controller>();

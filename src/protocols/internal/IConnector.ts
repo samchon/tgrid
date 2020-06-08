@@ -23,7 +23,7 @@ export namespace IConnector
         CLOSING,
         CLOSED
     }
-
+    
     export function inspect(state: State, method: string): Error | null
     {
         // NO ERROR

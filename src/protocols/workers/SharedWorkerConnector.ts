@@ -11,7 +11,8 @@ import WebCompiler from "./internal/web-worker";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
-import { Pair } from "tstl/utility/Pair";
+import { Latch } from "tstl/thread/Latch";
+import { once } from "../internal/once";
 
 /**
  * SharedWorker Connector
@@ -35,11 +36,11 @@ import { Pair } from "tstl/utility/Pair";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerServer.close}()
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerConnector<Provider extends object = {}>
-    extends Communicator<Provider | null>
+export class SharedWorkerConnector<Headers extends object, Provider extends object | null>
+    extends Communicator<Provider>
     implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
 {
     /**
@@ -52,16 +53,6 @@ export class SharedWorkerConnector<Provider extends object = {}>
      */
     private port_?: MessagePort;
 
-    /**
-     * @hidden
-     */
-    private headers_?: object;
-    
-    /**
-     * @hidden
-     */
-    private connector_?: Pair<()=>void, (error: Error)=>void>;
-
     /* ----------------------------------------------------------------
         CONSTRUCTOR
     ---------------------------------------------------------------- */
@@ -70,7 +61,7 @@ export class SharedWorkerConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features (functions & objects) for remote system.
      */
-    public constructor(provider: Provider | null = null)
+    public constructor(provider: Provider)
     {
         super(provider);
 
@@ -96,49 +87,92 @@ export class SharedWorkerConnector<Provider extends object = {}>
      * @param jsFile JS File to be {@link SharedWorkerServer}.
      * @param args Arguments to deliver.
      */
-    public connect<Headers extends object>
-        (jsFile: string, headers: Headers = {} as Headers): Promise<void>
+    public async connect(jsFile: string, headers: Headers, timeout?: number): Promise<void>
     {
-        return new Promise((resolve, reject) => 
+        // TEST CONDITION
+        if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
         {
-            // TEST CONDITION
-            if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
+            if (this.state_ === SharedWorkerConnector.State.CONNECTING)
+                throw new DomainError("On connecting.");
+            else if (this.state_ === SharedWorkerConnector.State.OPEN)
+                throw new DomainError("Already connected.");
+            else
+                throw new DomainError("Closing.");
+        }
+
+        //----
+        // CONNECTION
+        //----
+        // SET CURRENT STATE
+        this.state_ = SharedWorkerConnector.State.CONNECTING;
+
+        try
+        {
+            // PREPARE ASSETS
+            let latch: Latch = new Latch(1);
+            let error: Error | null = null;
+
+            // CONNECT WITH EVENT LISTENERS
+            let worker: SharedWorker = new SharedWorker(jsFile);
+            this.port_ = worker.port as MessagePort;
+
+            this.port_.onmessage = once(async evt =>
             {
-                let err: Error;
-                if (this.state_ === SharedWorkerConnector.State.CONNECTING)
-                    err = new DomainError("On connecting.");
-                else if (this.state_ === SharedWorkerConnector.State.OPEN)
-                    err = new DomainError("Already connected.");
+                // SUCCEEDED TO CONNECT
+                if (evt.data === SharedWorkerConnector.State.CONNECTING)
+                {
+                    this.port_!.postMessage(JSON.stringify(headers));
+                    this.port_!.onmessage = once(async evt =>
+                    {
+                        if (evt.data === SharedWorkerConnector.State.OPEN)
+                        {
+                            // SUCCESS
+                            this.state_ = SharedWorkerConnector.State.OPEN;
+
+                            // NEW LISTENERS
+                            this.port_!.onmessage = this._Handle_message.bind(this);
+                            this.port_!.onmessageerror = () => {};
+                        }
+                        else
+                        {
+                            // REJECTED OR HANDSHAKE ERROR
+                            let reject: IReject | null = null;
+                            try
+                            {
+                                reject = JSON.parse(evt.data);
+                            }
+                            catch {}
+
+                            if (reject && reject.name === "reject" && typeof reject.message === "string")
+                                error = new RuntimeError(reject.message);
+                            else
+                                error = new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule.`);
+                        }
+                        await latch.count_down();
+                    });
+                }
                 else
-                    err = new DomainError("Closing.");
+                {
+                    // HANDSHAKE ERROR
+                    error = new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule.`);
+                    await latch.count_down();
+                }
+            });
+            this.port_.start();
 
-                reject(err);
-                return;
-            }
+            if (timeout === undefined)
+                await latch.wait();
+            else if (await latch.wait_for(timeout) === false)
+                error = new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker is not sending handshake data over ${timeout} milliseconds.`);
 
-            //----
-            // CONNECTOR
-            //----
-            try
-            {
-                // PREPARE MEMBERS
-                this.state_ = SharedWorkerConnector.State.CONNECTING;
-                this.headers_ = headers;
-                this.connector_ = new Pair(resolve, reject);
-
-                // DO CONNECT
-                let worker = new SharedWorker(jsFile);
-                
-                this.port_ = worker.port;
-                this.port_.onmessage = this._Handle_message.bind(this);
-                this.port_.start();
-            }
-            catch (exp)
-            {
-                this.state_ = SharedWorkerConnector.State.NONE;
-                reject(exp);
-            }
-        });
+            if (error !== null)
+                throw error;
+        }
+        catch (exp)
+        {
+            this.state_ = SharedWorkerConnector.State.NONE;
+            throw exp;
+        }
     }
 
     /**
@@ -200,38 +234,15 @@ export class SharedWorkerConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        // PROCESSES
-        if (evt.data === SharedWorkerConnector.State.CONNECTING)
-            this.port_!.postMessage(JSON.stringify(this.headers_!));
-        else if (evt.data === SharedWorkerConnector.State.OPEN)
-        {
-            this.state_ = SharedWorkerConnector.State.OPEN;
-            this.connector_!.first();
-        }
-        else if (evt.data === SharedWorkerConnector.State.CLOSING)
+        if (evt.data === SharedWorkerConnector.State.CLOSING)
             this._Handle_close();
 
         // RFC OR REJECT
         else
         {
-            
-            let data: Invoke | IReject = JSON.parse(evt.data);
-            if ((data as Invoke).uid !== undefined)
-                this.replyData(data as Invoke);
-            else
-                this._Handle_reject((data as IReject).message);
+            let data: Invoke = JSON.parse(evt.data);
+            this.replyData(data as Invoke);
         }
-    }
-
-    /**
-     * @hidden
-     */
-    private async _Handle_reject(reason: string): Promise<void>
-    {
-        this.state_ = SharedWorkerConnector.State.CLOSING;
-        this.connector_!.second(new RuntimeError(reason));
-
-        await this._Handle_close();
     }
 
     /**

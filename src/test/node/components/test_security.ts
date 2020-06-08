@@ -32,14 +32,14 @@ async function must_be_error(procedures: (() => Promise<void>)[]): Promise<void>
 
 export async function test_security(): Promise<void>
 {
-    let server: WebServer = new WebServer();
+    let server: WebServer<{}, CustomCalculator> = new WebServer();
     await server.open(10101, async acceptor =>
     {
         await acceptor.accept(new CustomCalculator());
     });
 
-    let connector: WebConnector = new WebConnector();
-    await connector.connect("ws://127.0.0.1:10101");
+    let connector: WebConnector<{}, null> = new WebConnector(null);
+    await connector.connect("ws://127.0.0.1:10101", {});
 
     let calc: Driver<CustomCalculator> = connector.getDriver();
     await must_be_error([

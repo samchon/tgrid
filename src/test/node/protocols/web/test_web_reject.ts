@@ -5,7 +5,7 @@ const PORT = 10101;
 
 export async function test_web_reject(): Promise<void>
 {
-    let server = new WebServer();
+    let server = new WebServer<{}, null>();
 
     // TEST RE-USABILITY TOO
     for (let i: number = 0; i < 5; ++i)
@@ -15,12 +15,12 @@ export async function test_web_reject(): Promise<void>
             await acceptor.reject(1001, "Rejected by test automation program.");
         });
 
-        let connector = new WebConnector();
+        let connector: WebConnector<{}, null> = new WebConnector(null);
         let error: Error | null = null;
 
         try
         {
-            await connector.connect(`ws://127.0.0.1:${PORT}`);
+            await connector.connect(`ws://127.0.0.1:${PORT}`, {});
         }
         catch (exp)
         {

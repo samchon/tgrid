@@ -14,8 +14,8 @@
  *   - `Controller`: Definition only
  *   - `Driver`: Remote Function Call
  * 
- * @typeParam Controller An interface defining features (functions & objects) provided from the remote system.
- * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+ * @type Controller An interface defining features (functions & objects) provided from the remote system.
+ * @type UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export type Driver<Controller extends object, Parametric extends boolean = false> = typeof Driver & Readonly<Driver.Promisive<Controller, Parametric>>;
@@ -35,8 +35,8 @@ export namespace Driver
      *   - object: promisifies recursively (`O` -> `Promisify<O>`).
      *   - atomic value: be ignored (be `never` type).
      * 
-     * @typeParam Instance An object type to be promised.
-     * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+     * @type Instance An object type to be promised.
+     * @type UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      */
     export type Promisive<Instance extends object, UseParametric extends boolean = false> = 
     {
@@ -57,8 +57,8 @@ export namespace Driver
      *   - `Ret`: `Promise<Primitive<Ret>>`
      *   - `Promise<Ret>`: `Promise<Primitive<Ret>>`
      * 
-     * @typeParam Method A function type to be promisified.
-     * @typeParam UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+     * @type Method A function type to be promisified.
+     * @type UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      */
     export type Functional<Method extends Function, UseParametric extends boolean = false> = 
     (
@@ -85,7 +85,7 @@ export namespace Driver
      * removed. Also, if the target type has a `toJSON()` method, its return type 
      * would be chosen.
      * 
-     * @typeParam Instance An instance type to be primitive
+     * @type Instance An instance type to be primitive
      */
     export type Primitive<Instance> = value_of<Instance> extends object
         ? Instance extends object

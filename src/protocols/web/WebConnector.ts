@@ -7,6 +7,7 @@ import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
+import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { Latch } from "tstl/thread/Latch";
@@ -26,10 +27,11 @@ import { is_node } from "tstl/utility/node";
  * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
  * close the connection in time, it may waste vulnerable resources of the server.
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Headers Type of headers containing additional information like activation.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebConnector<Provider extends object = {}>
+export class WebConnector<Headers extends object, Provider extends object | null>
     extends Communicator<Provider | null>
     implements IWebCommunicator, IConnector<WebConnector.State>
 {
@@ -51,7 +53,7 @@ export class WebConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(provider: Provider | null = null)
+    public constructor(provider: Provider)
     {
         super(provider);
         this.state_ = WebConnector.State.NONE;
@@ -70,8 +72,7 @@ export class WebConnector<Provider extends object = {}>
      * @param url URL address to connect.
      * @param headers Headers containing additional info like activation.
      */
-    public async connect<Headers extends object = {}>
-        (url: string, headers: Headers = {} as Headers): Promise<void>
+    public async connect(url: string, headers: Headers): Promise<void>
     {
         // TEST CONDITION
         if (this.socket_ && this.state !== WebConnector.State.CLOSED)
@@ -80,7 +81,7 @@ export class WebConnector<Provider extends object = {}>
             else if (this.socket_.readyState === WebConnector.State.OPEN)
                 throw new DomainError("Error on WebConnector.connect(): already connected.");
             else
-                throw new DomainError("Error on WebConnector.connecotr(): already closing.");
+                throw new DomainError("Error on WebConnector.connect(): already closing.");
 
         // PREPARE ASSETS
         this.state_ = WebConnector.State.CONNECTING;
@@ -142,19 +143,19 @@ export class WebConnector<Provider extends object = {}>
                 this.socket_!.onerror = () => {};
 
                 // HANDSHAKE MESSAGE
-                this.socket_!.onmessage = async evt =>
+                this.socket_!.onmessage = once(async evt =>
                 {
                     if (evt.data !== WebConnector.State.OPEN.toString())
                         error = new WebError(1008, "Error on WebConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.");
                     await latch.count_down();
-                };
+                });
 
                 // CLOSED DURING HANDSHAKE
-                this.socket_!.onclose = async evt => 
+                this.socket_!.onclose = once(async evt => 
                 {
                     error = new WebError(evt.code, evt.reason);
                     await latch.count_down();
-                };
+                });
 
                 //----
                 // FINALIZATION

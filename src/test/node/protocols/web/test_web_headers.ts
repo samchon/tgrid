@@ -11,8 +11,8 @@ interface IHeaders
 
 export async function test_web_headers(): Promise<void>
 {
-    let server: WebServer = new WebServer();
-    await server.open<IHeaders>(PORT, async acceptor =>
+    let server: WebServer<IHeaders, null> = new WebServer();
+    await server.open(PORT, async acceptor =>
     {
         if (acceptor.headers.token !== TOKEN)
             await acceptor.reject();
@@ -20,7 +20,7 @@ export async function test_web_headers(): Promise<void>
             await acceptor.accept();
     });
 
-    let connector: WebConnector = new WebConnector();
+    let connector: WebConnector<IHeaders, null> = new WebConnector(null);
     await connector.connect(`ws://127.0.0.1:${PORT}`, { token: TOKEN });
     await connector.close();
 

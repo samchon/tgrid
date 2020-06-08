@@ -15,7 +15,7 @@ export async function test_web_calculator(): Promise<void>
     //----
     // SERVER
     //----
-    let server: WebServer = new WebServer();
+    let server: WebServer<{}, Calculator | Vector<number>> = new WebServer();
     await server.open(PORT, async acceptor =>
     {
         // SPEICFY PROVIDER
@@ -30,14 +30,14 @@ export async function test_web_calculator(): Promise<void>
     //----
     // CLIENTS
     //----
-    let connector: WebConnector = new WebConnector();
+    let connector: WebConnector<{}, null> = new WebConnector(null);
 
     // TEST RE-USABILITY
     for (let path of ["calculator", "vector"])
         for (let i: number = 0; i < 3; ++i)
         {
             // DO CONNECT
-            await connector.connect(`ws://127.0.0.1:${PORT}/${path}`);
+            await connector.connect(`ws://127.0.0.1:${PORT}/${path}`, {});
 
             // SET DRIVER AND TEST BY CALCULATOR PROCESS
             if (path === "calculator")

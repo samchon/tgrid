@@ -6,10 +6,11 @@ import { IServer } from "../internal/IServer";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
-import { URLVariables } from "../../utils/URLVariables";
+import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
+import { Latch } from "tstl/thread";
 import { is_node } from "tstl/utility/node";
 
 /**
@@ -29,13 +30,12 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerServer<Provider extends object = {}, Headers extends object = {}>
-    extends Communicator<Provider | null | undefined>
-    implements IWorkerSystem, 
-        IServer<WorkerServer.State>
+export class WorkerServer<Headers extends object, Provider extends object | null>
+    extends Communicator<Provider | undefined>
+    implements IWorkerSystem, IServer<WorkerServer.State>
 {
     /**
      * @hidden
@@ -71,7 +71,7 @@ export class WorkerServer<Provider extends object = {}, Headers extends object =
      * 
      * @param provider An object providing featrues for the remote system.
      */
-    public async open(provider: Provider | null = null): Promise<void>
+    public async open(provider: Provider): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === false)
@@ -86,11 +86,21 @@ export class WorkerServer<Provider extends object = {}, Headers extends object =
         
         // OPEN WORKER
         this.state_ = WorkerServer.State.OPENING;
+        this.provider_ = provider;
+
+        let latch: Latch = new Latch(1);
+
+        g.onmessage = once(async evt =>
         {
-            this.provider_ = provider;
+            this.headers_ = JSON.parse(evt.data);
             g.onmessage = this._Handle_message.bind(this);
-            g.postMessage(WorkerServer.State.OPEN);
-        }
+            
+            await latch.count_down();
+        });
+        g.postMessage(WorkerServer.State.OPENING);
+
+        await latch.wait();
+        g.postMessage(WorkerServer.State.OPEN);
         this.state_ = WorkerServer.State.OPEN;
     }
 
@@ -138,14 +148,6 @@ export class WorkerServer<Provider extends object = {}, Headers extends object =
      */
     public get headers(): Headers
     {
-        if (this.headers_ === undefined)
-            if (is_node())
-                this.headers_ = JSON.parse(global.process.argv[2]);
-            else
-            {
-                let vars: URLVariables = new URLVariables(self.location.href);
-                this.headers_ = JSON.parse(vars.get("__m_pArgs"))
-            }
         return this.headers_!;
     }
 

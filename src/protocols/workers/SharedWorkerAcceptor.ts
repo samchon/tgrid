@@ -22,10 +22,10 @@ import { DomainError } from "tstl/exception/DomainError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * business has been completed.
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerAcceptor<Provider extends object = {}, Headers extends object = {}>
+export class SharedWorkerAcceptor<Headers extends object, Provider extends object | null>
     extends Communicator<Provider | null | undefined>
     implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
 {
@@ -55,11 +55,12 @@ export class SharedWorkerAcceptor<Provider extends object = {}, Headers extends 
     /**
      * @internal
      */
-    public static create<Provider extends object, Headers extends object>(
+    public static create<Headers extends object, Provider extends object | null>
+        (
             port: MessagePort, 
             headers: Headers, 
             eraser: ()=>void
-        ): SharedWorkerAcceptor<Provider>
+        ): SharedWorkerAcceptor<Headers, Provider>
     {
         return new SharedWorkerAcceptor(port, headers, eraser);
     }

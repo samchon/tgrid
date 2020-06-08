@@ -25,10 +25,10 @@ import { DomainError } from "tstl/exception/DomainError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * busines has been completed.
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebAcceptor<Provider extends object = {}, Headers extends object = {}>
+export class WebAcceptor<Headers extends object, Provider extends object | null>
     extends Communicator<Provider | null | undefined>
     implements IWebCommunicator, IAcceptor<WebAcceptor.State, Provider>
 {
@@ -58,8 +58,8 @@ export class WebAcceptor<Provider extends object = {}, Headers extends object = 
     /**
      * @internal
      */
-    public static create<Provider extends object, Headers extends object>
-        (request: http.IncomingMessage, socket: WebSocket, headers: Headers): WebAcceptor<Provider, Headers>
+    public static create<Headers extends object, Provider extends object | null>
+        (request: http.IncomingMessage, socket: WebSocket, headers: Headers): WebAcceptor<Headers, Provider>
     {
         return new WebAcceptor(request, socket, headers);
     }

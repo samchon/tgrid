@@ -3,6 +3,7 @@
 //================================================================
 import { IServer } from "../internal/IServer";
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
+import { once } from "../internal/once";
 
 import { is_node } from "tstl/utility/node";
 import { HashSet } from "tstl/container/HashSet";
@@ -25,10 +26,10 @@ import { DomainError } from "tstl/exception/DomainError";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerConnector.close}()
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerServer<Provider extends object = {}>
+export class SharedWorkerServer<Headers extends object, Provider extends object | null>
     implements IServer<SharedWorkerServer.State>
 {
     /**
@@ -39,7 +40,7 @@ export class SharedWorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private acceptors_: HashSet<SharedWorkerAcceptor<Provider>>;
+    private acceptors_: HashSet<SharedWorkerAcceptor<Headers, Provider>>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -58,7 +59,7 @@ export class SharedWorkerServer<Provider extends object = {}>
      * 
      * @param handler Callback function called whenever client connects.
      */
-    public async open(handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): Promise<void>
+    public async open(handler: (acceptor: SharedWorkerAcceptor<Headers, Provider>) => any): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === true)
@@ -105,19 +106,14 @@ export class SharedWorkerServer<Provider extends object = {}>
     /**
      * @hidden
      */
-    private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Provider>) => any): void
+    private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Headers, Provider>) => any): void
     {
-        let acceptor: SharedWorkerAcceptor<Provider> | null = null;
+        let acceptor: SharedWorkerAcceptor<Headers, Provider> | null = null;
 
-        port.onmessage = (evt: MessageEvent) =>
+        port.onmessage = once(evt =>
         {
-            // CLOSE MESSAGE CHANNEL TEMPORARILY
-            port.onmessage = null;
-            if (acceptor !== null)
-                return;
-
             // ARGUMENTS
-            let headers: object = JSON.parse(evt.data);
+            let headers: Headers = JSON.parse(evt.data);
 
             // CREATE ACCEPTOR
             acceptor = SharedWorkerAcceptor.create(port, headers, () =>
@@ -128,7 +124,7 @@ export class SharedWorkerServer<Provider extends object = {}>
 
             // SHIFT TO THE CALLBACK
             handler(acceptor);
-        };
+        });
         port.postMessage(SharedWorkerServer.State.OPENING);
     }
 

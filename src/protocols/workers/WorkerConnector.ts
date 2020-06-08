@@ -7,8 +7,10 @@ import { IConnector } from "../internal/IConnector";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { IWorkerCompiler } from "./internal/IWebCompiler";
 import { Invoke } from "../../components/Invoke";
+import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
+import { Latch } from "tstl/thread/Latch";
 import { is_node } from "tstl/utility/node";
 
 /**
@@ -26,11 +28,11 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and 
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
- * @typeParam Provider Type of features provided for remote system.
+ * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerConnector<Provider extends object = {}>
-    extends Communicator<Provider | null>
+export class WorkerConnector<Headers extends object, Provider extends object | null>
+    extends Communicator<Provider>
     implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
 {
     /**
@@ -43,11 +45,6 @@ export class WorkerConnector<Provider extends object = {}>
      */
     private worker_?: Worker;
 
-    /**
-     * @hidden
-     */
-    private connector_?: ()=>void;
-
     /* ----------------------------------------------------------------
         CONSTRUCTOR
     ---------------------------------------------------------------- */
@@ -56,7 +53,7 @@ export class WorkerConnector<Provider extends object = {}>
      * 
      * @param provider An object providing features for remote system.
      */
-    public constructor(provider: Provider | null = null)
+    public constructor(provider: Provider)
     {
         super(provider);
         
@@ -79,9 +76,9 @@ export class WorkerConnector<Provider extends object = {}>
      * 
      * @param content JS Source code to compile.
      * @param headers Headers containing additional info like activation.
+     * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
-    public async compile<Headers extends object>
-        (content: string, headers: Headers = {} as Headers): Promise<void>
+    public async compile(content: string, headers: Headers, timeout?: number): Promise<void>
     {
         //----
         // PRELIMINIARIES
@@ -99,7 +96,7 @@ export class WorkerConnector<Provider extends object = {}>
         // TRY CONNECTION
         try
         {
-            await this._Connect(path, headers);
+            await this._Connect("compile", path, headers, timeout);
         }
         catch (exp)
         {
@@ -128,15 +125,16 @@ export class WorkerConnector<Provider extends object = {}>
      * 
      * @param jsFile JS File to be {@link WorkerServer}.
      * @param args Headers containing additional info like activation.
+     * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
     public async connect<Headers extends object>
-        (jsFile: string, headers: Headers = {} as Headers): Promise<void>
+        (jsFile: string, headers: Headers, timeout?: number): Promise<void>
     {
         // TEST CONDITION
         this._Test_connection("connect");
 
         // DO CONNECT
-        await this._Connect(jsFile, headers);
+        await this._Connect("connect", jsFile, headers, timeout);
     }
 
     /**
@@ -158,28 +156,61 @@ export class WorkerConnector<Provider extends object = {}>
     /**
      * @hidden
      */
-    private _Connect<Headers extends object>(jsFile: string, headers: Headers): Promise<void>
+    private async _Connect<Headers extends object>
+        (method: string, jsFile: string, headers: Headers, timeout?: number): Promise<void>
     {
-        return new Promise<void>((resolve, reject) =>
+        // SET CURRENT STATE
+        this.state_ = WorkerConnector.State.CONNECTING;
+
+        try
         {
-            try
-            {
-                // SET STATE -> CONNECTING
-                this.state_ = WorkerConnector.State.CONNECTING;
+            // PREPARE ASSETS
+            let latch: Latch = new Latch(1);
+            let error: Error | null = null;
 
-                // DO CONNECT
-                this.worker_ = Compiler.execute(jsFile, headers);
-                this.worker_.onmessage = this._Handle_message.bind(this);
-
-                // GO RETURN
-                this.connector_ = resolve;
-            }
-            catch (exp)
+            this.worker_ = Compiler.execute(jsFile);
+            this.worker_!.onmessage = once(async evt =>
             {
-                this.state_ = WorkerConnector.State.NONE;
-                reject(exp);
-            }
-        });
+                // SUCCEEDED TO CONNECT
+                if (evt.data === WorkerConnector.State.CONNECTING)
+                {
+                    this.worker_!.postMessage(JSON.stringify(headers));
+                    this.worker_!.onmessage = once(async evt =>
+                    {
+                        if (evt.data === WorkerConnector.State.OPEN)
+                        {
+                            // SUCCESS
+                            this.state_ = WorkerConnector.State.OPEN;
+
+                            // NEW LISTENERS
+                            this.worker_!.onmessage = this._Handle_message.bind(this);
+                        }
+                        else
+                            error = new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when opened.`);
+
+                        await latch.count_down();
+                    });
+                }
+                else
+                {
+                    error = new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when opening.`);
+                    await latch.count_down();
+                }
+            });
+
+            if (timeout === undefined)
+                await latch.wait();
+            else if (await latch.wait_for(timeout) === false)
+                error = new DomainError(`Error on WorkerConnector.${method}(): target worker is not sending handshake data over ${timeout} milliseconds.`);
+
+            if (error !== null)
+                throw error;
+        }
+        catch (exp)
+        {
+            this.state_ = WorkerConnector.State.NONE;
+            throw exp;
+        }
     }
 
     /**
@@ -241,12 +272,7 @@ export class WorkerConnector<Provider extends object = {}>
      */
     private _Handle_message(evt: MessageEvent): void
     {
-        if (evt.data === WorkerConnector.State.OPEN)
-        {
-            this.state_ = WorkerConnector.State.OPEN;
-            this.connector_!();
-        }
-        else if (evt.data === WorkerConnector.State.CLOSING)
+        if (evt.data === WorkerConnector.State.CLOSING)
             this._Handle_close();
         else
             this.replyData(JSON.parse(evt.data));

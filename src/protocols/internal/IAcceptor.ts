@@ -5,7 +5,7 @@ import { IState } from "./IState";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
 
-export interface IAcceptor<State extends IAcceptor.State, Provider extends object>
+export interface IAcceptor<State extends IAcceptor.State, Provider extends object | null>
     extends IState<State>
 {
     /**

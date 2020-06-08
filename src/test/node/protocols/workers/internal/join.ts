@@ -5,8 +5,8 @@ const FILE_PATH = __dirname + "/../log.dat";
 
 async function main(): Promise<void>
 {
-    let server: WorkerServer = new WorkerServer();
-    await server.open();
+    let server: WorkerServer<{}, null> = new WorkerServer();
+    await server.open(null);
     await server.join();
     
     fs.writeFileSync(FILE_PATH, "WorkerServer.join()", "utf8");
