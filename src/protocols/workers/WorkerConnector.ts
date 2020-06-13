@@ -10,8 +10,8 @@ import { Invoke } from "../../components/Invoke";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
-import { Latch } from "tstl/thread/Latch";
 import { is_node } from "tstl/utility/node";
+import { sleep_until } from "tstl/thread/global";
 
 /**
  * Worker Connector.
@@ -159,58 +159,74 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
     private async _Connect<Headers extends object>
         (method: string, jsFile: string, headers: Headers, timeout?: number): Promise<void>
     {
+        // TIME LIMIT
+        let at: Date | undefined = (timeout !== undefined)
+            ? new Date(Date.now() + timeout)
+            : undefined;
+
         // SET CURRENT STATE
         this.state_ = WorkerConnector.State.CONNECTING;
 
         try
         {
-            // PREPARE ASSETS
-            let latch: Latch = new Latch(1);
-            let error: Error | null = null;
-
+            // EXECUTE THE WORKER
             this.worker_ = Compiler.execute(jsFile);
-            this.worker_!.onmessage = once(async evt =>
-            {
-                // SUCCEEDED TO CONNECT
-                if (evt.data === WorkerConnector.State.CONNECTING)
-                {
-                    this.worker_!.postMessage(JSON.stringify(headers));
-                    this.worker_!.onmessage = once(async evt =>
-                    {
-                        if (evt.data === WorkerConnector.State.OPEN)
-                        {
-                            // SUCCESS
-                            this.state_ = WorkerConnector.State.OPEN;
 
-                            // NEW LISTENERS
-                            this.worker_!.onmessage = this._Handle_message.bind(this);
-                        }
-                        else
-                            error = new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when opened.`);
+            // WAIT THE WORKER TO BE READY
+            if (await this._Handshake(method, timeout, at) !== WorkerConnector.State.CONNECTING)
+                throw new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
-                        await latch.count_down();
-                    });
-                }
-                else
-                {
-                    error = new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when opening.`);
-                    await latch.count_down();
-                }
-            });
+            // SEND HEADERS
+            this.worker_!.postMessage(JSON.stringify(headers));
 
-            if (timeout === undefined)
-                await latch.wait();
-            else if (await latch.wait_for(timeout) === false)
-                error = new DomainError(`Error on WorkerConnector.${method}(): target worker is not sending handshake data over ${timeout} milliseconds.`);
+            // WAIT COMPLETION
+            if (await this._Handshake(method, timeout, at) !== WorkerConnector.State.OPEN)
+                throw new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connected.`);
 
-            if (error !== null)
-                throw error;
+            // SUCCESS
+            this.state_ = WorkerConnector.State.OPEN;
+            this.worker_!.onmessage = this._Handle_message.bind(this);
         }
         catch (exp)
         {
+            try
+            {
+                if (this.worker_)
+                    this.worker_.terminate();
+            }
+            catch {}
+
             this.state_ = WorkerConnector.State.NONE;
             throw exp;
         }
+    }
+
+    private _Handshake(method: string, timeout?: number, until?: Date): Promise<number>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            let completed: boolean = false;
+            let expired: boolean = false;
+
+            if (until !== undefined)
+                sleep_until(until).then(() =>
+                {
+                    if (completed === false)
+                    {
+                        reject(new DomainError(`Error on WorkerConnector.${method}(): target worker is not sending handshake data over ${timeout} milliseconds.`));
+                        expired = true;
+                    }
+                });
+
+            this.worker_!.onmessage = once(evt =>
+            {
+                if (expired === false)
+                {
+                    completed = true;
+                    resolve(evt.data);
+                }
+            });
+        });
     }
 
     /**

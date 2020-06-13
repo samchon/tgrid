@@ -11,7 +11,7 @@ import WebCompiler from "./internal/web-worker";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
-import { Latch } from "tstl/thread/Latch";
+import { sleep_until } from "tstl/thread/global";
 import { once } from "../internal/once";
 
 /**
@@ -86,6 +86,7 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
      * 
      * @param jsFile JS File to be {@link SharedWorkerServer}.
      * @param args Arguments to deliver.
+     * @param timeout Milliseconds to wait the shared-worker program to open itself. If omitted, the waiting would be forever.
      */
     public async connect(jsFile: string, headers: Headers, timeout?: number): Promise<void>
     {
@@ -103,76 +104,89 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
         //----
         // CONNECTION
         //----
+        // TIME LIMIT
+        let at: Date | undefined = (timeout !== undefined)
+            ? new Date(Date.now() + timeout)
+            : undefined;
+
         // SET CURRENT STATE
         this.state_ = SharedWorkerConnector.State.CONNECTING;
 
         try
         {
-            // PREPARE ASSETS
-            let latch: Latch = new Latch(1);
-            let error: Error | null = null;
-
-            // CONNECT WITH EVENT LISTENERS
+            // EXECUET THE WORKER
             let worker: SharedWorker = new SharedWorker(jsFile);
             this.port_ = worker.port as MessagePort;
 
-            this.port_.onmessage = once(async evt =>
+            // WAIT THE WORKER TO BE READY
+            if (await this._Handshake(timeout, at) !== SharedWorkerConnector.State.CONNECTING)
+                throw new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
+
+            // SEND HEADERS
+            this.port_.postMessage(JSON.stringify(headers));
+
+            // WAIT ACCEPTION OR REJECTION
+            let last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(timeout, at);
+            if (last === SharedWorkerConnector.State.OPEN)
             {
-                // SUCCEEDED TO CONNECT
-                if (evt.data === SharedWorkerConnector.State.CONNECTING)
+                // ACCEPTED
+                this.state_ = SharedWorkerConnector.State.OPEN;
+
+                this.port_.onmessage = this._Handle_message.bind(this);
+                this.port_.onmessageerror = () => {};
+            }
+            else
+            {
+                // REJECT OR HANDSHAKE ERROR
+                let reject: IReject | null = null;
+                try
                 {
-                    this.port_!.postMessage(JSON.stringify(headers));
-                    this.port_!.onmessage = once(async evt =>
-                    {
-                        if (evt.data === SharedWorkerConnector.State.OPEN)
-                        {
-                            // SUCCESS
-                            this.state_ = SharedWorkerConnector.State.OPEN;
-
-                            // NEW LISTENERS
-                            this.port_!.onmessage = this._Handle_message.bind(this);
-                            this.port_!.onmessageerror = () => {};
-                        }
-                        else
-                        {
-                            // REJECTED OR HANDSHAKE ERROR
-                            let reject: IReject | null = null;
-                            try
-                            {
-                                reject = JSON.parse(evt.data);
-                            }
-                            catch {}
-
-                            if (reject && reject.name === "reject" && typeof reject.message === "string")
-                                error = new RuntimeError(reject.message);
-                            else
-                                error = new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule.`);
-                        }
-                        await latch.count_down();
-                    });
+                    reject = JSON.parse(last);
                 }
+                catch {}
+
+                if (reject && reject.name === "reject" && typeof reject.message === "string")
+                    throw new RuntimeError(reject.message);
                 else
-                {
-                    // HANDSHAKE ERROR
-                    error = new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule.`);
-                    await latch.count_down();
-                }
-            });
-            this.port_.start();
-
-            if (timeout === undefined)
-                await latch.wait();
-            else if (await latch.wait_for(timeout) === false)
-                error = new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker is not sending handshake data over ${timeout} milliseconds.`);
-
-            if (error !== null)
-                throw error;
+                    throw new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule.`);
+            }
         }
         catch (exp)
         {
             this.state_ = SharedWorkerConnector.State.NONE;
             throw exp;
         }
+    }
+    
+    /**
+     * @hidden
+     */
+    private _Handshake(timeout?: number, at?: Date): Promise<any>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            let completed: boolean = false;
+            let expired: boolean = false;
+
+            if (at !== undefined)
+                sleep_until(at).then(() =>
+                {
+                    if (completed === false)
+                    {
+                        reject(new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker is not sending handshake data over ${timeout} milliseconds.`));
+                        expired = true;
+                    }
+                });
+
+            this.port_!.onmessage = once(evt =>
+            {
+                if (expired === false)
+                {
+                    completed = true;
+                    resolve(evt.data);
+                }
+            });
+        });
     }
 
     /**

@@ -176,7 +176,7 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
     {
         // VALIDATION
         if (this.state_ !== WebAcceptor.State.NONE)
-            new DomainError("You've already accepted (or rejected) the connection.");
+            throw new DomainError("You've already accepted (or rejected) the connection.");
 
         // SEND CLOSING FRAME
         this.state_ = WebAcceptor.State.REJECTING;

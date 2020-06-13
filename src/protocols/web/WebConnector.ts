@@ -10,8 +10,8 @@ import { WebError } from "./WebError";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
-import { Latch } from "tstl/thread/Latch";
 import { is_node } from "tstl/utility/node";
+import { sleep_for } from "tstl/thread/global";
 
 /**
  * Web Socket Connector.
@@ -71,8 +71,9 @@ export class WebConnector<Headers extends object, Provider extends object | null
      * 
      * @param url URL address to connect.
      * @param headers Headers containing additional info like activation.
+     * @param timeout Milliseconds to wait the web-socket server to accept or reject it. If omitted, the waiting would be forever.
      */
-    public async connect(url: string, headers: Headers): Promise<void>
+    public async connect(url: string, headers: Headers, timeout?: number): Promise<void>
     {
         // TEST CONDITION
         if (this.socket_ && this.state !== WebConnector.State.CLOSED)
@@ -83,12 +84,59 @@ export class WebConnector<Headers extends object, Provider extends object | null
             else
                 throw new DomainError("Error on WebConnector.connect(): already closing.");
 
+        //----
+        // CONNECTION
+        //----
         // PREPARE ASSETS
         this.state_ = WebConnector.State.CONNECTING;
-        this.socket_ = new g.WebSocket(url);
 
-        // FINALIZATION
-        await this._Connect(headers);
+        try
+        {
+            // DO CONNNECT
+            this.socket_ = new g.WebSocket(url);
+            await this._Wait_connection();
+            
+            // SEND HEADERS
+            this.socket_!.send(JSON.stringify(headers));
+
+            // PROMISED HANDSHAKE
+            if (await this._Handshake(timeout) !== WebConnector.State.OPEN.toString())
+                throw new WebError(1008, "Error on WebConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.");
+            
+            // SUCCESS
+            this.state_ = WebConnector.State.OPEN;
+            {
+                this.socket_!.onmessage = this._Handle_message.bind(this);
+                this.socket_!.onclose = this._Handle_close.bind(this);
+                this.socket_!.onerror = () => {};
+            }
+        }
+        catch (exp)
+        {
+            this.state_ = WebConnector.State.NONE;
+            if (this.socket_!.readyState === WebConnector.State.OPEN)
+                this.socket_!.close();
+            throw exp;
+        }
+    }
+
+    /**
+     * @hidden
+     */
+    private _Wait_connection(): Promise<WebSocket>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            this.socket_!.onopen = () => resolve();
+            this.socket_!.onclose = once(evt =>
+            {
+                reject(new WebError(evt.code, evt.reason));
+            });
+            this.socket_!.onerror = once(() =>
+            {
+                reject( new WebError(1006, "Connection refused."));
+            });
+        });
     }
 
     /**
@@ -118,85 +166,49 @@ export class WebConnector<Headers extends object, Provider extends object | null
     /**
      * @hidden
      */
-    private _Connect<Headers extends object>(headers: Headers): Promise<void>
+    private _Handshake(timeout?: number): Promise<string>
     {
         return new Promise((resolve, reject) =>
         {
-            // WHEN FAILED TO CONNECT
-            this.socket_!.onerror = () => 
-            {
-                this.state_ = WebConnector.State.NONE;
-                reject( new WebError(1006, "Connection refused.") );
-            };
+            let completed: boolean = false;
+            let expired: boolean = false;
 
-            // SUCCEEDED TO CONNECT
-            this.socket_!.onopen = async () =>
-            {
-                // PREPARE CONDITION-VARIABLE FOR JOINING
-                let latch: Latch = new Latch(1);
-                let error: WebError | null = null;
-                
-                //----
-                // CONFIGURE EVENTS
-                //----
-                // IGNORE ERROR
-                this.socket_!.onerror = () => {};
-
-                // HANDSHAKE MESSAGE
-                this.socket_!.onmessage = once(async evt =>
+            // TIMEOUT
+            if (timeout !== undefined)
+                sleep_for(timeout).then(() =>
                 {
-                    if (evt.data !== WebConnector.State.OPEN.toString())
-                        error = new WebError(1008, "Error on WebConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.");
-                    await latch.count_down();
+                    if (completed === false)
+                    {
+                        reject(new WebError(1008, `Error on WebConnector.connect(): target server is not sending handshake data over ${timeout} milliseconds.`));
+                        expired = true;
+                    }
                 });
 
-                // CLOSED DURING HANDSHAKE
-                this.socket_!.onclose = once(async evt => 
+            // EVENT LISTENRES
+            this.socket_!.onmessage = once(evt =>
+            {
+                if (expired === false)
                 {
-                    error = new WebError(evt.code, evt.reason);
-                    await latch.count_down();
-                });
-
-                //----
-                // FINALIZATION
-                //----
-                // SEND HANDSHAKE MESSAGE
-                this.socket_!.send(JSON.stringify(headers));
-
-                // JOIN RESPONSE
-                if (await latch.wait_for(WebConnector.HANDSHAKE_TIMEOUT) === false)
-                    error = new WebError(1008, `Error on WebConnector.connect(): target server is not sending handshake data over ${WebConnector.HANDSHAKE_TIMEOUT} milliseconds.`);
-                
-                if (error === null)
-                {
-                    // SUCCESS
-                    this.socket_!.onmessage = this._Handle_message.bind(this);
-                    this.socket_!.onclose = this._Handle_close.bind(this);
-
-                    // SUCCESS
-                    this.state_ = WebConnector.State.OPEN;
-                    resolve();
+                    completed = true;
+                    resolve(evt.data);
                 }
-                else
+            });
+            this.socket_!.onclose = once(evt =>
+            {
+                if (expired === false)
                 {
-                    // FAILURE
-                    if (this.socket_!.readyState === g.WebSocket.OPEN)
-                    {
-                        this.state_ = WebConnector.State.CLOSING;
-                        this.socket_!.onclose = () => 
-                        {
-                            this.state_ = WebConnector.State.CLOSED;
-                            reject(error);
-                        };
-                        this.socket_!.close(error.status, error.message);
-                    }
-                    else
-                    {
-                        this.state_ = WebConnector.State.CLOSED;
-                        reject(error);
-                    }
+                    completed = true;
+                    reject(new WebError(evt.code, evt.reason));
                 }
-            };
+            });
+            this.socket_!.onerror = once(() =>
+            {
+                if (expired === false)
+                {
+                    completed = true;
+                    reject( new WebError(1006, "Connection refused.") );
+                }
+            });
         });
     }
 
