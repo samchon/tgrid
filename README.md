@@ -49,13 +49,13 @@ However, whatever [Grid Computing](#12-grid-computing) and *Remote Function Call
 
 #### [`composite-calculator/server.ts`](https://github.com/samchon/tgrid.examples/blob/master/src/projects/composite-calculator/server.ts)
 ```typescript
-import { WebServer, WebAcceptor } from "tgrid/protocols/web";
+import { WebServer } from "tgrid/protocols/web";
 import { CompositeCalculator } from "../../providers/Calculator";
 
 async function main(): Promise<void>
 {
-    let server: WebServer = new WebServer();
-    await server.open(10102, async (acceptor: WebAcceptor) =>
+    let server: WebServer<{}, CompositeCalculator> = new WebServer();
+    await server.open(10102, async acceptor =>
     {
         await acceptor.accept(new CompositeCalculator());
     });
@@ -75,8 +75,8 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    let connector: WebConnector = new WebConnector();
-    await connector.connect("ws://127.0.0.1:10102");
+    let connector: WebConnector<{}, null> = new WebConnector(null);
+    await connector.connect("ws://127.0.0.1:10102", {});
 
     //----
     // CALL REMOTE FUNCTIONS
@@ -184,8 +184,8 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    let connector: WebConnector = new WebConnector();
-    await connector.connect("ws://127.0.0.1:10101");
+    let connector: WebConnector<{}, null> = new WebConnector(null);
+    await connector.connect("ws://127.0.0.1:10101", {});
 
     //----
     // CALL REMOTE FUNCTIONS

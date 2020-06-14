@@ -5,9 +5,16 @@ import { IState } from "./IState";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
 
-export interface IAcceptor<State extends IAcceptor.State, Provider extends object | null>
+export interface IAcceptor<State extends IAcceptor.State, 
+        Headers extends object, 
+        Provider extends object | null>
     extends IState<State>
 {
+    /**
+     * Headers containing initialization data like activation.
+     */
+    headers: Headers;
+
     /**
      * Accept connection.
      *

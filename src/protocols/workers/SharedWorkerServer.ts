@@ -26,6 +26,7 @@ import { DomainError } from "tstl/exception/DomainError";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerConnector.close}()
  * 
+ * @type Headers Type of headers containing initialization data like activation.
  * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */

@@ -22,12 +22,14 @@ import { DomainError } from "tstl/exception/DomainError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * business has been completed.
  * 
+ * @type Headers Type of headers containing initialization data like activation.
  * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerAcceptor<Headers extends object, Provider extends object | null>
     extends Communicator<Provider | null | undefined>
-    implements IWorkerSystem, IAcceptor<SharedWorkerAcceptor.State, Provider>
+    implements IWorkerSystem, 
+        IAcceptor<SharedWorkerAcceptor.State, Headers, Provider>
 {
     /**
      * @hidden
@@ -130,7 +132,7 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
     }
 
     /**
-     * Arguments delivered from the connector.
+     * @inheritDoc
      */
     public get headers(): Headers
     {

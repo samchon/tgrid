@@ -75,7 +75,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
      * memory leak.
      * 
      * @param content JS Source code to compile.
-     * @param headers Headers containing additional info like activation.
+     * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
     public async compile(content: string, headers: Headers, timeout?: number): Promise<void>
@@ -124,7 +124,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
      * memory leak.
      * 
      * @param jsFile JS File to be {@link WorkerServer}.
-     * @param args Headers containing additional info like activation.
+     * @param args Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
     public async connect<Headers extends object>

@@ -36,6 +36,7 @@ import { once } from "../internal/once";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerServer.close}()
  * 
+ * @type Headers Type of headers containing initialization data like activation.
  * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
@@ -85,7 +86,7 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
      *  - {@link SharedWorkerServer.close}()
      * 
      * @param jsFile JS File to be {@link SharedWorkerServer}.
-     * @param args Arguments to deliver.
+     * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the shared-worker program to open itself. If omitted, the waiting would be forever.
      */
     public async connect(jsFile: string, headers: Headers, timeout?: number): Promise<void>
@@ -153,6 +154,13 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
         }
         catch (exp)
         {
+            try
+            {
+                if (this.port_)
+                    this.port_.close();
+            }
+            catch {}
+
             this.state_ = SharedWorkerConnector.State.NONE;
             throw exp;
         }

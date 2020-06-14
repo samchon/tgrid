@@ -30,6 +30,7 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
+ * @type Headers Type of headers containing initialization data like activation.
  * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
@@ -144,7 +145,7 @@ export class WorkerServer<Headers extends object, Provider extends object | null
     }
 
     /**
-     * Arguments delivered from the connector.
+     * Headers containing initialization data like activation.
      */
     public get headers(): Headers
     {

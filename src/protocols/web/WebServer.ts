@@ -23,6 +23,7 @@ import { WebAcceptor } from "./WebAcceptor";
  * To open the server, call the {@link open}() method with a callback function which would be
  * called whenever a client has been connected.
  * 
+ * @type Headers Type of headers containing initialization data like activation.
  * @type Provider Type of features provided for remote systems.
  * @author Jeongho Nam - https://github.com/samchon
  */

@@ -27,7 +27,7 @@ import { sleep_for } from "tstl/thread/global";
  * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
  * close the connection in time, it may waste vulnerable resources of the server.
  * 
- * @type Headers Type of headers containing additional information like activation.
+ * @type Headers Type of headers containing initialization data like activation.
  * @type Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
@@ -70,7 +70,7 @@ export class WebConnector<Headers extends object, Provider extends object | null
      * connection in time to prevent waste of the server resource.
      * 
      * @param url URL address to connect.
-     * @param headers Headers containing additional info like activation.
+     * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the web-socket server to accept or reject it. If omitted, the waiting would be forever.
      */
     public async connect(url: string, headers: Headers, timeout?: number): Promise<void>
@@ -115,7 +115,10 @@ export class WebConnector<Headers extends object, Provider extends object | null
         {
             this.state_ = WebConnector.State.NONE;
             if (this.socket_!.readyState === WebConnector.State.OPEN)
+            {
+                this.socket_!.onclose = () => {};
                 this.socket_!.close();
+            }
             throw exp;
         }
     }
