@@ -10,8 +10,9 @@ import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
-import { Latch } from "tstl/thread";
+import { Singleton } from "tstl-singleton";
 import { is_node } from "tstl/utility/node";
+import { sleep_until } from "tstl/thread/global";
 
 /**
  * Worker Server.
@@ -46,7 +47,7 @@ export class WorkerServer<Headers extends object, Provider extends object | null
     /**
      * @hidden
      */
-    private headers_?: Headers;
+    private headers_: Singleton<Headers>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -57,7 +58,15 @@ export class WorkerServer<Headers extends object, Provider extends object | null
     public constructor()
     {
         super(undefined);
+
         this.state_ = WorkerServer.State.NONE;
+        this.headers_ = new Singleton(async () =>
+        {
+            g.postMessage(WorkerServer.State.OPENING);
+
+            let data: string = await this._Handshake("getHeaders");
+            return JSON.parse(data);
+        });
     }
 
     /**
@@ -89,19 +98,13 @@ export class WorkerServer<Headers extends object, Provider extends object | null
         this.state_ = WorkerServer.State.OPENING;
         this.provider_ = provider;
 
-        let latch: Latch = new Latch(1);
+        // GET HEADERS
+        await this.headers_.get();
 
-        g.onmessage = once(async evt =>
-        {
-            this.headers_ = JSON.parse(evt.data);
-            g.onmessage = this._Handle_message.bind(this);
-            
-            await latch.count_down();
-        });
-        g.postMessage(WorkerServer.State.OPENING);
-
-        await latch.wait();
+        // SUCCESS
+        g.onmessage = this._Handle_message.bind(this);
         g.postMessage(WorkerServer.State.OPEN);
+
         this.state_ = WorkerServer.State.OPEN;
     }
 
@@ -147,9 +150,40 @@ export class WorkerServer<Headers extends object, Provider extends object | null
     /**
      * Headers containing initialization data like activation.
      */
-    public get headers(): Headers
+    public getHeaders(): Promise<Headers>
     {
-        return this.headers_!;
+        return this.headers_.get();
+    }
+
+    /**
+     * @hidden
+     */
+    private _Handshake(method: string, timeout?: number, until?: Date): Promise<any>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            let completed: boolean = false;
+            let expired: boolean = false;
+
+            if (until !== undefined)
+                sleep_until(until).then(() =>
+                {
+                    if (completed === false)
+                    {
+                        reject(new DomainError(`Error on WorkerConnector.${method}(): target worker is not sending handshake data over ${timeout} milliseconds.`));
+                        expired = true;
+                    }
+                });
+
+            g.onmessage = once(evt =>
+            {
+                if (expired === false)
+                {
+                    completed = true;
+                    resolve(evt.data);
+                }
+            });
+        });
     }
 
     /* ----------------------------------------------------------------

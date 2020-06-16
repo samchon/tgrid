@@ -15,7 +15,7 @@ async function main(): Promise<void>
     let scripts: IScript[] = [];
 
     // PREPARE ASSETS
-    let myName: string = server.headers.name;
+    let myName: string = (await server.getHeaders()).name;
     let service: Driver<IChatService> = server.getDriver<IChatService>();
 
     await server.open

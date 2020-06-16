@@ -10,7 +10,7 @@ export async function test_worker_join(): Promise<void>
     await FileSystem.write(FILE_PATH, "NOT YET");
 
     let connector: WorkerConnector<{}, null> = new WorkerConnector(null);
-    await connector.connect(__dirname + "/internal/join.js", {});
+    await connector.connect(__dirname + "/internal/join.js", { });
 
     sleep_for(100).then(() => connector.close());
     await connector.join();
