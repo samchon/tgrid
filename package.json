@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.5.1",
+  "version": "0.5.2",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -23,8 +23,7 @@
   },
   "dependencies": {
     "serialize-error": "^4.1.0",
-    "tstl": "^2.4.8",
-    "tstl-singleton": "^1.0.0",
+    "tstl": "^2.4.9",
     "ws": "^7.3.0"
   },
   "devDependencies": {

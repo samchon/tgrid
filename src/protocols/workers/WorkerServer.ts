@@ -10,9 +10,9 @@ import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
-import { Singleton } from "tstl-singleton";
-import { is_node } from "tstl/utility/node";
+import { Singleton } from "tstl/thread/Singleton";
 import { sleep_until } from "tstl/thread/global";
+import { is_node } from "tstl/utility/node";
 
 /**
  * Worker Server.
