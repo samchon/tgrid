@@ -1,4 +1,4 @@
-import { WebServer } from "../../protocols/web";
+import { WebServer } from "../../protocols/web/module";
 import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void>

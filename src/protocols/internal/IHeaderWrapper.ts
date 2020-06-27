@@ -6,20 +6,20 @@
 /**
  * @hidden
  */
-export interface IHeadersWrapper<Headers>
+export interface IHeaderWrapper<Headers>
 {
-    headers: Headers;
+    header: Headers;
 }
 
 /**
  * @hidden
  */
-export namespace IHeadersWrapper
+export namespace IHeaderWrapper
 {
-    export function wrap<Headers>(headers: Headers): IHeadersWrapper<Headers>
+    export function wrap<Header>(header: Header): IHeaderWrapper<Header>
     {
         return {
-            headers: headers
+            header: header
         };
     }
 }

@@ -3,7 +3,7 @@
  * @module tgrid.protocols
  */
 //----------------------------------------------------------------
-import * as protocols from "./module";
+import * as web from "./web/module";
+import * as workers from "./workers/module";
 
-export default protocols;
-export * from "./module";
+export { web, workers };

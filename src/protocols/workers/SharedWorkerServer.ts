@@ -6,7 +6,7 @@
 import { IServer } from "../internal/IServer";
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
-import { IHeadersWrapper } from "../internal/IHeadersWrapper";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
@@ -30,13 +30,11 @@ import { is_node } from "tstl/utility/node";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerConnector.close}()
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerServer<
-        Headers extends object | null, 
-        Provider extends object | null>
+export class SharedWorkerServer<Header, Provider extends object | null>
     implements IServer<SharedWorkerServer.State>
 {
     /**
@@ -47,7 +45,7 @@ export class SharedWorkerServer<
     /**
      * @hidden
      */
-    private acceptors_: HashSet<SharedWorkerAcceptor<Headers, Provider>>;
+    private acceptors_: HashSet<SharedWorkerAcceptor<Header, Provider>>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -66,7 +64,7 @@ export class SharedWorkerServer<
      * 
      * @param handler Callback function called whenever client connects.
      */
-    public async open(handler: (acceptor: SharedWorkerAcceptor<Headers, Provider>) => any): Promise<void>
+    public async open(handler: (acceptor: SharedWorkerAcceptor<Header, Provider>) => any): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === true)
@@ -113,17 +111,17 @@ export class SharedWorkerServer<
     /**
      * @hidden
      */
-    private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Headers, Provider>) => any): void
+    private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Header, Provider>) => any): void
     {
-        let acceptor: SharedWorkerAcceptor<Headers, Provider> | null = null;
+        let acceptor: SharedWorkerAcceptor<Header, Provider> | null = null;
 
         port.onmessage = once(evt =>
         {
             // ARGUMENTS
-            let wrapper: IHeadersWrapper<Headers> = JSON.parse(evt.data);
+            let wrapper: IHeaderWrapper<Header> = JSON.parse(evt.data);
 
             // CREATE ACCEPTOR
-            acceptor = SharedWorkerAcceptor.create(port, wrapper.headers!, () =>
+            acceptor = SharedWorkerAcceptor.create(port, wrapper.header, () =>
             {
                 this.acceptors_.erase(acceptor!);
             });

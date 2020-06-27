@@ -1,4 +1,4 @@
-import { SharedWorkerServer } from "../../protocols/workers";
+import { SharedWorkerServer } from "../../protocols/workers/module";
 import { Calculator } from "../providers/Calculator";
 
 /// chrome://inspect/#workers

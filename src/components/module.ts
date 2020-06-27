@@ -3,7 +3,6 @@
  * @module tgrid.components
  */
 //----------------------------------------------------------------
-import * as components from "./module";
-
-export default components;
-export * from "./module";
+export * from "./Communicator";
+export * from "./Invoke";
+export * from "./Driver";

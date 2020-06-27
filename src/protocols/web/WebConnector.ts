@@ -7,7 +7,7 @@ import { ConnectorBase } from "../internal/ConnectorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 
 import { Invoke } from "../../components/Invoke";
-import { IHeadersWrapper } from "../internal/IHeadersWrapper";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
@@ -29,14 +29,12 @@ import { sleep_for } from "tstl/thread/global";
  * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
  * close the connection in time, it may waste vulnerable resources of the server.
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebConnector<
-        Headers extends object | null, 
-        Provider extends object | null>
-    extends ConnectorBase<Headers, Provider>
+export class WebConnector<Header, Provider extends object | null>
+    extends ConnectorBase<Header, Provider>
     implements IWebCommunicator
 {
     /**
@@ -84,7 +82,7 @@ export class WebConnector<
             await this._Wait_connection();
             
             // SEND HEADERS
-            this.socket_!.send(JSON.stringify( IHeadersWrapper.wrap(this.headers) ));
+            this.socket_!.send(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // PROMISED HANDSHAKE
             if (await this._Handshake(timeout) !== WebConnector.State.OPEN.toString())

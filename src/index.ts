@@ -1,10 +1,9 @@
 /** 
  * @packageDocumentation
- * @module tgrid 
+ * @module tgrid
  */
 //----------------------------------------------------------------
-import * as components from "./components";
-import * as protocols from "./protocols";
-import * as utils from "./utils";
+import * as tgrid from "./module";
 
-export { components, protocols, utils };
+export default tgrid;
+export * from "./module";

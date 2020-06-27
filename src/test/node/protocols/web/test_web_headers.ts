@@ -17,7 +17,7 @@ export async function test_web_headers(): Promise<void>
         if (acceptor.headers.token !== TOKEN)
             await acceptor.reject();
         else
-            await acceptor.accept();
+            await acceptor.accept(null);
     });
 
     let connector: WebConnector<IHeaders, null> = new WebConnector({ token: TOKEN }, null);

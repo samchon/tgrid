@@ -14,19 +14,17 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
  * The `ConnectorBase` is an abtract communicator class, who can connect to remote server who 
  * interacts with clients using the RFC (Remote Function Call).
  * 
- * @template Headers Type of headers containing initialilzation data like activation.
+ * @template Header Type of header containing initialilzation data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export abstract class ConnectorBase<
-        Headers extends object | null, 
-        Provider extends object | null>
+export abstract class ConnectorBase<Header, Provider extends object | null>
     extends Communicator<Provider>
 {
     /**
      * @hidden
      */
-    private readonly headers_: Headers;
+    private readonly header_: Header;
 
     /**
      * @hidden
@@ -39,14 +37,14 @@ export abstract class ConnectorBase<
     /**
      * Initializer Constructor.
      * 
-     * @param headers An object containing initialization data like activation.
+     * @param header An object containing initialization data like activation.
      * @param provider An object providing features for remote system.
      */
-    public constructor(headers: Headers, provider: Provider)
+    public constructor(header: Header, provider: Provider)
     {
         super(provider);
 
-        this.headers_ = headers;
+        this.header_ = header;
         this.state_ = ConnectorBase.State.NONE;
     }
 
@@ -54,11 +52,11 @@ export abstract class ConnectorBase<
         ACCESSORS
     ---------------------------------------------------------------- */
     /**
-     * Headers containing initialization data like activation.
+     * Header containing initialization data like activation.
      */
-    public get headers(): Headers
+    public get header(): Header
     {
-        return this.headers_;
+        return this.header_;
     }
 
     /**
@@ -99,6 +97,9 @@ export abstract class ConnectorBase<
 
 export namespace ConnectorBase
 {
+    /**
+     * Current state type of connector.
+     */
     export const enum State
     {
         NONE = -1,

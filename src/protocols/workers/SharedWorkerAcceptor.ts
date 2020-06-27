@@ -23,14 +23,12 @@ import { DomainError } from "tstl/exception/DomainError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * business has been completed.
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerAcceptor<
-        Headers extends object | null, 
-        Provider extends object | null>
-    extends AcceptorBase<Headers, Provider>
+export class SharedWorkerAcceptor<Header, Provider extends object | null>
+    extends AcceptorBase<Header, Provider>
     implements IWorkerSystem
 {
     /**
@@ -49,22 +47,22 @@ export class SharedWorkerAcceptor<
     /**
      * @internal
      */
-    public static create<Headers extends object, Provider extends object | null>
+    public static create<Header, Provider extends object | null>
         (
             port: MessagePort, 
-            headers: Headers, 
+            header: Header, 
             eraser: ()=>void
-        ): SharedWorkerAcceptor<Headers, Provider>
+        ): SharedWorkerAcceptor<Header, Provider>
     {
-        return new SharedWorkerAcceptor(port, headers, eraser);
+        return new SharedWorkerAcceptor(port, header, eraser);
     }
 
     /**
      * @hidden
      */
-    private constructor(port: MessagePort, headers: Headers, eraser: ()=>void)
+    private constructor(port: MessagePort, header: Header, eraser: ()=>void)
     {
-        super(headers);
+        super(header);
 
         // ASSIGN MEMBER
         this.port_ = port;

@@ -11,7 +11,7 @@ import WebSocket from "ws";
 import { WebAcceptor } from "./WebAcceptor";
 import { IServer } from "../internal/IServer";
 
-import { IHeadersWrapper } from "../internal/IHeadersWrapper";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
 
@@ -26,13 +26,11 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
  * To open the server, call the {@link open}() method with a callback function which would be
  * called whenever a client has been connected.
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote systems.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebServer<
-        Headers extends object | null, 
-        Provider extends object | null>
+export class WebServer<Header, Provider extends object | null>
     implements IServer<WebServer.State>
 {
     /**
@@ -102,7 +100,7 @@ export class WebServer<
     public async open
         (
             port: number, 
-            handler: WebServer.ConnectionHandler<Headers, Provider>
+            handler: WebServer.ConnectionHandler<Header, Provider>
         ): Promise<void>
     {
         //----
@@ -141,8 +139,8 @@ export class WebServer<
 
                     try
                     {
-                        let wrapper: IHeadersWrapper<Headers> = JSON.parse(data as string);
-                        let acceptor: WebAcceptor<Headers, Provider> =  WebAcceptor.create(request, webSocket, wrapper.headers!);
+                        let wrapper: IHeaderWrapper<Header> = JSON.parse(data as string);
+                        let acceptor: WebAcceptor<Header, Provider> =  WebAcceptor.create(request, webSocket, wrapper.header);
                         
                         await handler(acceptor);
                     }
@@ -236,10 +234,8 @@ export namespace WebServer
 {
     export import State = IServer.State;
 
-    export interface ConnectionHandler<
-            Headers extends object | null, 
-            Provider extends object | null>
+    export interface ConnectionHandler<Header, Provider extends object | null>
     {
-        (acceptor: WebAcceptor<Headers, Provider>): Promise<void>;
+        (acceptor: WebAcceptor<Header, Provider>): Promise<void>;
     }
 }

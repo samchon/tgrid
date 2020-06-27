@@ -1,5 +1,5 @@
-import { WebConnector } from "../../protocols/web";
-import { Driver } from "../../components";
+import { WebConnector } from "../../protocols/web/module";
+import { Driver } from "../../components/module";
 import { InvalidArgument } from "tstl/exception/InvalidArgument";
 
 import { ICalculator } from "../controllers/ICalculator";

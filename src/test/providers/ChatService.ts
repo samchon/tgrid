@@ -1,6 +1,6 @@
 import { IChatService } from "../controllers/IChatService";
 
-import { Driver } from "../../components";
+import { Driver } from "../../components/module";
 import { HashMap } from "tstl/container/HashMap";
 import { IChatPrinter } from "../controllers/IChatPrinter";
 

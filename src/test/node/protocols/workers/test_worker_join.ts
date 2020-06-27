@@ -1,4 +1,4 @@
-import { WorkerConnector } from "../../../../protocols/workers";
+import { WorkerConnector } from "../../../../protocols/workers/module";
 
 import { FileSystem } from "../../../../protocols/workers/internal/FileSystem";
 import { sleep_for } from "tstl/thread";

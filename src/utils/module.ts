@@ -3,7 +3,6 @@
  * @module tgrid.utils
  */
 //----------------------------------------------------------------
-import * as utils from "./module";
-
-export default utils;
-export * from "./module";
+export * from "./URLVariables";
+export * from "./XML";
+export * from "./XMLList";

@@ -1,4 +1,4 @@
-import { WebServer, WebConnector } from "../../../../protocols/web";
+import { WebServer, WebConnector } from "../../../../protocols/web/module";
 import { Driver } from "../../../../components/Driver";
 
 import { IScript } from "../../../controllers/IScript";

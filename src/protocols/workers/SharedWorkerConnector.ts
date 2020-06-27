@@ -7,7 +7,7 @@ import { ConnectorBase } from "../internal/ConnectorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
-import { IHeadersWrapper } from "../internal/IHeadersWrapper";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IReject } from "./internal/IReject";
 import WebCompiler from "./internal/web-worker";
 import { once } from "../internal/once";
@@ -38,14 +38,12 @@ import { sleep_until } from "tstl/thread/global";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerServer.close}()
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerConnector<
-        Headers extends object | null, 
-        Provider extends object | null>
-    extends ConnectorBase<Headers, Provider>
+export class SharedWorkerConnector<Header, Provider extends object | null>
+    extends ConnectorBase<Header, Provider>
     implements IWorkerSystem
 {
     /**
@@ -110,7 +108,7 @@ export class SharedWorkerConnector<
                 throw new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
             // SEND HEADERS
-            this.port_.postMessage(JSON.stringify( IHeadersWrapper.wrap(this.headers) ));
+            this.port_.postMessage(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // WAIT ACCEPTION OR REJECTION
             let last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(timeout, at);

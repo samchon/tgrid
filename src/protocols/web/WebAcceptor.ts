@@ -26,14 +26,12 @@ import { WebError } from "./WebError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * busines has been completed.
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebAcceptor<
-        Headers extends object | null, 
-        Provider extends object | null>
-    extends AcceptorBase<Headers, Provider>
+export class WebAcceptor<Header, Provider extends object | null>
+    extends AcceptorBase<Header, Provider>
     implements IWebCommunicator
 {
     /**
@@ -52,18 +50,18 @@ export class WebAcceptor<
     /**
      * @internal
      */
-    public static create<Headers extends object, Provider extends object | null>
-        (request: http.IncomingMessage, socket: WebSocket, headers: Headers): WebAcceptor<Headers, Provider>
+    public static create<Header, Provider extends object | null>
+        (request: http.IncomingMessage, socket: WebSocket, header: Header): WebAcceptor<Header, Provider>
     {
-        return new WebAcceptor(request, socket, headers);
+        return new WebAcceptor(request, socket, header);
     }
 
     /**
      * @hidden
      */
-    private constructor(request: http.IncomingMessage, socket: WebSocket, headers: Headers)
+    private constructor(request: http.IncomingMessage, socket: WebSocket, header: Header)
     {
-        super(headers);
+        super(header);
         
         this.request_ = request;
         this.socket_ = socket;
@@ -108,11 +106,17 @@ export class WebAcceptor<
     /* ----------------------------------------------------------------
         ACCESSORS
     ---------------------------------------------------------------- */
+    /**
+     * IP Address of client.
+     */
     public get ip(): string
     {
         return this.request_.connection.remoteAddress!;
     }
 
+    /**
+     * Path of client has connected.
+     */
     public get path(): string
     {
         return this.request_.url!;
@@ -124,7 +128,7 @@ export class WebAcceptor<
     /**
      * @inheritDoc
      */
-    public async accept(provider: Provider | null = null): Promise<void>
+    public async accept(provider: Provider): Promise<void>
     {
         // VALIDATION
         if (this.state_ !== WebAcceptor.State.NONE)

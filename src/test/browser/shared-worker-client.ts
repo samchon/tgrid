@@ -1,4 +1,4 @@
-import { SharedWorkerConnector } from "../../protocols/workers";
+import { SharedWorkerConnector } from "../../protocols/workers/module";
 import { ICalculator } from "../controllers/ICalculator";
 import { complete } from "./internal";
 

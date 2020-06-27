@@ -7,7 +7,7 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { ConnectorBase } from "../internal/ConnectorBase";
 
 import { Invoke } from "../../components/Invoke";
-import { IHeadersWrapper } from "../internal/IHeadersWrapper";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 
 import { IWorkerCompiler } from "./internal/IWebCompiler";
@@ -30,13 +30,12 @@ import { sleep_until } from "tstl/thread/global";
  * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and 
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerConnector<
-        Headers extends object | null, 
-        Provider extends object | null>
-    extends ConnectorBase<Headers, Provider>
+export class WorkerConnector<Header, Provider extends object | null>
+    extends ConnectorBase<Header, Provider>
     implements IWorkerSystem
 {
     /**
@@ -161,7 +160,7 @@ export class WorkerConnector<
                 throw new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
             // SEND HEADERS
-            this.worker_!.postMessage(JSON.stringify( IHeadersWrapper.wrap(this.headers) ));
+            this.worker_!.postMessage(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // WAIT COMPLETION
             if (await this._Handshake(method, timeout, at) !== WorkerConnector.State.OPEN)

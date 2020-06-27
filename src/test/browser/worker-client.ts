@@ -1,6 +1,6 @@
 import "whatwg-fetch";
 
-import { WorkerConnector } from "../../protocols/workers";
+import { WorkerConnector } from "../../protocols/workers/module";
 import { ICalculator } from "../controllers/ICalculator";
 import { complete } from "./internal";
 

@@ -1,4 +1,4 @@
-import { WorkerConnector } from "../../../../protocols/workers";
+import { WorkerConnector } from "../../../../protocols/workers/module";
 import { IScientific } from "../../../controllers/ICalculator";
 
 export async function test_worker(): Promise<void>

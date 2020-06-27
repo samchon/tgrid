@@ -8,7 +8,7 @@ import { IServer } from "../internal/IServer";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
-import { IHeadersWrapper } from "../internal/IHeadersWrapper";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
@@ -34,13 +34,11 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
- * @template Headers Type of headers containing initialization data like activation.
+ * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerServer<
-        Headers extends object | null, 
-        Provider extends object | null>
+export class WorkerServer<Header, Provider extends object | null>
     extends Communicator<Provider | undefined>
     implements IWorkerSystem, IServer<WorkerServer.State>
 {
@@ -52,7 +50,7 @@ export class WorkerServer<
     /**
      * @hidden
      */
-    private headers_: Singleton<Headers>;
+    private header_: Singleton<Header>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -65,14 +63,14 @@ export class WorkerServer<
         super(undefined);
 
         this.state_ = WorkerServer.State.NONE;
-        this.headers_ = new Singleton(async () =>
+        this.header_ = new Singleton(async () =>
         {
             g.postMessage(WorkerServer.State.OPENING);
 
-            let data: string = await this._Handshake("getHeaders");
-            let wrapper: IHeadersWrapper<Headers> = JSON.parse(data);
+            let data: string = await this._Handshake("getHeader");
+            let wrapper: IHeaderWrapper<Header> = JSON.parse(data);
             
-            return wrapper.headers;
+            return wrapper.header;
         });
     }
 
@@ -106,7 +104,7 @@ export class WorkerServer<
         this.provider_ = provider;
 
         // GET HEADERS
-        await this.headers_.get();
+        await this.header_.get();
 
         // SUCCESS
         g.onmessage = this._Handle_message.bind(this);
@@ -155,11 +153,11 @@ export class WorkerServer<
     }
 
     /**
-     * Headers containing initialization data like activation.
+     * Get header containing initialization data like activation.
      */
-    public getHeaders(): Promise<Headers>
+    public getHeader(): Promise<Header>
     {
-        return this.headers_.get();
+        return this.header_.get();
     }
 
     /**

@@ -1,4 +1,4 @@
-import { WorkerServer } from "../../../../../protocols/workers";
+import { WorkerServer } from "../../../../../protocols/workers/module";
 import { Scientific } from "../../../../providers/Calculator";
 
 async function main(): Promise<void>

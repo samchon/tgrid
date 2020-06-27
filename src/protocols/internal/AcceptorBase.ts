@@ -15,19 +15,17 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
  * a remote client in the server side. If the client's connection has been accepted, the 
  * `AcceptorBase` can start interaction with the client through the RFC (Remote Function Call).
  * 
- * @template Headers Type of headers containing initialilzation data like activation.
+ * @template Header Type of header containing initialilzation data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export abstract class AcceptorBase<
-        Headers extends object | null, 
-        Provider extends object | null>
+export abstract class AcceptorBase<Header, Provider extends object | null>
     extends Communicator<Provider | null | undefined>
 {
     /**
      * @hidden
      */
-    private readonly headers_: Headers;
+    private readonly header_: Header;
 
     /**
      * @hidden
@@ -40,11 +38,11 @@ export abstract class AcceptorBase<
     /**
      * @hidden
      */
-    protected constructor(headers: Headers)
+    protected constructor(header: Header)
     {
         super(undefined);
 
-        this.headers_ = headers;
+        this.header_ = header;
         this.state_ = AcceptorBase.State.NONE;
     }
 
@@ -63,9 +61,9 @@ export abstract class AcceptorBase<
     /**
      * Headers containing initialization data like activation.
      */
-    public get headers(): Headers
+    public get headers(): Header
     {
-        return this.headers_;
+        return this.header_;
     }
 
     /**
@@ -103,6 +101,9 @@ export abstract class AcceptorBase<
 
 export namespace AcceptorBase
 {
+    /**
+     * Current state type of acceptor.
+     */
     export const enum State
     {
         REJECTING = -2,
