@@ -1,12 +1,9 @@
-//================================================================ 
-/** @module tgrid.protocols */
-//================================================================
-/**
- * Web Socket Protocol
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols
  */
-export import web = require("./web");
+//----------------------------------------------------------------
+import * as web from "./web";
+import * as workers from "./workers";
 
-/**
- * Workers Protocol
- */
-export import workers = require("./workers");
+export { web, workers };

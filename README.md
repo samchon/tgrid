@@ -75,7 +75,7 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    let connector: WebConnector<{}, null> = new WebConnector(null);
+    let connector: WebConnector<null, null> = new WebConnector(null);
     await connector.connect("ws://127.0.0.1:10102", {});
 
     //----
@@ -184,7 +184,7 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    let connector: WebConnector<{}, null> = new WebConnector(null);
+    let connector: WebConnector<null, null> = new WebConnector(null);
     await connector.connect("ws://127.0.0.1:10101", {});
 
     //----

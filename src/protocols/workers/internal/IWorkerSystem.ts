@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
 /**
  * Common interface for communicators based on `Worker`.
  * 

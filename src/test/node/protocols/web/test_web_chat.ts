@@ -16,7 +16,7 @@ const PORT = 10101;
 class Client
 {
     private name_!: string;
-    private connector_!: WebConnector<{}, IChatPrinter>;
+    private connector_!: WebConnector<null, IChatPrinter>;
     private scripts_!: IScript[];
 
     private service_!: Driver<IChatService>;
@@ -26,7 +26,7 @@ class Client
         // ASSIGN MEMBERS
         this.name_ = name;
         this.connector_ = new WebConnector
-        ({
+        (null, {
             print: (name: string, message: string): void =>
             {
                 this.scripts_.push({ name: name, message: message });
@@ -36,7 +36,7 @@ class Client
         this.scripts_ = [];
         
         // PREPARE INTERACTION
-        await this.connector_.connect("http://127.0.0.1:" + PORT, {});
+        await this.connector_.connect("http://127.0.0.1:" + PORT);
         await this.service_.setName(name);
     }
 

@@ -1,5 +1,5 @@
-import fs = require("fs");
-import cp = require("child_process");
+import fs from "fs";
+import cp from "child_process";
 
 import { WorkerConnector } from "../../../../protocols/workers/WorkerConnector";
 import { ICalculator } from "../../../controllers/ICalculator";
@@ -8,7 +8,7 @@ export function test_worker_connect(): Promise<void>
 {
     return _Test_worker(worker =>
     {
-        return worker.connect(__dirname + "/../../../browser/worker-server.js", ["first", "second"]);
+        return worker.connect(__dirname + "/../../../browser/worker-server.js");
     });
 }
 
@@ -20,13 +20,13 @@ export async function test_worker_compile(): Promise<void>
 
     await _Test_worker(worker =>
     {
-        return worker.compile(fs.readFileSync(PATH, "utf8"), ["first", "second"]);
+        return worker.compile(fs.readFileSync(PATH, "utf8"));
     });
 }
 
-async function _Test_worker(connect: (obj: WorkerConnector<{}, null>)=>Promise<void>): Promise<void>
+async function _Test_worker(connect: (obj: WorkerConnector<null, null>)=>Promise<void>): Promise<void>
 {
-    let worker: WorkerConnector<{}, null> = new WorkerConnector(null);
+    let worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
 
     // TEST RE-USABILITY
     for (let i: number = 0; i < 5; ++i)

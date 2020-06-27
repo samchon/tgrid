@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
 import { tmpdir } from "os";
 import { sep } from "path";
 

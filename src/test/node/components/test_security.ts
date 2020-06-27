@@ -38,8 +38,8 @@ export async function test_security(): Promise<void>
         await acceptor.accept(new CustomCalculator());
     });
 
-    let connector: WebConnector<{}, null> = new WebConnector(null);
-    await connector.connect("ws://127.0.0.1:10101", {});
+    let connector: WebConnector<null, null> = new WebConnector(null, null);
+    await connector.connect("ws://127.0.0.1:10101");
 
     let calc: Driver<CustomCalculator> = connector.getDriver();
     await must_be_error([

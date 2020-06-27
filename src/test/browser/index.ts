@@ -1,4 +1,4 @@
-import puppeteer = require("puppeteer");
+import puppeteer from "puppeteer";
 const HttpServer = require("local-web-server");
 
 const PORT = 37792;

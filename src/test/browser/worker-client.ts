@@ -15,11 +15,11 @@ async function get_source(): Promise<string>
 
 window.onload = async () =>
 {
-    let worker: WorkerConnector<{}, null> = new WorkerConnector(null);
+    let worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
 
     for (let i: number = 0; i < 5; ++i)
     {
-        await worker.compile(await get_source(), {});
+        await worker.compile(await get_source());
 
         await ICalculator.main(worker.getDriver<ICalculator>());
         await worker.close();

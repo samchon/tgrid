@@ -1,9 +1,10 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
-import { Communicator } from "../../components/Communicator";
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
+import { AcceptorBase } from "../internal/AcceptorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IAcceptor } from "../internal/IAcceptor";
 
 import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
@@ -22,14 +23,15 @@ import { DomainError } from "tstl/exception/DomainError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * business has been completed.
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote system.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerAcceptor<Headers extends object, Provider extends object | null>
-    extends Communicator<Provider | null | undefined>
-    implements IWorkerSystem, 
-        IAcceptor<SharedWorkerAcceptor.State, Headers, Provider>
+export class SharedWorkerAcceptor<
+        Headers extends object | null, 
+        Provider extends object | null>
+    extends AcceptorBase<Headers, Provider>
+    implements IWorkerSystem
 {
     /**
      * @hidden
@@ -40,16 +42,6 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
      * @hidden 
      */
     private eraser_: ()=>void;
-
-    /** 
-     * @hidden
-     */
-    private state_: SharedWorkerAcceptor.State;
-
-    /**
-     * @hidden
-     */
-    private headers_: Headers;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -72,15 +64,11 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
      */
     private constructor(port: MessagePort, headers: Headers, eraser: ()=>void)
     {
-        super(undefined);
+        super(headers);
 
         // ASSIGN MEMBER
         this.port_ = port;
         this.eraser_ = eraser;
-        this.headers_ = headers;
-
-        // PROPERTIES
-        this.state_ = SharedWorkerAcceptor.State.NONE;
     }
 
     /**
@@ -89,7 +77,7 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("SharedWorkerAcceptor.close");
+        let error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
 
@@ -118,25 +106,6 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
 
         // WELL, IT MAY HARD TO SEE SUCH PROPERTIES
         this.state_ = SharedWorkerAcceptor.State.CLOSED;
-    }
-
-    /* ----------------------------------------------------------------
-        ACCESSORS
-    ---------------------------------------------------------------- */
-    /**
-     * @inheritDoc
-     */
-    public get state(): SharedWorkerAcceptor.State
-    {
-        return this.state_;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public get headers(): Headers
-    {
-        return this.headers_;
     }
 
     /* ----------------------------------------------------------------
@@ -199,14 +168,6 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
     {
         this.port_.postMessage(JSON.stringify(invoke));
     }
-    
-    /**
-     * @hidden
-     */
-    protected inspectReady(method: string): Error | null
-    {
-        return IAcceptor.inspect(this.state_, method);
-    }
 
     /**
      * @hidden
@@ -222,5 +183,5 @@ export class SharedWorkerAcceptor<Headers extends object, Provider extends objec
 
 export namespace SharedWorkerAcceptor
 {
-    export import State = IAcceptor.State;
+    export import State = AcceptorBase.State;
 }

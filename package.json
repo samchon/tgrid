@@ -6,11 +6,11 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.5.2",
+  "version": "0.6.0-dev.20200628",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "api": "typedoc src --plugin typedoc-plugin-external-module-name --exclude \"src/test/**\" --out ",
+    "api": "typedoc src --exclude \"**/+(test|benchmark)/**\" --excludeNotDocumented --plugin typedoc-plugin-external-module-name --plugin typedoc-plugin-exclude-references --out ../tgrid.com/docs/api",
     "build": "npm run clean && npm run compile && npm run bundle && npm run dist && npm run test",
     "bundle": "ts-node build/bundle",
     "clean": "ts-node build/clean",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "serialize-error": "^4.1.0",
-    "tstl": "^2.4.9",
+    "tstl": "^2.4.10",
     "ws": "^7.3.0"
   },
   "devDependencies": {
@@ -37,8 +37,9 @@
     "puppeteer": "^1.20.0",
     "source-map-support": "^0.5.16",
     "ts-node": "^8.6.2",
-    "typedoc": "^0.14.2",
-    "typedoc-plugin-external-module-name": "^2.0.0",
+    "typedoc": "^0.17.7",
+    "typedoc-plugin-exclude-references": "0.0.0",
+    "typedoc-plugin-external-module-name": "^4.0.3",
     "typescript": "^3.9.2",
     "whatwg-fetch": "^3.0.0"
   },

@@ -1,7 +1,9 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
-import cp = require("child_process");
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
+import cp from "child_process";
 
 /**
  * @hidden

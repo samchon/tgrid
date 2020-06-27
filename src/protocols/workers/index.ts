@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
 export * from "./WorkerServer";
 export * from "./WorkerConnector";
 

@@ -19,7 +19,7 @@ When same error occurs with the `@next` version, then please fill the below temp
 
 ### Code occuring the bug
 ```typescript
-import grid = require("tgrid");
+import tg from "tgrid";
 
 /* Demonstration code occuring the bug you're reporting */
 ```

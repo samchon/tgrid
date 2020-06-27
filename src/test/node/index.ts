@@ -2,7 +2,7 @@
 if (EXTENSION === "js")
     require("source-map-support").install();
 
-import fs = require("fs");
+import fs from "fs";
 import { StringUtil } from "../utils/StringUtil";
 
 interface IModule

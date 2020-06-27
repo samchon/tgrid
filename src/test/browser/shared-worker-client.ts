@@ -4,12 +4,12 @@ import { complete } from "./internal";
 
 window.onload = async () =>
 {
-    let worker: SharedWorkerConnector<{}, null> = new SharedWorkerConnector(null);
+    let worker: SharedWorkerConnector<null, null> = new SharedWorkerConnector(null, null);
 
     // TEST RE-USABILITY
     for (let i: number = 0; i < 5; ++i)
     {
-        await worker.connect("shared-worker-server.js", ["first", "second", "third"]);
+        await worker.connect("shared-worker-server.js");
 
         await ICalculator.main(worker.getDriver<ICalculator>());
         await worker.close();

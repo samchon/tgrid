@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.components */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.components
+ */
+//----------------------------------------------------------------
 import { Driver } from "./Driver";
 import { Invoke } from "./Invoke";
 
@@ -12,7 +14,7 @@ import { Exception } from "tstl/exception/Exception";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
 
-import serializeError = require("serialize-error");
+import serializeError from "serialize-error";
 
 /**
  * The basic communicator.
@@ -28,7 +30,7 @@ import serializeError = require("serialize-error");
  *   - {@link replyData}
  *   - {@link sendData}
  * 
- * @type Provider Type of features provided for remote system.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export abstract class Communicator<Provider>
@@ -219,8 +221,8 @@ export abstract class Communicator<Provider>
      *   - `Controller`: Definition only
      *   - `Driver`: Remote Function Call
      * 
-     * @type Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
-     * @type UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+     * @template Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
+     * @template UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
      * @return A Driver for the RFC.
      */
     public getDriver<Controller extends object, UseParametric extends boolean = false>(): Driver<Controller, UseParametric>

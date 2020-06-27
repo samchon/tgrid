@@ -20,8 +20,8 @@ export async function test_web_headers(): Promise<void>
             await acceptor.accept();
     });
 
-    let connector: WebConnector<IHeaders, null> = new WebConnector(null);
-    await connector.connect(`ws://127.0.0.1:${PORT}`, { token: TOKEN });
+    let connector: WebConnector<IHeaders, null> = new WebConnector({ token: TOKEN }, null);
+    await connector.connect(`ws://127.0.0.1:${PORT}`);
     await connector.close();
 
     await server.close();

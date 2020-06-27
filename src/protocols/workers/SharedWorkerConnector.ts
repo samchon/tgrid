@@ -1,18 +1,20 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
-import { Communicator } from "../../components/Communicator";
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
+import { ConnectorBase } from "../internal/ConnectorBase";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
+import { IHeadersWrapper } from "../internal/IHeadersWrapper";
 import { IReject } from "./internal/IReject";
 import WebCompiler from "./internal/web-worker";
+import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
 import { sleep_until } from "tstl/thread/global";
-import { once } from "../internal/once";
 
 /**
  * SharedWorker Connector
@@ -36,39 +38,24 @@ import { once } from "../internal/once";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerServer.close}()
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote system.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerConnector<Headers extends object, Provider extends object | null>
-    extends Communicator<Provider>
-    implements IWorkerSystem, IConnector<SharedWorkerConnector.State>
+export class SharedWorkerConnector<
+        Headers extends object | null, 
+        Provider extends object | null>
+    extends ConnectorBase<Headers, Provider>
+    implements IWorkerSystem
 {
-    /**
-     * @hidden
-     */
-    private state_: SharedWorkerConnector.State;
-
     /**
      * @hidden
      */
     private port_?: MessagePort;
 
     /* ----------------------------------------------------------------
-        CONSTRUCTOR
+        CONNECTIONS
     ---------------------------------------------------------------- */
-    /**
-     * Initializer Constructor.
-     * 
-     * @param provider An object providing features (functions & objects) for remote system.
-     */
-    public constructor(provider: Provider)
-    {
-        super(provider);
-
-        this.state_ = SharedWorkerConnector.State.NONE;
-    }
-
     /**
      * Connect to remote server.
      * 
@@ -86,10 +73,9 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
      *  - {@link SharedWorkerServer.close}()
      * 
      * @param jsFile JS File to be {@link SharedWorkerServer}.
-     * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the shared-worker program to open itself. If omitted, the waiting would be forever.
      */
-    public async connect(jsFile: string, headers: Headers, timeout?: number): Promise<void>
+    public async connect(jsFile: string, timeout?: number): Promise<void>
     {
         // TEST CONDITION
         if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
@@ -124,7 +110,7 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
                 throw new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
             // SEND HEADERS
-            this.port_.postMessage(JSON.stringify(headers));
+            this.port_.postMessage(JSON.stringify( IHeadersWrapper.wrap(this.headers) ));
 
             // WAIT ACCEPTION OR REJECTION
             let last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(timeout, at);
@@ -203,7 +189,7 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("SharedWorkerConnector.close");
+        let error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
 
@@ -222,17 +208,6 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
     }
 
     /* ----------------------------------------------------------------
-        ACCESSORS
-    ---------------------------------------------------------------- */
-    /**
-     * @inheritDoc
-     */
-    public get state(): SharedWorkerConnector.State
-    {
-        return this.state_;
-    }
-
-    /* ----------------------------------------------------------------
         COMMUNICATOR
     ---------------------------------------------------------------- */
     /**
@@ -241,14 +216,6 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
     protected sendData(invoke: Invoke): void
     {
         this.port_!.postMessage(JSON.stringify(invoke));
-    }
-
-    /**
-     * @hidden
-     */
-    protected inspectReady(method: string): Error | null
-    {
-        return IConnector.inspect(this.state_, method);
     }
 
     /**
@@ -279,7 +246,7 @@ export class SharedWorkerConnector<Headers extends object, Provider extends obje
 
 export namespace SharedWorkerConnector
 {
-    export import State = IConnector.State;
+    export import State = ConnectorBase.State;
     
     /**
      * Compile JS source code.

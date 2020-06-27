@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.protocols.web */
-//================================================================
-import WebSocket = require("ws");
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.web
+ */
+//----------------------------------------------------------------
+import WebSocket from "ws";
 
 export { WebSocket };

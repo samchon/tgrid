@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.protocols.web */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.web
+ */
+//----------------------------------------------------------------
 import { DomainError } from "tstl/exception/DomainError";
 
 /**

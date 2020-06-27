@@ -1,16 +1,19 @@
-//================================================================ 
-/** @module tgrid.protocols.web */
-//================================================================
-import http = require("http");
-import https = require("https");
-import net = require("net");
-import WebSocket = require("ws");
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.web
+ */
+//----------------------------------------------------------------
+import http from "http";
+import https from "https";
+import net from "net";
+import WebSocket from "ws";
 
+import { WebAcceptor } from "./WebAcceptor";
+import { IServer } from "../internal/IServer";
+
+import { IHeadersWrapper } from "../internal/IHeadersWrapper";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
-
-import { IServer } from "../internal/IServer";
-import { WebAcceptor } from "./WebAcceptor";
 
 /**
  * Web Socket Server.
@@ -23,11 +26,13 @@ import { WebAcceptor } from "./WebAcceptor";
  * To open the server, call the {@link open}() method with a callback function which would be
  * called whenever a client has been connected.
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote systems.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote systems.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebServer<Headers extends object, Provider extends object | null>
+export class WebServer<
+        Headers extends object | null, 
+        Provider extends object | null>
     implements IServer<WebServer.State>
 {
     /**
@@ -136,8 +141,8 @@ export class WebServer<Headers extends object, Provider extends object | null>
 
                     try
                     {
-                        let headers: Headers = JSON.parse(data as string);
-                        let acceptor: WebAcceptor<Headers, Provider> =  WebAcceptor.create(request, webSocket, headers);
+                        let wrapper: IHeadersWrapper<Headers> = JSON.parse(data as string);
+                        let acceptor: WebAcceptor<Headers, Provider> =  WebAcceptor.create(request, webSocket, wrapper.headers!);
                         
                         await handler(acceptor);
                     }
@@ -231,7 +236,9 @@ export namespace WebServer
 {
     export import State = IServer.State;
 
-    export interface ConnectionHandler<Headers extends object, Provider extends object | null>
+    export interface ConnectionHandler<
+            Headers extends object | null, 
+            Provider extends object | null>
     {
         (acceptor: WebAcceptor<Headers, Provider>): Promise<void>;
     }

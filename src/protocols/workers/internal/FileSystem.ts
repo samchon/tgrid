@@ -1,7 +1,9 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
-import fs = require("fs");
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
+import fs from "fs";
 
 /**
  * @hidden

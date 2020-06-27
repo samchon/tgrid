@@ -1,3 +1,8 @@
+/** 
+ * @packageDocumentation
+ * @module tgrid.utils
+ */
+//----------------------------------------------------------------
 import { Dictionary } from "./internal/Dictionary";
 import { XMLList } from "./XMLList";
 

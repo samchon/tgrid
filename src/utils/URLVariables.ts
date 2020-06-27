@@ -1,6 +1,8 @@
-//================================================================ 
-/** @module tgrid.utils */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.utils
+ */
+//----------------------------------------------------------------
 import { Dictionary } from "./internal/Dictionary";
 import { Driver } from "../components/Driver";
 

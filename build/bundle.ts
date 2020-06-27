@@ -1,5 +1,5 @@
-import fs = require("fs");
-import browserify = require('browserify');
+import fs from "fs";
+import browserify from "browserify";
 
 function bundle(path: string, output: string): Promise<void>
 {

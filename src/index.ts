@@ -1,17 +1,10 @@
-//================================================================ 
-/** @module tgrid */
-//================================================================
-/**
- * Basic components.
+/** 
+ * @packageDocumentation
+ * @module tgrid 
  */
-export import components = require("./components");
+//----------------------------------------------------------------
+import * as components from "./components";
+import * as protocols from "./protocols";
+import * as utils from "./utils";
 
-/**
- * Provided protocols.
- */
-export import protocols = require("./protocols");
-
-/**
- * Utility classes.
- */
-export import utils = require("./utils");
+export { components, protocols, utils };

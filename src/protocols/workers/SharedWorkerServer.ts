@@ -1,13 +1,17 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
 import { IServer } from "../internal/IServer";
 import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
+
+import { IHeadersWrapper } from "../internal/IHeadersWrapper";
 import { once } from "../internal/once";
 
-import { is_node } from "tstl/utility/node";
-import { HashSet } from "tstl/container/HashSet";
 import { DomainError } from "tstl/exception/DomainError";
+import { HashSet } from "tstl/container/HashSet";
+import { is_node } from "tstl/utility/node";
 
 /**
  * SharedWorker server.
@@ -26,11 +30,13 @@ import { DomainError } from "tstl/exception/DomainError";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerConnector.close}()
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote system.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerServer<Headers extends object, Provider extends object | null>
+export class SharedWorkerServer<
+        Headers extends object | null, 
+        Provider extends object | null>
     implements IServer<SharedWorkerServer.State>
 {
     /**
@@ -114,10 +120,10 @@ export class SharedWorkerServer<Headers extends object, Provider extends object 
         port.onmessage = once(evt =>
         {
             // ARGUMENTS
-            let headers: Headers = JSON.parse(evt.data);
+            let wrapper: IHeadersWrapper<Headers> = JSON.parse(evt.data);
 
             // CREATE ACCEPTOR
-            acceptor = SharedWorkerAcceptor.create(port, headers, () =>
+            acceptor = SharedWorkerAcceptor.create(port, wrapper.headers!, () =>
             {
                 this.acceptors_.erase(acceptor!);
             });

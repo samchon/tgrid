@@ -35,8 +35,8 @@ class Provider
 
 async function _Test_client(): Promise<void>
 {
-    let connector: WebConnector<{}, null> = new WebConnector(null);
-    await connector.connect(`ws://127.0.0.1:${PORT}`, {});
+    let connector: WebConnector<null, null> = new WebConnector(null, null);
+    await connector.connect(`ws://127.0.0.1:${PORT}`);
 
     let driver: Driver<Provider> = connector.getDriver<Provider>();
     await driver.mutex.lock();

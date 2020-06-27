@@ -1,15 +1,17 @@
-//================================================================ 
-/** @module tgrid.protocols.web */
-//================================================================
-import { Communicator } from "../../components/Communicator";
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.web
+ */
+//----------------------------------------------------------------
+import { ConnectorBase } from "../internal/ConnectorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
-import { IConnector } from "../internal/IConnector";
 
 import { Invoke } from "../../components/Invoke";
-import { WebError } from "./WebError";
+import { IHeadersWrapper } from "../internal/IHeadersWrapper";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
+import { WebError } from "./WebError";
 import { is_node } from "tstl/utility/node";
 import { sleep_for } from "tstl/thread/global";
 
@@ -27,38 +29,24 @@ import { sleep_for } from "tstl/thread/global";
  * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
  * close the connection in time, it may waste vulnerable resources of the server.
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote system.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebConnector<Headers extends object, Provider extends object | null>
-    extends Communicator<Provider | null>
-    implements IWebCommunicator, IConnector<WebConnector.State>
+export class WebConnector<
+        Headers extends object | null, 
+        Provider extends object | null>
+    extends ConnectorBase<Headers, Provider>
+    implements IWebCommunicator
 {
     /**
      * @hidden
      */
     private socket_?: WebSocket;
 
-    /**
-     * @hidden
-     */
-    private state_: WebConnector.State;
-
     /* ----------------------------------------------------------------
-        CONSTRUCTOR
+        CONNECTION
     ---------------------------------------------------------------- */
-    /**
-     * Initializer Constructor.
-     * 
-     * @param provider An object providing features for remote system.
-     */
-    public constructor(provider: Provider)
-    {
-        super(provider);
-        this.state_ = WebConnector.State.NONE;
-    }
-
     /**
      * Connect to remote websocket server.
      * 
@@ -70,10 +58,9 @@ export class WebConnector<Headers extends object, Provider extends object | null
      * connection in time to prevent waste of the server resource.
      * 
      * @param url URL address to connect.
-     * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the web-socket server to accept or reject it. If omitted, the waiting would be forever.
      */
-    public async connect(url: string, headers: Headers, timeout?: number): Promise<void>
+    public async connect(url: string, timeout?: number): Promise<void>
     {
         // TEST CONDITION
         if (this.socket_ && this.state !== WebConnector.State.CLOSED)
@@ -97,7 +84,7 @@ export class WebConnector<Headers extends object, Provider extends object | null
             await this._Wait_connection();
             
             // SEND HEADERS
-            this.socket_!.send(JSON.stringify(headers));
+            this.socket_!.send(JSON.stringify( IHeadersWrapper.wrap(this.headers) ));
 
             // PROMISED HANDSHAKE
             if (await this._Handshake(timeout) !== WebConnector.State.OPEN.toString())
@@ -148,7 +135,7 @@ export class WebConnector<Headers extends object, Provider extends object | null
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("WebConnector.close");
+        let error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
         
@@ -218,17 +205,12 @@ export class WebConnector<Headers extends object, Provider extends object | null
     /* ----------------------------------------------------------------
         ACCESSORS
     ---------------------------------------------------------------- */
+    /**
+     * Connection URL.
+     */
     public get url(): string | undefined
     {
         return this.socket_ ? this.socket_.url : undefined;
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    public get state(): WebConnector.State
-    {
-        return this.state_;
     }
 
     /* ----------------------------------------------------------------
@@ -241,15 +223,7 @@ export class WebConnector<Headers extends object, Provider extends object | null
     {
         this.socket_!.send(JSON.stringify(invoke));
     }
-
-    /**
-     * @hidden
-     */
-    protected inspectReady(method: string): Error | null
-    {
-        return IConnector.inspect(this.state, method);
-    }
-
+    
     /**
      * @hidden
      */
@@ -278,9 +252,7 @@ export class WebConnector<Headers extends object, Provider extends object | null
 
 export namespace WebConnector
 {
-    export import State = IConnector.State;
-
-    export var HANDSHAKE_TIMEOUT: number = 5000;
+    export import State = ConnectorBase.State;
 }
 
 //----

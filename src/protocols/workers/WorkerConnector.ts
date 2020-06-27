@@ -1,14 +1,16 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
-import { Communicator } from "../../components/Communicator";
-import { IConnector } from "../internal/IConnector";
-
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { IWorkerCompiler } from "./internal/IWebCompiler";
+import { ConnectorBase } from "../internal/ConnectorBase";
+
 import { Invoke } from "../../components/Invoke";
+import { IHeadersWrapper } from "../internal/IHeadersWrapper";
 import { once } from "../internal/once";
 
+import { IWorkerCompiler } from "./internal/IWebCompiler";
 import { DomainError } from "tstl/exception/DomainError";
 import { is_node } from "tstl/utility/node";
 import { sleep_until } from "tstl/thread/global";
@@ -28,39 +30,23 @@ import { sleep_until } from "tstl/thread/global";
  * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and 
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
- * @type Provider Type of features provided for remote system.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerConnector<Headers extends object, Provider extends object | null>
-    extends Communicator<Provider>
-    implements IWorkerSystem, Pick<IConnector<WorkerConnector.State>, "state">
+export class WorkerConnector<
+        Headers extends object | null, 
+        Provider extends object | null>
+    extends ConnectorBase<Headers, Provider>
+    implements IWorkerSystem
 {
-    /**
-     * @hidden
-     */
-    private state_: WorkerConnector.State;
-
     /**
      * @hidden
      */
     private worker_?: Worker;
 
     /* ----------------------------------------------------------------
-        CONSTRUCTOR
+        CONNECTIONS
     ---------------------------------------------------------------- */
-    /**
-     * Initializer Constructor.
-     * 
-     * @param provider An object providing features for remote system.
-     */
-    public constructor(provider: Provider)
-    {
-        super(provider);
-        
-        // ASSIGN MEMBERS
-        this.state_ = WorkerConnector.State.NONE;
-    }
-
     /**
      * Compile server and connect to there.
      * 
@@ -78,7 +64,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
      * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
-    public async compile(content: string, headers: Headers, timeout?: number): Promise<void>
+    public async compile(content: string, timeout?: number): Promise<void>
     {
         //----
         // PRELIMINIARIES
@@ -96,7 +82,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
         // TRY CONNECTION
         try
         {
-            await this._Connect("compile", path, headers, timeout);
+            await this._Connect("compile", path, timeout);
         }
         catch (exp)
         {
@@ -127,14 +113,13 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
      * @param args Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
-    public async connect<Headers extends object>
-        (jsFile: string, headers: Headers, timeout?: number): Promise<void>
+    public async connect(jsFile: string, timeout?: number): Promise<void>
     {
         // TEST CONDITION
         this._Test_connection("connect");
 
         // DO CONNECT
-        await this._Connect("connect", jsFile, headers, timeout);
+        await this._Connect("connect", jsFile, timeout);
     }
 
     /**
@@ -156,8 +141,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
     /**
      * @hidden
      */
-    private async _Connect<Headers extends object>
-        (method: string, jsFile: string, headers: Headers, timeout?: number): Promise<void>
+    private async _Connect(method: string, jsFile: string, timeout?: number): Promise<void>
     {
         // TIME LIMIT
         let at: Date | undefined = (timeout !== undefined)
@@ -177,7 +161,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
                 throw new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
             // SEND HEADERS
-            this.worker_!.postMessage(JSON.stringify(headers));
+            this.worker_!.postMessage(JSON.stringify( IHeadersWrapper.wrap(this.headers) ));
 
             // WAIT COMPLETION
             if (await this._Handshake(method, timeout, at) !== WorkerConnector.State.OPEN)
@@ -201,6 +185,9 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
         }
     }
 
+    /**
+     * @hidden
+     */
     private _Handshake(method: string, timeout?: number, until?: Date): Promise<number>
     {
         return new Promise((resolve, reject) =>
@@ -235,7 +222,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("WorkerConnector.close");
+        let error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
 
@@ -252,17 +239,6 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
         // LAZY RETURN
         await ret;
     }
-
-    /* ----------------------------------------------------------------
-        ACCESSORS
-    ---------------------------------------------------------------- */
-    /**
-     * @inheritDoc
-     */
-    public get state(): WorkerConnector.State
-    {
-        return this.state_;
-    }
     
     /* ----------------------------------------------------------------
         COMMUNICATOR
@@ -273,14 +249,6 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
     protected sendData(invoke: Invoke): void
     {
         this.worker_!.postMessage(JSON.stringify(invoke));
-    }
-
-    /**
-     * @hidden
-     */
-    protected inspectReady(method: string): Error | null
-    {
-        return IConnector.inspect(this.state_, `WorkerConnector.${method}()`);
     }
 
     /**
@@ -307,7 +275,7 @@ export class WorkerConnector<Headers extends object, Provider extends object | n
 
 export namespace WorkerConnector
 {
-    export import State = IConnector.State;
+    export import State = ConnectorBase.State;
 }
 
 //----

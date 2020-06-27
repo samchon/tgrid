@@ -30,14 +30,14 @@ export async function test_web_calculator(): Promise<void>
     //----
     // CLIENTS
     //----
-    let connector: WebConnector<{}, null> = new WebConnector(null);
+    let connector: WebConnector<null, null> = new WebConnector(null, null);
 
     // TEST RE-USABILITY
     for (let path of ["calculator", "vector"])
         for (let i: number = 0; i < 3; ++i)
         {
             // DO CONNECT
-            await connector.connect(`ws://127.0.0.1:${PORT}/${path}`, {});
+            await connector.connect(`ws://127.0.0.1:${PORT}/${path}`);
 
             // SET DRIVER AND TEST BY CALCULATOR PROCESS
             if (path === "calculator")

@@ -1,17 +1,18 @@
-//================================================================ 
-/** @module tgrid.protocols.web */
-//================================================================
-import http = require("http");
-import WebSocket = require("ws");
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.web
+ */
+//----------------------------------------------------------------
+import http from "http";
+import WebSocket from "ws";
 
-import { Communicator } from "../../components/Communicator";
+import { AcceptorBase } from "../internal/AcceptorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
-import { IAcceptor } from "../internal/IAcceptor";
 
 import { Invoke } from "../../components/Invoke";
-import { WebError } from "./WebError";
 
 import { DomainError } from "tstl/exception/DomainError";
+import { WebError } from "./WebError";
 
 /**
  * Web Socket Acceptor.
@@ -25,20 +26,16 @@ import { DomainError } from "tstl/exception/DomainError";
  * method with special `Provider`. Also, don't forget to closing the connection after your 
  * busines has been completed.
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote system.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebAcceptor<Headers extends object, Provider extends object | null>
-    extends Communicator<Provider | null | undefined>
-    implements IWebCommunicator, 
-        IAcceptor<WebAcceptor.State, Headers, Provider>
+export class WebAcceptor<
+        Headers extends object | null, 
+        Provider extends object | null>
+    extends AcceptorBase<Headers, Provider>
+    implements IWebCommunicator
 {
-    /**
-     * @hidden
-     */
-    private state_: WebAcceptor.State;
-
     /**
      * @hidden
      */
@@ -48,11 +45,6 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
      * @hidden
      */
     private socket_: WebSocket;
-
-    /**
-     * @hidden
-     */
-    private headers_: Headers;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -71,12 +63,10 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
      */
     private constructor(request: http.IncomingMessage, socket: WebSocket, headers: Headers)
     {
-        super(undefined);
+        super(headers);
         
-        this.state_ = WebAcceptor.State.NONE;
         this.request_ = request;
         this.socket_ = socket;
-        this.headers_ = headers;
     }
 
     /**
@@ -85,7 +75,7 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("WebAcceptor.close");
+        let error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
         
@@ -126,22 +116,6 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
     public get path(): string
     {
         return this.request_.url!;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public get state(): WebAcceptor.State
-    {
-        return this.state_;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public get headers(): Headers
-    {
-        return this.headers_;
     }
 
     /* ----------------------------------------------------------------
@@ -205,14 +179,6 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
     /**
      * @hidden
      */
-    protected inspectReady(method: string): Error | null
-    {
-        return IAcceptor.inspect(this.state_, method);
-    }
-
-    /**
-     * @hidden
-     */
     private _Handle_message(data: WebSocket.Data): void
     {
         if (typeof data === "string")
@@ -237,5 +203,5 @@ export class WebAcceptor<Headers extends object, Provider extends object | null>
 
 export namespace WebAcceptor
 {
-    export import State = IAcceptor.State;
+    export import State = AcceptorBase.State;
 }

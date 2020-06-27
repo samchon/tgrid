@@ -1,3 +1,11 @@
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols
+ */
+//----------------------------------------------------------------
+/**
+ * @hidden
+ */
 export function once<Func>(handler: Func): Func
 {
     let called: boolean = false;

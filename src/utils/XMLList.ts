@@ -1,3 +1,8 @@
+/** 
+ * @packageDocumentation
+ * @module tgrid.utils
+ */
+//----------------------------------------------------------------
 import { Vector } from "tstl/container/Vector";
 import { XML } from "./XML";
 

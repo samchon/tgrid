@@ -1,11 +1,14 @@
-//================================================================ 
-/** @module tgrid.protocols.workers */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.workers
+ */
+//----------------------------------------------------------------
 import { Communicator } from "../../components/Communicator";
 import { IServer } from "../internal/IServer";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
+import { IHeadersWrapper } from "../internal/IHeadersWrapper";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
@@ -31,11 +34,13 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
- * @type Headers Type of headers containing initialization data like activation.
- * @type Provider Type of features provided for remote system.
+ * @template Headers Type of headers containing initialization data like activation.
+ * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerServer<Headers extends object, Provider extends object | null>
+export class WorkerServer<
+        Headers extends object | null, 
+        Provider extends object | null>
     extends Communicator<Provider | undefined>
     implements IWorkerSystem, IServer<WorkerServer.State>
 {
@@ -65,7 +70,9 @@ export class WorkerServer<Headers extends object, Provider extends object | null
             g.postMessage(WorkerServer.State.OPENING);
 
             let data: string = await this._Handshake("getHeaders");
-            return JSON.parse(data);
+            let wrapper: IHeadersWrapper<Headers> = JSON.parse(data);
+            
+            return wrapper.headers;
         });
     }
 

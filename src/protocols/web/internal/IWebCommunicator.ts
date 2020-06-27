@@ -1,6 +1,13 @@
-//================================================================ 
-/** @module tgrid.protocols.web */
-//================================================================
+/** 
+ * @packageDocumentation
+ * @module tgrid.protocols.web
+ */
+//----------------------------------------------------------------
+/**
+ * Common interface for websocket communicators
+ * 
+ * @author Jeongho Nam - https://github.com/samchon
+ */
 export interface IWebCommunicator
 {
     /**
