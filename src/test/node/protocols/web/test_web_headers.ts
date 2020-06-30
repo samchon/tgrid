@@ -14,7 +14,7 @@ export async function test_web_headers(): Promise<void>
     let server: WebServer<IHeaders, null> = new WebServer();
     await server.open(PORT, async acceptor =>
     {
-        if (acceptor.headers.token !== TOKEN)
+        if (acceptor.header.token !== TOKEN)
             await acceptor.reject();
         else
             await acceptor.accept(null);

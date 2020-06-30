@@ -59,9 +59,9 @@ export abstract class AcceptorBase<Header, Provider extends object | null>
         ACCESSORS
     ---------------------------------------------------------------- */
     /**
-     * Headers containing initialization data like activation.
+     * Header containing initialization data like activation.
      */
-    public get headers(): Header
+    public get header(): Header
     {
         return this.header_;
     }

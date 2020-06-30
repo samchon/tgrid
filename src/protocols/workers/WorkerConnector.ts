@@ -60,7 +60,6 @@ export class WorkerConnector<Header, Provider extends object | null>
      * memory leak.
      * 
      * @param content JS Source code to compile.
-     * @param headers Headers containing initialization data like activation.
      * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
      */
     public async compile(content: string, timeout?: number): Promise<void>
