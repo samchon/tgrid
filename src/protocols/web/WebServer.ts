@@ -209,11 +209,12 @@ export class WebServer<Header, Provider extends object | null>
     {
         return new Promise(resolve =>
         {
-            this.server_.close(() =>
+            this.protocol_.close(() =>
             {
-                // BE CLOSED
-                this.state_ = WebServer.State.CLOSED;
-                resolve();
+                this.server_.close(() =>
+                {
+                    resolve();
+                });
             });
         });
     }

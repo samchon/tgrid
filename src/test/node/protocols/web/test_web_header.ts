@@ -9,7 +9,7 @@ interface IHeaders
     token: string;
 }
 
-export async function test_web_headers(): Promise<void>
+export async function test_web_header(): Promise<void>
 {
     let server: WebServer<IHeaders, null> = new WebServer();
     await server.open(PORT, async acceptor =>
