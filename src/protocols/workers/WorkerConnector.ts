@@ -30,6 +30,15 @@ import { sleep_until } from "tstl/thread/global";
  * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and 
  * communication channel would not be destroyed and it may cause the memory leak.
  * 
+ * Also, when declaring this {@link WorkerConnector} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * system after the connection. I hope you and server not to omit it and utilize it as an 
+ * activation tool to enhance security. 
+ * 
+ * The second template argument *Provider* represents the features provided for the remote system. 
+ * If you don't have any plan to provide any feature to the remote system, just declare it as 
+ * `null`.
+ * 
  * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
@@ -271,8 +280,14 @@ export class WorkerConnector<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace WorkerConnector
 {
+    /**
+     * Current state of the {@link WorkerConnector}.
+     */
     export import State = ConnectorBase.State;
 }
 

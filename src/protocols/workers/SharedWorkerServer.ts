@@ -15,7 +15,8 @@ import { is_node } from "tstl/utility/node";
 
 /**
  * SharedWorker server.
- *  - available only in Web Browser.
+ * 
+ *  - available only in the Web Browser.
  * 
  * The `SharedWorkerServer` is a class representing a server server in a `SharedWorker` 
  * environment. Clients connecting to the `SharedWorkerServer` would communicate with this 
@@ -30,8 +31,16 @@ import { is_node } from "tstl/utility/node";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerConnector.close}()
  * 
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
+ * Also, when declaring this {@link SharedWorkerServer} type, you've to define two template 
+ * arguments, *Header* and *Provider*. The *Header* type repersents an initial data gotten from the 
+ * remote client after the connection.
+ * 
+ * The second template argument *Provider* represents the features provided for the remote client. 
+ * If you don't have any plan to provide any feature to the remote client, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerServer<Header, Provider extends object | null>
@@ -60,11 +69,23 @@ export class SharedWorkerServer<Header, Provider extends object | null>
     }
 
     /**
-     * Open server.
+     * Open shared worker server.
+     * 
+     * Open a server through the shared worker protocol, with *handler* function determining 
+     * whether to accept the client's connection or not. After the server has been opened, clients 
+     * can connect to that websocket server by using the {@link SharedWorkerServer} class.
+     * 
+     * When implementing the *handler* function with the {@link SharedWorkerServer} instance, calls 
+     * the {@link SharedWorkerAcceptor.accept} method if you want to accept the new client's 
+     * connection. Otherwise you dont't want to accept the client and reject its connection, just 
+     * calls the {@link SharedWorkerAcceptor.reject} instead.
      * 
      * @param handler Callback function called whenever client connects.
      */
-    public async open(handler: (acceptor: SharedWorkerAcceptor<Header, Provider>) => any): Promise<void>
+    public async open
+        (
+            handler: (acceptor: SharedWorkerAcceptor<Header, Provider>) => Promise<void>
+        ): Promise<void>
     {
         // TEST CONDITION
         if (is_node() === true)
@@ -137,7 +158,17 @@ export class SharedWorkerServer<Header, Provider extends object | null>
         ACCESSORS
     ---------------------------------------------------------------- */
     /**
-     * @inheritDoc
+     * Get server state.
+     * 
+     * Get current state of the websocket server. 
+     * 
+     * List of values are such like below:
+     * 
+     *   - `NONE`: The `{@link SharedWorkerServer} instance is newly created, but did nothing yet.
+     *   - `OPENING`: The {@link SharedWorkerServer.open} method is on running.
+     *   - `OPEN`: The websocket server is online.
+     *   - `CLOSING`: The {@link SharedWorkerServer.close} method is on running.
+     *   - `CLOSED`: The websocket server is offline.
      */
     public get state(): SharedWorkerServer.State
     {
@@ -145,8 +176,14 @@ export class SharedWorkerServer<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace SharedWorkerServer
 {
+    /**
+     * Current state of the {@link SharedWorkerServer}.
+     */
     export import State = IServer.State;
 }
 

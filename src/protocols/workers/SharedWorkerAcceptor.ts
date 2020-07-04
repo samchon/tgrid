@@ -12,19 +12,29 @@ import { DomainError } from "tstl/exception/DomainError";
 
 /**
  * SharedWorker acceptor for client.
- *  - available only in Web Browser.
+ * 
+ *  - available only in the Web Browser.
  * 
  * The `SharedWorkerAcceptor` is a communicator class communicating with the remote client 
  * ({@link SharedWorkerConnector}) using RFC (Remote Function Call). The `SharedAcceptor` 
  * objects are always created by the {@link SharedWorkerServer} class whenever a remote client
  * connects to its server.
  * 
- * To accept connection and start interaction with the remote client, call the {@link accept}() 
- * method with special `Provider`. Also, don't forget to closing the connection after your 
- * business has been completed.
+ * To accept connection and start interaction with the remote client, call the {@link accept} 
+ * method with special `Provider`. After the {@link accept acceptance}, don't forget to closing 
+ * the connection after your business has been completed. Otherwise, you don't want to accept but 
+ * reject the connection, call the {@link reject} method.
  * 
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
+ * Also, when declaring this {@link SharedWorkerAcceptor} type, you've to define two template 
+ * arguments, *Header* and *Provider*. The *Header* type repersents an initial data gotten from 
+ * the remote client after the connection.
+ * 
+ * The second template argument *Provider* represents the features provided for the remote client. 
+ * If you don't have any plan to provide any feature to the remote client, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerAcceptor<Header, Provider extends object | null>
@@ -39,7 +49,7 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
     /**
      * @hidden 
      */
-    private eraser_: ()=>void;
+    private eraser_: () => void;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR
@@ -51,7 +61,7 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
         (
             port: MessagePort, 
             header: Header, 
-            eraser: ()=>void
+            eraser: () => void
         ): SharedWorkerAcceptor<Header, Provider>
     {
         return new SharedWorkerAcceptor(port, header, eraser);
@@ -179,7 +189,13 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace SharedWorkerAcceptor
 {
+    /**
+     * Current state of the {@link SharedWorkerAcceptor}.
+     */
     export import State = AcceptorBase.State;
 }

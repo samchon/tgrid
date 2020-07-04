@@ -14,8 +14,17 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
  * The `ConnectorBase` is an abtract communicator class, who can connect to remote server who 
  * interacts with clients using the RFC (Remote Function Call).
  * 
- * @template Header Type of header containing initialilzation data like activation.
- * @template Provider Type of features provided for remote system.
+ * Also, when declaring this {@link ConnectorBase} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * client after the connection. I hope you and client not to omit it and utilize it as an 
+ * activation tool to enhance security. 
+ * 
+ * The second template argument *Provider* represents the features provided for the remote client. 
+ * If you don't have any plan to provide any feature to the remote client, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of additional features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export abstract class ConnectorBase<Header, Provider extends object | null>
@@ -60,7 +69,17 @@ export abstract class ConnectorBase<Header, Provider extends object | null>
     }
 
     /**
-     * Connection state with the server.
+     * Get state.
+     * 
+     * Get current state of connection state with the worker server. 
+     * 
+     * List of values are such like below:
+     * 
+     *   - `NONE`: This instance is newly created, but did nothing yet.
+     *   - `CONNECTING`: The `connect` method is on running.
+     *   - `OPEN`: The connection is online.
+     *   - `CLOSING`: The `close` method is on running.
+     *   - `CLOSED`: The connection is offline.
      */
     public get state(): ConnectorBase.State
     {

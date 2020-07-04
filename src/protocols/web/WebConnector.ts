@@ -29,8 +29,17 @@ import { sleep_for } from "tstl/thread/global";
  * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't 
  * close the connection in time, it may waste vulnerable resources of the server.
  * 
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
+ * Also, when declaring this {@link WebConnector} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * client after the connection. I hope you and client not to omit it and utilize it as an 
+ * activation tool to enhance security. 
+ * 
+ * The second template argument *Provider* represents the features provided for the remote system. 
+ * If you don't have any plan to provide any feature to the remote system, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebConnector<Header, Provider extends object | null>
@@ -211,6 +220,24 @@ export class WebConnector<Header, Provider extends object | null>
         return this.socket_ ? this.socket_.url : undefined;
     }
 
+    /**
+     * Get state.
+     * 
+     * Get current state of connection state with the websocket server. 
+     * 
+     * List of values are such like below:
+     * 
+     *   - `NONE`: The {@link WebConnector} instance is newly created, but did nothing yet.
+     *   - `CONNECTING`: The {@link WebConnector.connect} method is on running.
+     *   - `OPEN`: The connection is online.
+     *   - `CLOSING`: The {@link WebConnector.close} method is on running.
+     *   - `CLOSED`: The connection is offline.
+     */
+    public get state(): WebConnector.State
+    {
+        return this.state_;
+    }
+
     /* ----------------------------------------------------------------
         COMMUNICATOR
     ---------------------------------------------------------------- */
@@ -248,8 +275,14 @@ export class WebConnector<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace WebConnector
 {
+    /**
+     * Current state of the {@link WebConnector}.
+     */
     export import State = ConnectorBase.State;
 }
 

@@ -13,10 +13,20 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
  * 
  * The `AcceptorBase` is an abstract acceptor class, who can accept or reject connection from 
  * a remote client in the server side. If the client's connection has been accepted, the 
- * `AcceptorBase` can start interaction with the client through the RFC (Remote Function Call).
+ * `AcceptorBase` can start interaction with the client through the 
+ * [RFC](https://github.com/samchon/tgrid#13-remote-function-call) (Remote Function Call).
  * 
- * @template Header Type of header containing initialilzation data like activation.
- * @template Provider Type of features provided for remote system.
+ * Also, when declaring this {@link AcceptorBase} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * client after the connection. I hope you and client not to omit it and utilize it as an 
+ * activation tool to enhance security. 
+ * 
+ * The second template argument *Provider* represents the features provided for the remote client. 
+ * If you don't have any plan to provide any feature to the remote client, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export abstract class AcceptorBase<Header, Provider extends object | null>
@@ -67,7 +77,18 @@ export abstract class AcceptorBase<Header, Provider extends object | null>
     }
 
     /**
-     * Connection state with the client.
+     * Get state.
+     * 
+     * Get current state of connection state with the remote client. 
+     * 
+     * List of values are such like below:
+     * 
+     *   - `REJECTING`: The `reject` method is on running.
+     *   - `NONE`: This instance is newly created, but did nothing yet.
+     *   - `ACCEPTING`: The `accept` method is on running.
+     *   - `OPEN`: The connection is online.
+     *   - `CLOSING`: The `close` method is on running.
+     *   - `CLOSED`: The connection is offline.
      */
     public get state(): AcceptorBase.State
     {

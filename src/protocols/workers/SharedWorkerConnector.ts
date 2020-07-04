@@ -18,7 +18,8 @@ import { sleep_until } from "tstl/thread/global";
 
 /**
  * SharedWorker Connector
- *  - available only in Web Browser.
+ * 
+ *  - available only in the Web Browser.
  * 
  * The `SharedWorkerConnector` is a communicator class, who can connect to an `SharedWorker` 
  * instance and communicate with it using RFC (Remote Function Call), considering the 
@@ -38,8 +39,16 @@ import { sleep_until } from "tstl/thread/global";
  *  - {@link SharedWorkerAcceptor.close}()
  *  - {@link SharedWorkerServer.close}()
  * 
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
+ * Also, when declaring this {@link SharedWorkerConnector} type, you've to define two template 
+ * arguments, *Header* and *Provider*. The *Header* type repersents an initial data gotten from the 
+ * remote client after the connection.
+ * 
+ * The second template argument *Provider* represents the features provided for the remote system. 
+ * If you don't have any plan to provide any feature to the remote system, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerConnector<Header, Provider extends object | null>
@@ -242,8 +251,14 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace SharedWorkerConnector
 {
+    /**
+     * Current state of the {@link SharedWorkerConnector}.
+     */
     export import State = ConnectorBase.State;
     
     /**

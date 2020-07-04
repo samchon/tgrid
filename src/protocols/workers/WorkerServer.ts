@@ -34,6 +34,14 @@ import { is_node } from "tstl/utility/node";
  * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable 
  * memory and communication channel would be kept and it may cause the memory leak.
  * 
+ * Also, when declaring this {@link WorkerServer} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * system after the connection.
+ * 
+ * The second template argument *Provider* represents the features provided for the remote system. 
+ * If you don't have any plan to provide any feature to the remote system, just declare it as 
+ * `null`.
+ * 
  * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
  * @author Jeongho Nam - https://github.com/samchon
@@ -238,8 +246,14 @@ export class WorkerServer<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace WorkerServer
 {
+    /**
+     * Current state of the {@link WorkerServer}.
+     */
     export import State = IServer.State;
 }
 

@@ -16,18 +16,30 @@ import { WebError } from "./WebError";
 
 /**
  * Web Socket Acceptor.
- *  - available only in NodeJS.
  * 
- * The `WebAcceptor` is a communicator class interacting with the remote (web socket) client
- * using RFC (Remote Function Call). The `WebAcceptor` objects are always created by the 
- * {@link WebServer} class whenever a remote client connects to its server.
+ *  - available only in the NodeJS.
  * 
- * To accept connection and start interaction with the remote client, call the {@link accept}() 
- * method with special `Provider`. Also, don't forget to closing the connection after your 
- * busines has been completed.
+ * The `WebAcceptor` is a communicator class interacting with the remote (web socket) client using 
+ * [RFC](https://github.com/samchon/tgrid#13-remote-function-call) (Remote Function Call). The 
+ * `WebAcceptor` objects are always created by the {@link WebServer} class whenever a remote client 
+ * connects to its server.
  * 
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
+ * To accept connection and start interaction with the remote client, call the {@link accept}
+ * method with special `Provider`. After the {@link accept acceptance}, don't forget to closing the 
+ * connection after your busines has been completed. Otherwise, you don't want to accept but reject 
+ * the connection, call the {@link reject} method.
+ * 
+ * Also, when declaring this {@link WebAcceptor} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * client after the connection. I hope you and client not to omit it and utilize it as an 
+ * activation tool to enhance security. 
+ * 
+ * The second template argument *Provider* represents the features provided for the remote client. 
+ * If you don't have any plan to provide any feature to the remote client, just declare it as 
+ * `null`.
+ * 
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote system.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebAcceptor<Header, Provider extends object | null>
@@ -122,6 +134,25 @@ export class WebAcceptor<Header, Provider extends object | null>
         return this.request_.url!;
     }
 
+    /**
+     * Get state.
+     * 
+     * Get current state of connection state with the remote client. 
+     * 
+     * List of values are such like below:
+     * 
+     *   - `REJECTING`: The {@link WebAcceptor.reject} method is on running.
+     *   - `NONE`: The {@link WebAcceptor} instance is newly created, but did nothing yet.
+     *   - `ACCEPTING`: The {@link WebAcceptor.accept} method is on running.
+     *   - `OPEN`: The connection is online.
+     *   - `CLOSING`: The {@link WebAcceptor.close} method is on running.
+     *   - `CLOSED`: The connection is offline.
+     */
+    public get state(): WebAcceptor.State
+    {
+        return this.state_;
+    }
+
     /* ----------------------------------------------------------------
         HANDSHAKES
     ---------------------------------------------------------------- */
@@ -205,7 +236,13 @@ export class WebAcceptor<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace WebAcceptor
 {
+    /**
+     * Current state of the {@link WebAcceptor}.
+     */
     export import State = AcceptorBase.State;
 }

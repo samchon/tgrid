@@ -232,11 +232,15 @@ export abstract class Communicator<Provider>
 
     /**
      * Join connection.
+     * 
+     * Wait until the connection to be closed.
      */
     public join(): Promise<void>;
 
     /**
      * Join connection or timeout.
+     * 
+     * Wait until the connection to be clsoed until timeout.
      * 
      * @param ms The maximum milliseconds for joining.
      * @return Whether awaken by disconnection or timeout.
@@ -245,6 +249,8 @@ export abstract class Communicator<Provider>
 
     /**
      * Join connection or time expiration.
+     * 
+     * Wait until the connection to be closed until time expiration.
      * 
      * @param at The maximum time point to join.
      * @return Whether awaken by disconnection or time expiration.
@@ -371,6 +377,8 @@ export abstract class Communicator<Provider>
     ---------------------------------------------------------------- */
     /**
      * A function sending data to the remote system.
+     * 
+     * @param invoke Structured data to send.
      */
     protected abstract sendData(invoke: Invoke): void;
 

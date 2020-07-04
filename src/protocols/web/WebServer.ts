@@ -17,17 +17,27 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
 
 /**
  * Web Socket Server.
- *  - available only in NodeJS.
+ * 
+ *  - available only in the NodeJS.
  * 
  * The `WebServer` is a class who can open an websocket server. Clients connecting to the 
  * `WebServer` would communicate with this server through {@link WebAcceptor} objects using 
  * RFC (Remote Function Call).
  * 
- * To open the server, call the {@link open}() method with a callback function which would be
- * called whenever a client has been connected.
+ * To open the websocket server, call the {@link open}() method with your callback function which 
+ * would be called whenever a {@link WebAcceptor} has been newly created ay a client's connection.
+ * 
+ * Also, when declaring this {@link WebServer} type, you've to define two template arguments,
+ * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * client after the connection. I hope you and client not to omit it and utilize it as an 
+ * activation tool to enhance security. 
+ * 
+ * The second template argument *Provider* represents the features provided for the remote client. 
+ * If you don't have any plan to provide any feature to the remote client, just declare it as 
+ * `null`.
  * 
  * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote systems.
+ * @template Provider Type of features provided for the remote systems.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebServer<Header, Provider extends object | null>
@@ -92,15 +102,23 @@ export class WebServer<Header, Provider extends object | null>
     /**
      * Open websocket server.
      * 
+     * Open a server through the web-socket protocol, with its *port* number and *handler* 
+     * function determining whether to accept the client's connection or not. After the server has 
+     * been opened, clients can connect to that websocket server by using the {@link WebConnector} 
+     * class.
+     * 
+     * When implementing the *handler* function with the {@link WebAcceptor} instance, calls the 
+     * {@link WebAcceptor.accept} method if you want to accept the new client's connection. 
+     * Otherwise you dont't want to accept the client and reject its connection, just calls the 
+     * {@link WebAcceptor.reject} instead.
+     * 
      * @param port Port number to listen.
      * @param handler Callback function for client connection.
-     * 
-     * @todo should be normalized
      */
     public async open
         (
             port: number, 
-            handler: WebServer.ConnectionHandler<Header, Provider>
+            handler: (acceptor: WebAcceptor<Header, Provider>) => Promise<void>
         ): Promise<void>
     {
         //----
@@ -223,7 +241,17 @@ export class WebServer<Header, Provider extends object | null>
         ACCESSORS
     ---------------------------------------------------------------- */
     /**
-     * @inheritDoc
+     * Get server state.
+     * 
+     * Get current state of the websocket server. 
+     * 
+     * List of values are such like below:
+     * 
+     *   - `NONE`: The `{@link WebServer} instance is newly created, but did nothing yet.
+     *   - `OPENING`: The {@link WebServer.open} method is on running.
+     *   - `OPEN`: The websocket server is online.
+     *   - `CLOSING`: The {@link WebServer.close} method is on running.
+     *   - `CLOSED`: The websocket server is offline.
      */
     public get state(): WebServer.State
     {
@@ -231,12 +259,13 @@ export class WebServer<Header, Provider extends object | null>
     }
 }
 
+/**
+ * 
+ */
 export namespace WebServer
 {
+    /**
+     * Current state of the {@link WebServer}.
+     */
     export import State = IServer.State;
-
-    export interface ConnectionHandler<Header, Provider extends object | null>
-    {
-        (acceptor: WebAcceptor<Header, Provider>): Promise<void>;
-    }
 }
