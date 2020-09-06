@@ -6,17 +6,18 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.6.3",
+  "version": "0.6.4",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
     "api": "typedoc src --exclude \"**/+(test|benchmark)/**\" --excludeNotDocumented --plugin typedoc-plugin-external-module-name --plugin typedoc-plugin-exclude-references --out ../tgrid.com/docs/api",
-    "build": "npm run clean && npm run compile && npm run bundle && npm run dist && npm run test",
+    "build": "npm run clean && npm run compile && npm run bundle && npm run test",
     "bundle": "ts-node build/bundle",
     "clean": "ts-node build/clean",
     "compile": "tsc",
     "dev": "tsc --watch",
-    "dist": "ts-node build/dist",
+    "package": "npm run build && ts-node build/dist && npm publish",
+    "package:next": "npm run package -- --tag next",
     "test": "npm run test:node && npm run test:browser",
     "test:browser": "node dist/test/browser",
     "test:node": "node dist/test/node"
