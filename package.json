@@ -6,7 +6,7 @@
     "email": "samchon@samchon.org",
     "url": "http://samchon.org"
   },
-  "version": "0.6.4",
+  "version": "0.6.5",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -16,7 +16,7 @@
     "clean": "ts-node build/clean",
     "compile": "tsc",
     "dev": "tsc --watch",
-    "package": "npm run build && ts-node build/dist && npm publish",
+    "package": "npm run build && ts-node build/dist && cd dist && npm publish",
     "package:next": "npm run package -- --tag next",
     "test": "npm run test:node && npm run test:browser",
     "test:browser": "node dist/test/browser",
