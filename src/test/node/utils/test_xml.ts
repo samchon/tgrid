@@ -18,11 +18,11 @@ class Invoke extends Vector<Parameter>
 
 	public toXML(): XML
 	{
-		let ret: XML = new XML();
+		const ret: XML = new XML();
 		ret.setTag("invoke");
 		ret.setProperty("listener", this.listener);
 
-		for (let param of this)
+		for (const param of this)
 			ret.push(param.toXML());
 
 		return ret;
@@ -44,7 +44,7 @@ class Parameter
 
 	public toXML(): XML
 	{
-		let ret: XML = new XML();
+		const ret: XML = new XML();
 		ret.setTag("parameter");
 
 		ret.setProperty("name", this.name);
@@ -75,7 +75,7 @@ class Member
 
 	public toXML(): XML
 	{
-		let ret: XML = new XML();
+		const ret: XML = new XML();
 		ret.setTag("member");
 
 		ret.setProperty("id", this.id);
@@ -94,11 +94,11 @@ function validate_equality<T>(x: T, y: T): void
 
 function write(): Pair<Invoke, Vector<Member>>
 {
-	let invoke: Invoke = new Invoke("setMemberList");
+	const invoke: Invoke = new Invoke("setMemberList");
 	invoke.push_back(new Parameter("application", "string", "simulation"));
 	invoke.push_back(new Parameter("sequence", "number", "3"));
 
-	let members: Vector<Member> = new Vector();
+	const members: Vector<Member> = new Vector();
 	members.push
 	(
 		new Member("samchon", "samchon@samchon.org", "Jeongho Nam"),
@@ -106,10 +106,10 @@ function write(): Pair<Invoke, Vector<Member>>
 		new Member("robot", "google@google.com", "AlphaGo")
 	);
 
-	let memberList: XML = new XML();
+	const memberList: XML = new XML();
 	memberList.setTag("memberList");
 
-	for (let elem of members)
+	for (const elem of members)
 		memberList.push(elem.toXML());
 
 	invoke.push_back(new Parameter("memberList", "XML", memberList));
@@ -119,17 +119,17 @@ function write(): Pair<Invoke, Vector<Member>>
 
 function read(pair: Pair<Invoke, Vector<Member>>): void
 {
-	let invoke: Invoke = pair.first;
-	let members: Vector<Member> = pair.second;
+	const invoke: Invoke = pair.first;
+	const members: Vector<Member> = pair.second;
 
 	// CREATE AN XML OBJECT BY PARSING CHARACTERS
-	let xml: XML = pair.first.toXML();
+	const xml: XML = pair.first.toXML();
 
 	//----
 	// CONVERTING TESTS
 	//----
-	let xml2: XML = new XML(xml.toString());
-	let xml3: XML = new XML(xml);
+	const xml2: XML = new XML(xml.toString());
+	const xml3: XML = new XML(xml);
 
 	validate_equality(xml.toString(), xml2.toString());
 	validate_equality(xml2.toString(), xml3.toString());
@@ -147,8 +147,8 @@ function read(pair: Pair<Invoke, Vector<Member>>): void
 	// VALIDATE MEMBERS OF PARAMETERS
 	for (let i: number = 0; i < invoke.size(); ++i)
 	{
-		let param: Parameter = invoke.at(i);
-		let child: XML = xmlList.at(i);
+		const param: Parameter = invoke.at(i);
+		const child: XML = xmlList.at(i);
 
 		validate_equality(param.name, child.getProperty("name"));
 		validate_equality(param.type, child.getProperty("type"));
@@ -170,8 +170,8 @@ function read(pair: Pair<Invoke, Vector<Member>>): void
 	// VALIDATE MEMBERS OF MEMBERS
 	for (let i: number = 0; i < members.size(); ++i)
 	{
-		let member: Member = members.at(i);
-		let child: XML = xmlList.at(i);
+		const member: Member = members.at(i);
+		const child: XML = xmlList.at(i);
 
 		validate_equality(member.id, child.getProperty("id"));
 		validate_equality(member.email, child.getProperty("email"));

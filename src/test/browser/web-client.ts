@@ -9,10 +9,10 @@ window.onload = async () =>
 {
     for (let i: number = 0; i < 5; ++i)
     {
-        let connector: WebConnector<null, null> = new WebConnector(null, null);
+        const connector: WebConnector<null, null> = new WebConnector(null, null);
         await connector.connect("ws://127.0.0.1:10489");
         
-        let driver: Driver<ICalculator> = connector.getDriver();
+        const driver: Driver<ICalculator> = connector.getDriver();
         if (driver instanceof Driver === false)
             throw new InvalidArgument("Error on Driver type checking");
 

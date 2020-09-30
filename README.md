@@ -54,7 +54,7 @@ import { CompositeCalculator } from "../../providers/Calculator";
 
 async function main(): Promise<void>
 {
-    let server: WebServer<{}, CompositeCalculator> = new WebServer();
+    const server: WebServer<{}, CompositeCalculator> = new WebServer();
     await server.open(10102, async acceptor =>
     {
         await acceptor.accept(new CompositeCalculator());
@@ -75,14 +75,14 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    let connector: WebConnector<null, null> = new WebConnector(null);
-    await connector.connect("ws://127.0.0.1:10102", {});
+    const connector: WebConnector<null, null> = new WebConnector(null, null);
+    await connector.connect("ws://127.0.0.1:10102");
 
     //----
     // CALL REMOTE FUNCTIONS
     //----
     // GET DRIVER
-    let calc: Driver<ICalculator> = connector.getDriver<ICalculator>();
+    const calc: Driver<ICalculator> = connector.getDriver<ICalculator>();
 
     // FUNCTIONS IN THE ROOT SCOPE
     console.log("1 + 6 =", await calc.plus(1, 6));
@@ -184,14 +184,14 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    let connector: WebConnector<null, null> = new WebConnector(null);
-    await connector.connect("ws://127.0.0.1:10101", {});
+    const connector: WebConnector<null, null> = new WebConnector(null, null);
+    await connector.connect("ws://127.0.0.1:10101");
 
     //----
     // CALL REMOTE FUNCTIONS
     //----
     // GET DRIVER
-    let calc: Driver<ICalculator> = connector.getDriver<ICalculator>();
+    const calc: Driver<ICalculator> = connector.getDriver<ICalculator>();
 
     // CALL FUNCTIONS REMOTELY
     console.log("1 + 6 =", await calc.plus(1, 6));

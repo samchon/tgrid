@@ -75,10 +75,10 @@ export class XML
 		this.property_map_ = new HashMap(obj.property_map_);
 
 		// COPY CHILDREN
-		for (let entry of obj)
+		for (const entry of obj)
 		{
-			let xml_list: XMLList = new XMLList();
-			for (let child of entry.second)
+			const xml_list: XMLList = new XMLList();
+			for (const child of entry.second)
 				xml_list.push_back(new XML(child));
 
 			this.emplace(entry.first, xml_list);
@@ -158,7 +158,7 @@ export class XML
 		this._Parse_tag(str);
 		this._Parse_properties(str);
 
-		let res = this._Parse_value(str);
+		const res = this._Parse_value(str);
 		if (res.second === true)
 			this._Parse_children(res.first);
 	}
@@ -168,8 +168,8 @@ export class XML
 	 */
 	private _Parse_tag(str: string): void
 	{
-		let start: number = str.indexOf("<") + 1;
-		let end: number =
+		const start: number = str.indexOf("<") + 1;
+		const end: number =
 			XML._Compute_min_index
 			(
 				str.indexOf(" ", start),
@@ -191,13 +191,13 @@ export class XML
 	private _Parse_properties(str: string): void
 	{
 		let start: number = str.indexOf("<" + this.tag_) + this.tag_.length + 1;
-		let end: number = XML._Compute_min_index(str.lastIndexOf("/"), str.indexOf(">", start));
+		const end: number = XML._Compute_min_index(str.lastIndexOf("/"), str.indexOf(">", start));
 
 		if (start === -1 || end === -1 || start >= end)
 			return;
 
 		//<comp label='ABCD' /> : " label='ABCD' "
-		let line: string = str.substring(start, end);
+		const line: string = str.substring(start, end);
 		if (line.indexOf("=") === -1)
 			return;
 
@@ -261,8 +261,8 @@ export class XML
 	 */
 	private _Parse_value(str: string): Pair<string, boolean>
 	{
-		let end_slash: number = str.lastIndexOf("/");
-		let end_block: number = str.indexOf(">");
+		const end_slash: number = str.lastIndexOf("/");
+		const end_block: number = str.indexOf(">");
 
 		if (end_slash < end_block || end_slash + 1 === str.lastIndexOf("<")) 
 		{
@@ -273,8 +273,8 @@ export class XML
 			return new Pair<string, boolean>(str, false);
 		}
 
-		let start: number = end_block + 1;
-		let end: number = str.lastIndexOf("<");
+		const start: number = end_block + 1;
+		const end: number = str.lastIndexOf("<");
 		str = str.substring(start, end); //REDEFINE WEAK_STRING -> IN TO THE TAG
 
 		if (str.indexOf("<") === -1)
@@ -312,10 +312,10 @@ export class XML
 			{
 				end = str.indexOf(">", i);
 
-				let xmlList: XMLList;
-				let xml: XML = new XML();
+				const xml: XML = new XML();
 				xml._Parse(str.substring(start, end + 1));
-
+				
+				let xmlList: XMLList;
 				if (this.has(xml.tag_) === true)
 					xmlList = this.get(xml.tag_);
 				else 
@@ -381,7 +381,7 @@ export class XML
 	}
 	public insertValue(tag: string, value: string): XML
 	{
-		let xml = new XML();
+		const xml = new XML();
 		xml.setTag(tag);
 		xml.setValue(value);
 
@@ -395,7 +395,7 @@ export class XML
 	}
 	public eraseProperty(key: string): void
 	{
-		let it = this.property_map_.find(key);
+		const it = this.property_map_.find(key);
 		if (it.equals(this.property_map_.end()) === true)
 			throw new OutOfRange("Error on XML.eraseProperty(): unable to find the matched key.");
 
@@ -411,13 +411,13 @@ export class XML
 
 	public push(...items: any[]): number
 	{
-		for (let elem of items)
+		for (const elem of items)
 			if (elem instanceof XML)
 				if (this.has(elem.tag_) === true)
 					this.get(elem.tag_).push(elem);
 				else 
 				{
-					let xmlList: XMLList = new XMLList();
+					const xmlList: XMLList = new XMLList();
 					xmlList.push(elem);
 
 					this.set(elem.tag_, xmlList);
@@ -427,8 +427,7 @@ export class XML
 					continue;
 				else if (this.has(elem.getTag()) === true)
 				{
-					let xmlList: XMLList = this.get(elem.getTag());
-
+					const xmlList: XMLList = this.get(elem.getTag());
 					xmlList.insert(xmlList.end(), elem.begin(), elem.end());
 				}
 				else
@@ -446,10 +445,10 @@ export class XML
 	{
 		for (let it = first; !it.equals(last); it = it.next())
 		{
-			let tag: string = it.first;
-			let xmlList: XMLList = it.second;
+			const tag: string = it.first;
+			const xmlList: XMLList = it.second;
 
-			for (let xml of xmlList)
+			for (const xml of xmlList)
 				if (xml.getTag() !== tag)
 					xml.setTag(tag);
 		}
@@ -476,7 +475,7 @@ export class XML
 		let str: string = XML._Repeat("\t", tab) + "<" + this.tag_;
 
 		//PROPERTIES
-		for (let entry of this.property_map_)
+		for (const entry of this.property_map_)
 			str += " " + entry.first + "=\"" + XML.encode_property(entry.second) + "\"";
 
 		if (this.size() === 0) 
@@ -491,7 +490,7 @@ export class XML
 		{
 			// CHILDREN
 			str += ">\n";
-			for (let entry of this)
+			for (const entry of this)
 				str += entry.second.toString(tab + 1);
 			
 			str += XML._Repeat("\t", tab) + "</" + this.tag_ + ">";
@@ -506,7 +505,7 @@ export class XML
 	{
 		let min: number = -1;
 
-		for (let elem of args)
+		for (const elem of args)
 			if (elem === -1)
 				continue;
 			else if (min === -1 || elem < min)
@@ -540,26 +539,26 @@ export namespace XML
 
 	export function encode_value(str: string): string 
 	{
-		for (let p of VALUE_CODES)
+		for (const p of VALUE_CODES)
 			str = str.split(p.first).join(p.second);
 		return str;
 	}
 	export function encode_property(str: string): string 
 	{
-		for (let p of PROPERTY_CODES)
+		for (const p of PROPERTY_CODES)
 			str = str.split(p.first).join(p.second);
 		return str;
 	}
 
 	export function decode_value(str: string): string 
 	{
-		for (let p of VALUE_CODES)
+		for (const p of VALUE_CODES)
 			str = str.split(p.second).join(p.first);
 		return str;
 	}
 	export function decode_property(str: string): string 
 	{
-		for (let p of PROPERTY_CODES)
+		for (const p of PROPERTY_CODES)
 			str = str.split(p.second).join(p.first);
 		return str;
 	}

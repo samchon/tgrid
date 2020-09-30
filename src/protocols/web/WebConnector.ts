@@ -142,7 +142,7 @@ export class WebConnector<Header, Provider extends object | null>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("close");
+        const error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
         
@@ -150,7 +150,7 @@ export class WebConnector<Header, Provider extends object | null>
         // CLOSE WITH JOIN
         //----
         // PREPARE JOINER
-        let ret: Promise<void> = this.join();
+        const ret: Promise<void> = this.join();
         
         // DO CLOSE
         this.state_ = WebConnector.State.CLOSING;
@@ -256,7 +256,7 @@ export class WebConnector<Header, Provider extends object | null>
     {
         if (typeof evt.data === "string")
         {
-            let invoke: Invoke = JSON.parse(evt.data);
+            const invoke: Invoke = JSON.parse(evt.data);
             this.replyData(invoke);
         }
     }
@@ -266,7 +266,7 @@ export class WebConnector<Header, Provider extends object | null>
      */
     private async _Handle_close(event: CloseEvent): Promise<void>
     {
-        let error: WebError | undefined = (!event.code || event.code !== 1000)
+        const error: WebError | undefined = (!event.code || event.code !== 1000)
             ? new WebError(event.code, event.reason)
             : undefined;
         

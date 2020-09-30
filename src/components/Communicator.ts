@@ -103,13 +103,13 @@ export abstract class Communicator<Provider>
     protected async destructor(error?: Error): Promise<void>
     {
         // REJECT UNRETURNED FUNCTIONS
-        let rejectError: Error = error 
+        const rejectError: Error = error 
             ? error 
             : new RuntimeError("Connection has been closed.");
         
-        for (let entry of this.promises_)
+        for (const entry of this.promises_)
         {
-            let reject: Function = entry.second.second;
+            const reject: Function = entry.second.second;
             reject(rejectError);
         }
         
@@ -132,7 +132,7 @@ export abstract class Communicator<Provider>
      */
     private _Proxy_func(name: string): Function
     {
-        let func = (...params: any[]) => this._Call_function(name, ...params);
+        const func = (...params: any[]) => this._Call_function(name, ...params);
 
         return new Proxy(func, 
         {
@@ -158,7 +158,7 @@ export abstract class Communicator<Provider>
         return new Promise((resolve, reject) =>
         {
             // READY TO SEND ?
-            let error: Error | null = this.inspectReady("Communicator._Call_fuction");
+            const error: Error | null = this.inspectReady("Communicator._Call_fuction");
             if (error)
             {
                 reject(error);
@@ -166,7 +166,7 @@ export abstract class Communicator<Provider>
             }
 
             // CONSTRUCT INVOKE MESSAGE
-            let invoke: Invoke.IFunction =
+            const invoke: Invoke.IFunction =
             {
                 uid: ++Communicator.SEQUENCE,
                 listener: name,
@@ -260,7 +260,7 @@ export abstract class Communicator<Provider>
     public async join(param?: number | Date): Promise<void|boolean>
     {
         // IS JOINABLE ?
-        let error: Error | null = this.inspectReady(`${this.constructor.name}.join`);
+        const error: Error | null = this.inspectReady(`${this.constructor.name}.join`);
         if (error)
             throw error;
 
@@ -304,7 +304,7 @@ export abstract class Communicator<Provider>
      */
     private async _Handle_function(invoke: Invoke.IFunction): Promise<void>
     {
-        let uid: number = invoke.uid;
+        const uid: number = invoke.uid;
 
         try
         {
@@ -320,8 +320,8 @@ export abstract class Communicator<Provider>
             let func: Function = this.provider_ as any;
             let thisArg: any = undefined;
 
-            let routes: string[] = invoke.listener.split(".");
-            for (let name of routes)
+            const routes: string[] = invoke.listener.split(".");
+            for (const name of routes)
             {
                 thisArg = func;
                 func = thisArg[name];
@@ -342,8 +342,8 @@ export abstract class Communicator<Provider>
             // RETURN VALUE
             //----
             // CALL FUNCTION
-            let parameters: any[] = invoke.parameters.map(p => p.value);
-            let ret: any = await func(...parameters);
+            const parameters: any[] = invoke.parameters.map(p => p.value);
+            const ret: any = await func(...parameters);
 
             this._Send_return(uid, true, ret);
         }
@@ -359,12 +359,12 @@ export abstract class Communicator<Provider>
     private _Handle_return(invoke: Invoke.IReturn): void
     {
         // GET THE PROMISE OBJECT
-        let it = this.promises_.find(invoke.uid);
+        const it = this.promises_.find(invoke.uid);
         if (it.equals(this.promises_.end()))
             return;
 
         // RETURNS
-        let func: Function = invoke.success 
+        const func: Function = invoke.success 
             ? it.second.first 
             : it.second.second;
         this.promises_.erase(it);

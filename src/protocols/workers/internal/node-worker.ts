@@ -23,7 +23,7 @@ class _NodeWorkerCompiler implements IWorkerCompiler
 
         while (true)
         {
-            let myPath: string = path + sep + `${new Date().getTime()}_${Math.random()}_${Math.random()}.js`; 
+            const myPath: string = path + sep + `${new Date().getTime()}_${Math.random()}_${Math.random()}.js`; 
             if (await FileSystem.exists(myPath) === false)
             {
                 path = myPath;

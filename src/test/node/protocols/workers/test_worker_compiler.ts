@@ -26,7 +26,7 @@ export async function test_worker_compile(): Promise<void>
 
 async function _Test_worker(connect: (obj: WorkerConnector<null, null>)=>Promise<void>): Promise<void>
 {
-    let worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
+    const worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
 
     // TEST RE-USABILITY
     for (let i: number = 0; i < 5; ++i)

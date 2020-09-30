@@ -56,7 +56,7 @@ export namespace FileSystem
     {
         return new Promise((resolve, reject) => 
         {
-            let callback = (err: NodeJS.ErrnoException | null, ret: Buffer | string) =>
+            const callback = (err: NodeJS.ErrnoException | null, ret: Buffer | string) =>
             {
                 if (err)
                     reject(err);
@@ -97,7 +97,7 @@ export namespace FileSystem
     {
         return new Promise((resolve, reject) =>
         {
-            let callback = (err: NodeJS.ErrnoException | null) =>
+            const callback = (err: NodeJS.ErrnoException | null) =>
             {
                 if (err)
                     reject(err);

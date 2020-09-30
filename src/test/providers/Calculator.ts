@@ -62,17 +62,17 @@ export class Statistics implements IStatistics
     public mean(...elems: number[]): number
     {
         let ret: number = 0;
-        for (let val of elems)
+        for (const val of elems)
             ret += val;
         return ret / elems.length;
     }
 
     public stdev(...elems: number[]): number
     {
-        let mean: number = this.mean(...elems);
+        const mean: number = this.mean(...elems);
         let ret: number = 0;
 
-        for (let val of elems)
+        for (const val of elems)
             ret += Math.pow(val - mean, 2);
 
         return Math.sqrt(ret / elems.length);

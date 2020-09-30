@@ -85,7 +85,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     public async close(code?: number, reason?: string): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("close");
+        const error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
         
@@ -93,7 +93,7 @@ export class WebAcceptor<Header, Provider extends object | null>
         // CLOSE WITH JOIN
         //----
         // PREPARE LAZY RETURN
-        let ret: Promise<void> = this.join();
+        const ret: Promise<void> = this.join();
 
         // DO CLOSE
         this.state_ = WebAcceptor.State.CLOSING;
@@ -218,7 +218,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     {
         if (typeof data === "string")
         {
-            let invoke: Invoke = JSON.parse(data);
+            const invoke: Invoke = JSON.parse(data);
             this.replyData(invoke);
         }
     }
@@ -228,7 +228,7 @@ export class WebAcceptor<Header, Provider extends object | null>
      */
     private async _Handle_close(code: number, reason: string): Promise<void>
     {
-        let error: WebError | undefined = (code !== 100)
+        const error: WebError | undefined = (code !== 100)
             ? new WebError(code, reason)
             : undefined;
         

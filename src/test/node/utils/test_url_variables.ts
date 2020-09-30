@@ -25,10 +25,10 @@ function test_global(author: IAuthor): void
     // STRINGIFY & PARSE
     //----
     // STRINGIFY -> OBJECT TO URL-ENCODED STRING
-    let url_encoded_str: string = URLVariables.stringify(author);
+    const url_encoded_str: string = URLVariables.stringify(author);
 
     // PARSE -> URL-ENCODED STRING TO OBJECT
-    let obj: IAuthor = URLVariables.parse(url_encoded_str, true);
+    const obj: IAuthor = URLVariables.parse(url_encoded_str, true);
 
     //----
     // VALIDATE
@@ -38,7 +38,7 @@ function test_global(author: IAuthor): void
         throw new DomainError("Error on URLVariables.decode().");
 
     // VALIDATE PARSE -> (AUTHOR === OBJ)?
-    for (let key in author)
+    for (const key in author)
         if (author[key] !== obj[key])
             throw new DomainError("Error on URLVariables.parse().");
 }
@@ -48,7 +48,7 @@ function test_class(author: IAuthor): void
     //----
     // GENERATE URL-VARIABLES OBJECT
     //----
-    let dict: URLVariables = new URLVariables();
+    const dict: URLVariables = new URLVariables();
     
     // FILL ELEMENTS
     dict.set("name", author.name);
@@ -59,21 +59,21 @@ function test_class(author: IAuthor): void
     dict.set("is_crazy", String(author.is_crazy));
 
     // CONVERT THE URL-VARIABLES OBJECT TO URL-ENCODED STRING
-    let url_encoded_str: string = dict.toString();
+    const url_encoded_str: string = dict.toString();
 
     //----
     // VALIDATIONS
     //----
     // CREATE A NEW URL-VARIABLES OBJECT 
     // BY PARSING THE URL-ENCODED STRING
-    let vars: URLVariables = new URLVariables(url_encoded_str);
+    const vars: URLVariables = new URLVariables(url_encoded_str);
 
     // VALIDATE SIZE
     if (dict.size() !== vars.size())
         throw new LengthError("Size are different.");
 
     // ALL ELEMENTS ARE EQUAL
-    let equality: boolean = equal
+    const equality: boolean = equal
     (
         dict.begin(), dict.end(), vars.begin(), 
         function (x: Element, y: Element): boolean
@@ -91,7 +91,7 @@ function test_class(author: IAuthor): void
 
 export function test_url_variables(): void
 {
-    let author: IAuthor = 
+    const author: IAuthor = 
     {
         name: "Samchon (Jeongho Nam)",
         age: 29,
@@ -100,7 +100,6 @@ export function test_url_variables(): void
         memo: "Hello, I'm the best programmer in Korea.",
         is_crazy: true
     };
-    
     test_global(author);
     test_class(author);
 }

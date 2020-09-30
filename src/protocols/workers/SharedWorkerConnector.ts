@@ -99,7 +99,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
         // CONNECTION
         //----
         // TIME LIMIT
-        let at: Date | undefined = (timeout !== undefined)
+        const at: Date | undefined = (timeout !== undefined)
             ? new Date(Date.now() + timeout)
             : undefined;
 
@@ -109,7 +109,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
         try
         {
             // EXECUET THE WORKER
-            let worker: SharedWorker = new SharedWorker(jsFile);
+            const worker: SharedWorker = new SharedWorker(jsFile);
             this.port_ = worker.port as MessagePort;
 
             // WAIT THE WORKER TO BE READY
@@ -120,7 +120,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
             this.port_.postMessage(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // WAIT ACCEPTION OR REJECTION
-            let last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(timeout, at);
+            const last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(timeout, at);
             if (last === SharedWorkerConnector.State.OPEN)
             {
                 // ACCEPTED
@@ -196,7 +196,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("close");
+        const error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
 
@@ -204,7 +204,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
         // CLOSE WITH JOIN
         //----
         // PROMISE RETURN
-        let ret: Promise<void> = this.join();
+        const ret: Promise<void> = this.join();
 
         // REQUEST CLOSE TO SERVER
         this.state_ = SharedWorkerConnector.State.CLOSING;
@@ -236,7 +236,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
         // RFC OR REJECT
         else
         {
-            let data: Invoke = JSON.parse(evt.data);
+            const data: Invoke = JSON.parse(evt.data);
             this.replyData(data as Invoke);
         }
     }

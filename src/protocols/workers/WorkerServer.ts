@@ -75,8 +75,8 @@ export class WorkerServer<Header, Provider extends object | null>
         {
             g.postMessage(WorkerServer.State.OPENING);
 
-            let data: string = await this._Handshake("getHeader");
-            let wrapper: IHeaderWrapper<Header> = JSON.parse(data);
+            const data: string = await this._Handshake("getHeader");
+            const wrapper: IHeaderWrapper<Header> = JSON.parse(data);
             
             return wrapper.header;
         });
@@ -127,7 +127,7 @@ export class WorkerServer<Header, Provider extends object | null>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady();
+        const error: Error | null = this.inspectReady();
         if (error)
             throw error;
 

@@ -9,13 +9,13 @@ export async function test_worker_join(): Promise<void>
 {
     await FileSystem.write(FILE_PATH, "NOT YET");
 
-    let connector: WorkerConnector<null, null> = new WorkerConnector(null, null);
+    const connector: WorkerConnector<null, null> = new WorkerConnector(null, null);
     await connector.connect(__dirname + "/internal/join.js");
 
     sleep_for(100).then(() => connector.close());
     await connector.join();
 
-    let content: string = await FileSystem.read(FILE_PATH, "utf8");
+    const content: string = await FileSystem.read(FILE_PATH, "utf8");
     await FileSystem.unlink(FILE_PATH);
     
     if (content !== "WorkerServer.join()")

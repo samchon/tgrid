@@ -5,7 +5,7 @@ function bundle(path: string, output: string): Promise<void>
 {
     return new Promise((resolve, reject) =>
     {
-        let b = browserify([path]);
+        const b = browserify([path]);
         b.bundle((err, src) =>
         {
             if (err)
@@ -34,7 +34,7 @@ async function main(): Promise<void>
         "shared-worker-client",
         "web-client"
     ];
-    for (let instance of INSTANCES)
+    for (const instance of INSTANCES)
         await bundle(`${__dirname}/../dist/test/browser/${instance}.js`, `${__dirname}/../bundle/${instance}.js`);
 }
 main();

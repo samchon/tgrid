@@ -7,7 +7,7 @@ export namespace Bundler
     {
         return new Promise((resolve, reject) =>
         {
-            let b = browserify([path]);
+            const b = browserify([path]);
             b.bundle((err, src) =>
             {
                 if (err)

@@ -42,7 +42,7 @@ class Client
 
     public async shout(): Promise<void>
     {
-        for (let script of IScript.SCENARIO)
+        for (const script of IScript.SCENARIO)
         {
             await sleep_for(50);
             if (script.name === this.name_)
@@ -72,7 +72,7 @@ class Server
 
         await this.server_.open(PORT, async acceptor =>
         {
-            let service: ChatService = new ChatService();
+            const service: ChatService = new ChatService();
             service.assign(acceptor.getDriver<IChatPrinter>(), this.scripts_);
 
             await acceptor.accept(service);
@@ -95,29 +95,29 @@ class Server
 export async function test_web_chat(): Promise<void>
 {
     // OPEN SERVER
-    let server: Server = new Server();
+    const server: Server = new Server();
     await server.open();
 
     // PREPARE CLIENTS
-    let clients: Client[] = [];
-    for (let name of IScript.PEOPLE)
+    const clients: Client[] = [];
+    for (const name of IScript.PEOPLE)
     {
-        let c: Client = new Client();
+        const c: Client = new Client();
         await c.participate(name);
 
         clients.push(c);
     }
 
     // START CHATTING
-    let promiseList: Promise<void>[] = [];
-    for (let c of clients)
+    const promiseList: Promise<void>[] = [];
+    for (const c of clients)
         promiseList.push(c.shout());
     await Promise.all(promiseList);
 
     // VALIDATIONS
-    for (let c of clients)
+    for (const c of clients)
     {
-        let scripts: IScript[] = await c.close();
+        const scripts: IScript[] = await c.close();
         IScript.validate(scripts);
     }
     IScript.validate(await server.close());

@@ -102,7 +102,7 @@ export class SharedWorkerServer<Header, Provider extends object | null>
         {
             self.addEventListener("connect", evt =>
             {
-                for (let port of (evt as OpenEvent).ports)
+                for (const port of (evt as OpenEvent).ports)
                     this._Handle_connect(port, handler);
             });
         }
@@ -125,7 +125,7 @@ export class SharedWorkerServer<Header, Provider extends object | null>
             throw new DomainError("Error on SharedWorkerServer.close(): the server is not opened.");
         
         // CLOSE ALL CONNECTIONS
-        for (let acceptor of this.acceptors_)
+        for (const acceptor of this.acceptors_)
             await acceptor.close();
     }
 
@@ -134,17 +134,16 @@ export class SharedWorkerServer<Header, Provider extends object | null>
      */
     private _Handle_connect(port: MessagePort, handler: (acceptor: SharedWorkerAcceptor<Header, Provider>) => any): void
     {
-        let acceptor: SharedWorkerAcceptor<Header, Provider> | null = null;
-
         port.onmessage = once(evt =>
         {
             // ARGUMENTS
-            let wrapper: IHeaderWrapper<Header> = JSON.parse(evt.data);
+            const wrapper: IHeaderWrapper<Header> = JSON.parse(evt.data);
 
             // CREATE ACCEPTOR
+            let acceptor: SharedWorkerAcceptor<Header, Provider>;
             acceptor = SharedWorkerAcceptor.create(port, wrapper.header, () =>
             {
-                this.acceptors_.erase(acceptor!);
+                this.acceptors_.erase(acceptor);
             });
             this.acceptors_.insert(acceptor);
 

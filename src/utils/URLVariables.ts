@@ -61,9 +61,9 @@ export class URLVariables
             str = str.substr(0, str.indexOf("#"));
 
         var elements: string[] = str.split("&");
-        for (let pair of elements)
+        for (const pair of elements)
         {
-            let equal_index: number = pair.indexOf("=");
+            const equal_index: number = pair.indexOf("=");
             let key: string;
             let value: string;
 
@@ -121,10 +121,10 @@ export namespace URLVariables
 
     export function parse<T extends object>(str: string, autoCase: boolean = true): Serialize<T>
     {
-        let variables: URLVariables = new URLVariables(str);
-        let ret: any = {};
+        const variables: URLVariables = new URLVariables(str);
+        const ret: any = {};
 
-        for (let entry of variables)
+        for (const entry of variables)
         {
             if (!autoCase || entry.second === "")
             {
@@ -153,8 +153,8 @@ export namespace URLVariables
         else if (obj instanceof URLVariables)
             return obj.toString();
 
-        let variables: URLVariables = new URLVariables();
-        for (let key in obj)
+            const variables: URLVariables = new URLVariables();
+        for (const key in obj)
             variables.set(key, String(obj[key]));
 
         return variables.toString();

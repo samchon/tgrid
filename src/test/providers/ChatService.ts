@@ -46,12 +46,12 @@ export class ChatService implements IChatService
             throw new DomainError("No name");
 
         // INFORM TO EVERYBODY
-        for (let it of ChatService.participants_)
+        for (const it of ChatService.participants_)
         {
-            let driver: Driver<IChatPrinter> = it.second;
+            const driver: Driver<IChatPrinter> = it.second;
 
             // INFORM IT TO CLIENT
-            let promise: Promise<void> = driver.print(this.name_, content);
+            const promise: Promise<void> = driver.print(this.name_, content);
 
             // DISCONNECTION WHILE TALKING MAY POSSIBLE
             promise.catch(() => {});

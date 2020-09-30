@@ -11,18 +11,18 @@ async function main(): Promise<void>
     // PREPARATIONS
     //----
     // OPEN SERVER
-    let server: WorkerServer<{ name: string }, object> = new WorkerServer();
-    let scripts: IScript[] = [];
+    const server: WorkerServer<{ name: string }, object> = new WorkerServer();
+    const scripts: IScript[] = [];
 
     // PREPARE ASSETS
-    let myName: string = (await server.getHeader()).name;
-    let service: Driver<IChatService> = server.getDriver<IChatService>();
+    const myName: string = (await server.getHeader()).name;
+    const service: Driver<IChatService> = server.getDriver<IChatService>();
 
     await server.open
     ({
         shout: async () =>
         {
-            for (let script of IScript.SCENARIO)
+            for (const script of IScript.SCENARIO)
             {
                 await sleep_for(50);
                 if (script.name === myName)

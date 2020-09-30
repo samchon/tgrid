@@ -12,7 +12,7 @@ class _WebWorkerCompiler implements IWorkerCompiler
 {
     public async compile(content: string): Promise<string>
     {
-        let blob: Blob = new Blob([content], { type: "application/javascript" });
+        const blob: Blob = new Blob([content], { type: "application/javascript" });
         return window.URL.createObjectURL(blob);
     }
 

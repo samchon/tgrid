@@ -16,7 +16,7 @@ async function get<Controller extends object>
     (path: string): Promise<Driver<Controller>>
 {
     // DO CONNECT
-    let connector: WorkerConnector<null, null> = new WorkerConnector(null, null);
+    const connector: WorkerConnector<null, null> = new WorkerConnector(null, null);
     await connector.connect(path);
 
     // RETURN DRIVER
@@ -26,12 +26,12 @@ async function get<Controller extends object>
 async function main(): Promise<void>
 {
     // PREPARE REMOTE CALCULATOR
-    let calc = new HierarchicalCalculator();
+    const calc = new HierarchicalCalculator();
     calc.scientific = await get<IScientific>(__dirname + "/scientific.js");
     calc.statistics = await get<IStatistics>(__dirname + "/statistics.js");
 
     // OPEN SERVER
-    let server = new WorkerServer();
+    const server = new WorkerServer();
     await server.open(calc);
 }
 main();

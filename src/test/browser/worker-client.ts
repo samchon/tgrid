@@ -9,13 +9,13 @@ async function get_source(): Promise<string>
     let url: string = location.href;
     url = url.substr(0, url.lastIndexOf("/")) + "/worker-server.js";
 
-    let response: Response = await fetch(url, {method: "GET"});
+    const response: Response = await fetch(url, {method: "GET"});
     return await response.text();
 }
 
 window.onload = async () =>
 {
-    let worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
+    const worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
 
     for (let i: number = 0; i < 5; ++i)
     {

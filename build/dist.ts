@@ -13,7 +13,7 @@ function main(): void
     const ROOT = `${__dirname}/..`;
     const DIST = `${ROOT}/dist`;
 
-    for (let file of FILES)
+    for (const file of FILES)
         if (fs.existsSync(`${DIST}/${file}`) === false)
             fs.linkSync(`${ROOT}/${file}`, `${DIST}/${file}`);
 }

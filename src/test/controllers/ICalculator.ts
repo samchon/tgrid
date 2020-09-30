@@ -36,7 +36,7 @@ export namespace ICalculator
     export async function main(driver: Driver<ICalculator>): Promise<void>
     {
         // VALIDATOR
-        let validator: Calculator = new Calculator();
+        const validator: Calculator = new Calculator();
 
         // CALL FUNCTIONS IN SERVER FROM CLIENT
         for (let i: number = 0; i < 100; ++i)
@@ -53,13 +53,13 @@ export namespace ICalculator
             throw new InvalidArgument("Mistaken arguments.");
 
         // SPECIFY METHODS
-        let method: IMethod = METHODS[randint(0, METHODS.length - 1)];
-        let x: number = randint(2, 10);
-        let y: number = randint(2, 10);
+        const method: IMethod = METHODS[randint(0, METHODS.length - 1)];
+        const x: number = randint(2, 10);
+        const y: number = randint(2, 10);
 
         // CALL FUNCTION & GET ANSWER
-        let ret: number = await method(driver, x, y);
-        let answer: number = method(validator, x, y) as number;
+        const ret: number = await method(driver, x, y);
+        const answer: number = method(validator, x, y) as number;
         
         // VALIDATE
         if (ret !== answer)

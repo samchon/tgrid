@@ -29,7 +29,7 @@ export class XMLList extends Vector<XML>
 	public toString(level: number = 0): string
 	{
 		let ret: string = "";
-		for (let xml of this)
+		for (const xml of this)
 			ret += xml.toString(level) + "\n";
 		
 		return ret;

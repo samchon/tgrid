@@ -20,7 +20,7 @@ export namespace IVector
 
         for (let i: number = 0; i < 10; ++i)
         {
-            let val: number = randint(1, 10);
+            const val: number = randint(1, 10);
 
             mySum += val;
             await driver.push_back(val);

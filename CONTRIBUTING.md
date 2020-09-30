@@ -53,7 +53,7 @@ When you detect an error, then throw exception such below:
 ```typescript
 export function test_my_specific_logic1(): void
 {
-    let vec = new std.Vector<number>();
+    const vec = new std.Vector<number>();
     for (let i: number = 0; i < 100; ++i)
         vec.push_back(Math.random());
 
@@ -65,10 +65,10 @@ export function test_my_specific_logic1(): void
 
 export async function test_my_specific_logic2(): Promise<void>
 {
-    let t1: Date = new Date();
+    const t1: Date = new Date();
     await std.sleep_for(1000);
 
-    let t2: Date = new Date();
+    const t2: Date = new Date();
     if (t2.getTime() - t1.getTime() < 1000)
         throw new std.DomainError("std.sleep_for doesn't work.");
 }

@@ -3,7 +3,7 @@ import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void>
 {
-    let server: WorkerServer<{}, Calculator> = new WorkerServer();
+    const server: WorkerServer<{}, Calculator> = new WorkerServer();
     await server.open(new Calculator());
 }
 main();

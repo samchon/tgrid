@@ -32,9 +32,9 @@ export namespace IScript
             throw new LengthError("Different length between two scripts.");
     
         // VALIDATE MESSAGES
-        for (let script of scriptList)
+        for (const script of scriptList)
         {
-            let index: number = SCENARIO.findIndex(s => 
+            const index: number = SCENARIO.findIndex(s => 
             {
                 return s.name === script.name 
                     && s.message === script.message;

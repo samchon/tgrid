@@ -157,8 +157,8 @@ export class WebServer<Header, Provider extends object | null>
 
                     try
                     {
-                        let wrapper: IHeaderWrapper<Header> = JSON.parse(data as string);
-                        let acceptor: WebAcceptor<Header, Provider> =  WebAcceptor.create(request, webSocket, wrapper.header);
+                        const wrapper: IHeaderWrapper<Header> = JSON.parse(data as string);
+                        const acceptor: WebAcceptor<Header, Provider> =  WebAcceptor.create(request, webSocket, wrapper.header);
                         
                         await handler(acceptor);
                     }

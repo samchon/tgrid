@@ -12,11 +12,11 @@ interface IModule
 
 async function iterate(path: string): Promise<void>
 {
-    let file_list: string[] = fs.readdirSync(path);
-    for (let file of file_list)
+    const file_list: string[] = fs.readdirSync(path);
+    for (const file of file_list)
     {
-        let current_path: string = path + "/" + file;
-        let stat: fs.Stats = fs.lstatSync(current_path);
+        const current_path: string = path + "/" + file;
+        const stat: fs.Stats = fs.lstatSync(current_path);
         
         if (stat.isDirectory() === true && file !== "internal")
         {
@@ -26,8 +26,8 @@ async function iterate(path: string): Promise<void>
         else if (file.substr(-3) !== ".js" || current_path === __dirname + "/index.js")
             continue;
 
-        let external: IModule = await import(current_path.substr(0, current_path.length - 3));
-        for (let key in external)
+        const external: IModule = await import(current_path.substr(0, current_path.length - 3));
+        for (const key in external)
             if (key.substr(0, 5) === "test_")
             {
                 // WHEN SPECIALIZED
@@ -46,7 +46,7 @@ async function main(): Promise<void>
     //----
     // DO TEST
     //----
-    let time: number = Date.now();
+    const time: number = Date.now();
     await iterate(__dirname);
 
     //----
@@ -58,10 +58,10 @@ async function main(): Promise<void>
     console.log(`  - elapsed time: ${StringUtil.numberFormat(Date.now() - time)} ms`);
 
     // MEMORY USAGE
-    let memory: NodeJS.MemoryUsage = process.memoryUsage();
-    for (let property in memory)
+    const memory: NodeJS.MemoryUsage = process.memoryUsage();
+    for (const property in memory)
     {
-        let amount: number = memory[property as keyof NodeJS.MemoryUsage] / 10**6;
+        const amount: number = memory[property as keyof NodeJS.MemoryUsage] / 10**6;
         console.log(`  - ${property}: ${StringUtil.numberFormat(amount)} MB`);
     }
 }

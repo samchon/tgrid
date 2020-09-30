@@ -80,7 +80,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         this._Test_connection("compile");
 
         // COMPILATION
-        let path: string = await Compiler.compile(content);
+        const path: string = await Compiler.compile(content);
         let error: Error | null = null; // FOR LAZY-THROWING
 
         //----
@@ -151,7 +151,7 @@ export class WorkerConnector<Header, Provider extends object | null>
     private async _Connect(method: string, jsFile: string, timeout?: number): Promise<void>
     {
         // TIME LIMIT
-        let at: Date | undefined = (timeout !== undefined)
+        const at: Date | undefined = (timeout !== undefined)
             ? new Date(Date.now() + timeout)
             : undefined;
 
@@ -229,7 +229,7 @@ export class WorkerConnector<Header, Provider extends object | null>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("close");
+        const error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
 
@@ -237,7 +237,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         // CLOSE WITH JOIN
         //----
         // PROMISE RETURN
-        let ret: Promise<void> = this.join();
+        const ret: Promise<void> = this.join();
 
         // REQUEST CLOSE TO SERVER
         this.state_ = WorkerConnector.State.CLOSING;

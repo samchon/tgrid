@@ -4,7 +4,7 @@ import { complete } from "./internal";
 
 window.onload = async () =>
 {
-    let worker: SharedWorkerConnector<null, null> = new SharedWorkerConnector(null, null);
+    const worker: SharedWorkerConnector<null, null> = new SharedWorkerConnector(null, null);
 
     // TEST RE-USABILITY
     for (let i: number = 0; i < 5; ++i)

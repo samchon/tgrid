@@ -35,13 +35,13 @@ class Provider
 
 async function _Test_client(): Promise<void>
 {
-    let connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebConnector<null, null> = new WebConnector(null, null);
     await connector.connect(`ws://127.0.0.1:${PORT}`);
 
-    let driver: Driver<Provider> = connector.getDriver<Provider>();
+    const driver: Driver<Provider> = connector.getDriver<Provider>();
     await driver.mutex.lock();
     {
-        let index: number = await driver.getIndex();
+        const index: number = await driver.getIndex();
 
         await sleep_for((COUNT - index) * SLEEP_TIME);
         await driver.vector.push_back(index);
@@ -57,9 +57,9 @@ export async function test_web_mutex(): Promise<void>
     // PREPARES
     //----
     // OPEN SERVER
-    let server: WebServer<{}, Provider> = new WebServer();
-    let mutex: Mutex = new Mutex();
-    let vector: Vector<number> = new Vector();
+    const server: WebServer<{}, Provider> = new WebServer();
+    const mutex: Mutex = new Mutex();
+    const vector: Vector<number> = new Vector();
     let index: number = 0;
 
     await server.open(PORT, async acceptor =>
@@ -68,8 +68,8 @@ export async function test_web_mutex(): Promise<void>
     });
 
     // PREPARE LATCH & TIME RECORDER
-    let promiseList: Promise<void>[] = [];
-    let time: number = Date.now();
+    const promiseList: Promise<void>[] = [];
+    const time: number = Date.now();
 
     // CREATE CLIENTS
     for (let i: number = 0; i < COUNT; ++i)

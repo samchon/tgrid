@@ -15,11 +15,11 @@ export async function test_web_calculator(): Promise<void>
     //----
     // SERVER
     //----
-    let server: WebServer<{}, Calculator | Vector<number>> = new WebServer();
+    const server: WebServer<{}, Calculator | Vector<number>> = new WebServer();
     await server.open(PORT, async acceptor =>
     {
         // SPEICFY PROVIDER
-        let provider = /calculator/.test(acceptor.path)
+        const provider = /calculator/.test(acceptor.path)
             ? new Calculator()
             : new Vector<number>();
 
@@ -30,10 +30,10 @@ export async function test_web_calculator(): Promise<void>
     //----
     // CLIENTS
     //----
-    let connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebConnector<null, null> = new WebConnector(null, null);
 
-    // TEST RE-USABILITY
-    for (let path of ["calculator", "vector"])
+    // const RE-USABILITY
+    for (const path of ["calculator", "vector"])
         for (let i: number = 0; i < 3; ++i)
         {
             // DO CONNECT
@@ -42,12 +42,12 @@ export async function test_web_calculator(): Promise<void>
             // SET DRIVER AND TEST BY CALCULATOR PROCESS
             if (path === "calculator")
             {
-                let driver: Driver<ICalculator> = connector.getDriver<ICalculator>();
+                const driver: Driver<ICalculator> = connector.getDriver();
                 await ICalculator.main(driver);
             }
             else
             {
-                let driver: Driver<IVector<number>> = connector.getDriver<IVector<number>>();
+                const driver: Driver<IVector<number>> = connector.getDriver();
                 await IVector.main(driver);
             }
             await connector.close();

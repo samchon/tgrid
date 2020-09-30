@@ -85,7 +85,7 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
     public async close(): Promise<void>
     {
         // TEST CONDITION
-        let error: Error | null = this.inspectReady("close");
+        const error: Error | null = this.inspectReady("close");
         if (error)
             throw error;
 

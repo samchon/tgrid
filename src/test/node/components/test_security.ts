@@ -17,7 +17,7 @@ class CustomCalculator extends Calculator
 async function must_be_error(procedures: (() => Promise<void>)[]): Promise<void>
 {
     let count: number = 0;
-    for (let proc of procedures)
+    for (const proc of procedures)
         try
         {
             await proc();
@@ -32,16 +32,16 @@ async function must_be_error(procedures: (() => Promise<void>)[]): Promise<void>
 
 export async function test_security(): Promise<void>
 {
-    let server: WebServer<{}, CustomCalculator> = new WebServer();
+    const server: WebServer<{}, CustomCalculator> = new WebServer();
     await server.open(10101, async acceptor =>
     {
         await acceptor.accept(new CustomCalculator());
     });
 
-    let connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebConnector<null, null> = new WebConnector(null, null);
     await connector.connect("ws://127.0.0.1:10101");
 
-    let calc: Driver<CustomCalculator> = connector.getDriver();
+    const calc: Driver<CustomCalculator> = connector.getDriver();
     await must_be_error([
         () => (calc.plus as any).toString(),
         () => (calc as any).prototype.toString(),

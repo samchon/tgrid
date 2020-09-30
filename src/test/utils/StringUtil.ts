@@ -4,7 +4,7 @@ export namespace StringUtil
     {
         if (val >= 10000000)
         {
-            let multiplier: number = Math.floor(Math.log10(val));
+            const multiplier: number = Math.floor(Math.log10(val));
 
             return `${StringUtil.numberFormat(val / Math.pow(10, multiplier), precision)} X 10^${multiplier}`;
         }
@@ -16,8 +16,8 @@ export namespace StringUtil
         val = val / Math.pow(10, precision);
 
         // SEPERATE NUMBERS
-        let is_negative: boolean = (val < 0);
-        let natural: number = Math.floor(Math.abs(val));
+        const is_negative: boolean = (val < 0);
+        const natural: number = Math.floor(Math.abs(val));
         let fraction: number = Math.abs(val) - Math.floor(Math.abs(val));
 
         // NATURAL NUMBER
@@ -53,7 +53,7 @@ export namespace StringUtil
         if (precision > 0 && fraction !== 0)
         {
             fraction = Math.round(fraction * Math.pow(10, precision));
-            let zeros: number = precision - Math.floor(Math.log(fraction) / Math.log(10)) - 1;
+            const zeros: number = precision - Math.floor(Math.log(fraction) / Math.log(10)) - 1;
 
             str += "." + StringUtil.repeat("0", zeros) + fraction;
         }
