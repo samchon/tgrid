@@ -104,12 +104,14 @@ export namespace Driver
     /**
      * @hidden
      */
-    type PrimitiveObject<Instance extends object> =
-    {
-        [P in keyof Instance]: Instance[P] extends Function
-            ? never
-            : Primitive<Instance[P]>
-    };
+    type PrimitiveObject<Instance extends object> = Instance extends Array<infer T>
+        ? Primitive<T>[] 
+        :
+        {
+            [P in keyof Instance]: Instance[P] extends Function
+                ? never
+                : Primitive<Instance[P]>
+        };
 
     /**
      * Convert parameters to be compatible with primitive.
