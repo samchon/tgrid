@@ -3,11 +3,11 @@
  * @module tgrid.utils
  */
 //----------------------------------------------------------------
-import { Dictionary } from "./internal/Dictionary";
-import { Driver } from "../components/Driver";
-
 import { HashMap } from "tstl/container/HashMap";
 import { not_equal_to } from "tstl/functional/comparators";
+
+import { Dictionary } from "./internal/Dictionary";
+import { Primitive } from "../typings/Primitive";
 
 /**
  * URLVariables class is for representing variables of HTTP.
@@ -114,9 +114,9 @@ export namespace URLVariables
     
     export type Serialize<Instance extends object> = 
     {
-        [P in keyof Instance]: Driver.Primitive<Instance[P]> extends object
+        [P in keyof Instance]: Primitive<Instance[P]> extends object
             ? never
-            : Driver.Primitive<Instance[P]>;
+            : Primitive<Instance[P]>;
     };
 
     export function parse<T extends object>(str: string, autoCase: boolean = true): Serialize<T>

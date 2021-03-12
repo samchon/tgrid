@@ -124,7 +124,7 @@ export class WebConnector<Header, Provider extends object | null>
     {
         return new Promise((resolve, reject) =>
         {
-            this.socket_!.onopen = () => resolve();
+            this.socket_!.onopen = () => resolve(this.socket_!);
             this.socket_!.onclose = once(evt =>
             {
                 reject(new WebError(evt.code, evt.reason));

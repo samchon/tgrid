@@ -19,7 +19,7 @@ export namespace Bundler
                         if (err)
                             reject(err);
                         else
-                            resolve();
+                            resolve(src.toString());
                     });
                 }
             });
