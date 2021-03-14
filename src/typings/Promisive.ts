@@ -1,6 +1,11 @@
+/** 
+ * @packageDocumentation
+ * @module tgrid.typings
+ */
+//----------------------------------------------------------------
 import { Functional } from "./Functional";
 import { OmitEdgeUnderscored } from "./OmitEdgeUnderscored";
-import { OmitNever } from "./OmitNever";
+import { RemoveNever } from "./RemoveNever";
 import { ValueOf } from "./ValueOf";
 
 /**
@@ -15,7 +20,7 @@ import { ValueOf } from "./ValueOf";
  * @template Instance An object type to be promised.
  * @template UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
  */
- export type Promisive<Instance extends object, UseParametric extends boolean = false> = OmitNever<OmitEdgeUnderscored<
+ export type Promisive<Instance extends object, UseParametric extends boolean = false> = RemoveNever<OmitEdgeUnderscored<
  {
      [P in keyof Instance]: Instance[P] extends Function
          ? Functional<Instance[P], UseParametric> // function, its return type would be capsuled in the Promise

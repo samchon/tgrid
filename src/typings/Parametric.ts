@@ -1,3 +1,8 @@
+/** 
+ * @packageDocumentation
+ * @module tgrid.typings
+ */
+//----------------------------------------------------------------
 import { IJsonable } from "./IJsonable";
 import { Primitive } from "./Primitive";
 import { ValueOf } from "./ValueOf";
@@ -6,7 +11,7 @@ import { ValueOf } from "./ValueOf";
  * Convert parameters to be compatible with primitive.
  * 
  * @template Arguments List of parameters
- * @todo Considering whether this type is an over-spec or not.
+ * @author Jeongho Nam - https://github.com/samchon
  */
  export type Parametric<Arguments extends any[]> = 
  { 

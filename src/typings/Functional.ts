@@ -1,3 +1,8 @@
+/** 
+ * @packageDocumentation
+ * @module tgrid.typings
+ */
+//----------------------------------------------------------------
 import { Parametric } from "./Parametric";
 import { Primitive } from "./Primitive";
 
@@ -11,6 +16,7 @@ import { Primitive } from "./Primitive";
  * 
  * @template Method A function type to be promisified.
  * @template UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+ * @author Jeongho Nam - https://github.com/samchon
  */
  export type Functional<Method extends Function, UseParametric extends boolean = false> = 
  (

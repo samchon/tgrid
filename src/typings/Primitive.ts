@@ -11,6 +11,7 @@
  * would be chosen.
  * 
  * @template Instance An instance type to be primitive
+ * @author Jeongho Nam - https://github.com/samchon
  */
 export type Primitive<Instance> = value_of<Instance> extends object
     ? Instance extends object

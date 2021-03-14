@@ -3,6 +3,12 @@
  * @module tgrid.typings
  */
 //----------------------------------------------------------------
+/**
+ * Get origin value type.
+ * 
+ * @template Instance Target instance
+ * @author Jeongho Nam - https://github.com/samchon
+ */
 export type ValueOf<Instance> = 
     is_value_of<Instance, Boolean> extends true ? boolean
     : is_value_of<Instance, Number> extends true ? number
