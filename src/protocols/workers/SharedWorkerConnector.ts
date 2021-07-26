@@ -80,9 +80,13 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
      *  - {@link SharedWorkerServer.close}()
      * 
      * @param jsFile JS File to be {@link SharedWorkerServer}.
-     * @param timeout Milliseconds to wait the shared-worker program to open itself. If omitted, the waiting would be forever.
+     * @param options Detailed options like timeout.
      */
-    public async connect(jsFile: string, timeout?: number): Promise<void>
+    public async connect
+        (
+            jsFile: string, 
+            options: Partial<SharedWorkerConnector.IConnectOptions> = {}
+        ): Promise<void>
     {
         // TEST CONDITION
         if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED)
@@ -99,8 +103,8 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
         // CONNECTION
         //----
         // TIME LIMIT
-        const at: Date | undefined = (timeout !== undefined)
-            ? new Date(Date.now() + timeout)
+        const at: Date | undefined = (options.timeout !== undefined)
+            ? new Date(Date.now() + options.timeout)
             : undefined;
 
         // SET CURRENT STATE
@@ -113,14 +117,14 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
             this.port_ = worker.port as MessagePort;
 
             // WAIT THE WORKER TO BE READY
-            if (await this._Handshake(timeout, at) !== SharedWorkerConnector.State.CONNECTING)
+            if (await this._Handshake(options.timeout, at) !== SharedWorkerConnector.State.CONNECTING)
                 throw new DomainError(`Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
             // SEND HEADERS
             this.port_.postMessage(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // WAIT ACCEPTION OR REJECTION
-            const last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(timeout, at);
+            const last: string | SharedWorkerConnector.State.OPEN = await this._Handshake(options.timeout, at);
             if (last === SharedWorkerConnector.State.OPEN)
             {
                 // ACCEPTED
@@ -260,6 +264,17 @@ export namespace SharedWorkerConnector
      * Current state of the {@link SharedWorkerConnector}.
      */
     export import State = ConnectorBase.State;
+
+    /**
+     * Connection options for the {@link SharedWorkerConnector.connect}.
+     */
+    export interface IConnectOptions
+    {
+        /**
+         * Milliseconds to wait the shared-worker server to accept or reject it. If omitted, the waiting would be forever.
+         */
+        timeout: number;
+    }
     
     /**
      * Compile JS source code.

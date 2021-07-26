@@ -65,9 +65,13 @@ export class WebConnector<Header, Provider extends object | null>
      * connection in time to prevent waste of the server resource.
      * 
      * @param url URL address to connect.
-     * @param timeout Milliseconds to wait the web-socket server to accept or reject it. If omitted, the waiting would be forever.
+     * @param options Detailed options like timeout.
      */
-    public async connect(url: string, timeout?: number): Promise<void>
+    public async connect
+        (
+            url: string, 
+            options: Partial<WebConnector.IConnectOptions> = {}
+        ): Promise<void>
     {
         // TEST CONDITION
         if (this.socket_ && this.state !== WebConnector.State.CLOSED)
@@ -94,7 +98,7 @@ export class WebConnector<Header, Provider extends object | null>
             this.socket_!.send(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // PROMISED HANDSHAKE
-            if (await this._Handshake(timeout) !== WebConnector.State.OPEN.toString())
+            if (await this._Handshake(options.timeout) !== WebConnector.State.OPEN.toString())
                 throw new WebError(1008, "Error on WebConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.");
             
             // SUCCESS
@@ -284,6 +288,17 @@ export namespace WebConnector
      * Current state of the {@link WebConnector}.
      */
     export import State = ConnectorBase.State;
+
+    /**
+     * Connection options for the {@link WebConnector.connect}.
+     */
+    export interface IConnectOptions
+    {
+        /**
+         * Milliseconds to wait the web-socket server to accept or reject it. If omitted, the waiting would be forever.
+         */
+        timeout: number;
+    }
 }
 
 //----

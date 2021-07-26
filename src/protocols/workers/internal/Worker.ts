@@ -12,9 +12,9 @@ export class Worker
 {
     private process_: cp.ChildProcess;
 
-    public constructor(jsFile: string)
+    public constructor(jsFile: string, argv: string[] | undefined)
     {
-        this.process_ = cp.fork(jsFile);
+        this.process_ = cp.fork(jsFile, argv);
     }
 
     public terminate(): void

@@ -69,9 +69,13 @@ export class WorkerConnector<Header, Provider extends object | null>
      * memory leak.
      * 
      * @param content JS Source code to compile.
-     * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
+     * @param timeout Detailed options like timeout.
      */
-    public async compile(content: string, timeout?: number): Promise<void>
+    public async compile
+        (
+            content: string, 
+            options: Partial<WorkerConnector.IConnectOptions> = {}
+        ): Promise<void>
     {
         //----
         // PRELIMINIARIES
@@ -89,7 +93,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         // TRY CONNECTION
         try
         {
-            await this._Connect("compile", path, timeout);
+            await this._Connect("compile", path, options);
         }
         catch (exp)
         {
@@ -118,15 +122,19 @@ export class WorkerConnector<Header, Provider extends object | null>
      * 
      * @param jsFile JS File to be {@link WorkerServer}.
      * @param args Headers containing initialization data like activation.
-     * @param timeout Milliseconds to wait the worker program to open itself. If omitted, the waiting would be forever.
+     * @param timeout Detailed options like timeout.
      */
-    public async connect(jsFile: string, timeout?: number): Promise<void>
+    public async connect
+        (
+            jsFile: string, 
+            options: Partial<WorkerConnector.IConnectOptions> = {}
+        ): Promise<void>
     {
         // TEST CONDITION
         this._Test_connection("connect");
 
         // DO CONNECT
-        await this._Connect("connect", jsFile, timeout);
+        await this._Connect("connect", jsFile, options);
     }
 
     /**
@@ -148,11 +156,16 @@ export class WorkerConnector<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private async _Connect(method: string, jsFile: string, timeout?: number): Promise<void>
+    private async _Connect
+        (
+            method: string, 
+            jsFile: string, 
+            options: Partial<WorkerConnector.IConnectOptions>
+        ): Promise<void>
     {
         // TIME LIMIT
-        const at: Date | undefined = (timeout !== undefined)
-            ? new Date(Date.now() + timeout)
+        const at: Date | undefined = (options.timeout !== undefined)
+            ? new Date(Date.now() + options.timeout)
             : undefined;
 
         // SET CURRENT STATE
@@ -161,17 +174,23 @@ export class WorkerConnector<Header, Provider extends object | null>
         try
         {
             // EXECUTE THE WORKER
-            this.worker_ = Compiler.execute(jsFile);
+            this.worker_ = Compiler.execute
+            (
+                jsFile, 
+                is_node() === true
+                    ? options.argv 
+                    : undefined
+            );
 
             // WAIT THE WORKER TO BE READY
-            if (await this._Handshake(method, timeout, at) !== WorkerConnector.State.CONNECTING)
+            if (await this._Handshake(method, options.timeout, at) !== WorkerConnector.State.CONNECTING)
                 throw new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`);
 
             // SEND HEADERS
             this.worker_!.postMessage(JSON.stringify( IHeaderWrapper.wrap(this.header) ));
 
             // WAIT COMPLETION
-            if (await this._Handshake(method, timeout, at) !== WorkerConnector.State.OPEN)
+            if (await this._Handshake(method, options.timeout, at) !== WorkerConnector.State.OPEN)
                 throw new DomainError(`Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connected.`);
 
             // SUCCESS
@@ -289,6 +308,22 @@ export namespace WorkerConnector
      * Current state of the {@link WorkerConnector}.
      */
     export import State = ConnectorBase.State;
+
+    /**
+     * Connection options for the {@link WorkerConnector.connect}.
+     */
+    export interface IConnectOptions
+    {
+        /**
+         * Milliseconds to wait the worker server to accept or reject it. If omitted, the waiting would be forever.
+         */
+        timeout: number;
+
+        /**
+         * Arguments only for the NodeJS environments.
+         */
+        argv: string[];
+    }
 }
 
 //----

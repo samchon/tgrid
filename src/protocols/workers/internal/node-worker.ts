@@ -35,9 +35,9 @@ class _NodeWorkerCompiler implements IWorkerCompiler
         return path;
     }
 
-    public execute(jsFile: string): Worker
+    public execute(jsFile: string, argv: string[] | undefined): Worker
     {
-        return new _Worker(jsFile) as any;
+        return new _Worker(jsFile, argv) as any;
     }
 
     public async remove(path: string): Promise<void>
