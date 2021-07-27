@@ -178,7 +178,7 @@ export class WorkerConnector<Header, Provider extends object | null>
             (
                 jsFile, 
                 is_node() === true
-                    ? options.argv 
+                    ? options.execArgv 
                     : undefined
             );
 
@@ -322,7 +322,7 @@ export namespace WorkerConnector
         /**
          * Arguments only for the NodeJS environments.
          */
-        argv: string[];
+        execArgv: string[];
     }
 }
 
