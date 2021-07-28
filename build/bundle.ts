@@ -1,12 +1,14 @@
-import fs from "fs";
 import browserify from "browserify";
+import fs from "fs";
 
-function bundle(path: string, output: string): Promise<void>
+function bundle(input: string, output: string): Promise<void>
 {
     return new Promise((resolve, reject) =>
     {
-        const b = browserify([path]);
-        b.bundle((err, src) =>
+        const bundler: browserify.BrowserifyObject = browserify(input);
+        bundler.external("worker_threads");
+
+        bundler.bundle((err, src) =>
         {
             if (err)
                 reject(err);

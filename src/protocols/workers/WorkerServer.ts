@@ -102,8 +102,8 @@ export class WorkerServer<Header, Provider extends object | null>
             if (self.document !== undefined)
                 throw new DomainError("Error on WorkerServer.open(): this is not Worker.");    
         }
-        else if (global.process.send === undefined)
-            throw new DomainError("Error on WorkerServer.open(): this is not Child Process.");    
+        else if (g.is_worker_server() === false)
+            throw new DomainError("Error on WorkerServer.open(): this is not Worker.");
         else if (this.state_ !== WorkerServer.State.NONE)
             throw new DomainError("Error on WorkerServer.open(): the server has been opened yet.");
         
@@ -264,7 +264,7 @@ export namespace WorkerServer
  * @hidden
  */
 const g: IFeature = is_node()
-    ? require("./internal/worker-server-polyfill")
+    ? require("./internal/threads/ThreadPort")
     : self;
 
 /**
@@ -275,4 +275,5 @@ interface IFeature
     close(): void;
     postMessage(message: any): void;
     onmessage(event: MessageEvent): void;
+    is_worker_server(): boolean;
 }

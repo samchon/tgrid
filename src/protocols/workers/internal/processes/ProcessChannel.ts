@@ -6,7 +6,7 @@
 /**
  * @hidden
  */
-class WorkerServerPolyfill
+class ProcessChannel
 {
     public static postMessage(message: any): void
     {
@@ -25,5 +25,10 @@ class WorkerServerPolyfill
             listener({ data: msg } as MessageEvent);
         });
     }
+
+    public static is_worker_server(): boolean
+    {
+        return global.process.send !== undefined;
+    }
 }
-export = WorkerServerPolyfill;
+export = ProcessChannel;

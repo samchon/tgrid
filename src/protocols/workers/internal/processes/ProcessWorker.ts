@@ -8,19 +8,13 @@ import cp from "child_process";
 /**
  * @hidden
  */
-export class Worker
+export class ProcessWorker
 {
     private process_: cp.ChildProcess;
 
     public constructor(jsFile: string, execArgv: string[] | undefined)
     {
-        this.process_ = cp.fork
-        (
-            jsFile, 
-            execArgv
-                ? { execArgv: execArgv }
-                : undefined
-        );
+        this.process_ = cp.fork(jsFile, { execArgv });
     }
 
     public terminate(): void

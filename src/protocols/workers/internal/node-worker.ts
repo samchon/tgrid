@@ -4,11 +4,11 @@
  */
 //----------------------------------------------------------------
 import { tmpdir } from "os";
-import { sep } from "path";
+import { v4 } from "uuid";
 
-import { IWorkerCompiler } from "./IWebCompiler";
 import { FileSystem } from "./FileSystem";
-import { Worker as _Worker } from "./Worker";
+import { IWorkerCompiler } from "./IWebCompiler";
+import { ThreadWorker } from "./threads/ThreadWorker";
 
 /**
  * @hidden
@@ -17,13 +17,13 @@ class _NodeWorkerCompiler implements IWorkerCompiler
 {
     public async compile(content: string): Promise<string>
     {
-        let path: string = tmpdir() + sep + "tgrid";
+        let path: string = `${tmpdir().split("\\").join("/")}/tgrid`;
         if (await FileSystem.exists(path) === false)
             await FileSystem.mkdir(path);
 
         while (true)
         {
-            const myPath: string = path + sep + `${new Date().getTime()}_${Math.random()}_${Math.random()}.js`; 
+            const myPath: string = `${path}/${v4()}.js`; 
             if (await FileSystem.exists(myPath) === false)
             {
                 path = myPath;
@@ -35,9 +35,9 @@ class _NodeWorkerCompiler implements IWorkerCompiler
         return path;
     }
 
-    public execute(jsFile: string, argv: string[] | undefined): Worker
+    public execute(jsFile: string, execArgv: string[] | undefined): Worker
     {
-        return new _Worker(jsFile, argv) as any;
+        return new ThreadWorker(jsFile, execArgv) as any;
     }
 
     public async remove(path: string): Promise<void>
