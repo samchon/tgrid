@@ -74,7 +74,7 @@ export namespace ICalculator
         }
         catch (exp) 
         {
-            return exp.message; 
+            return (exp as Error).message;
         }
         return null;
     }

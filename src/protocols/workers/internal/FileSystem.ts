@@ -66,7 +66,7 @@ export namespace FileSystem
             if (encoding === undefined)
                 fs.readFile(path, callback);
             else
-                fs.readFile(path, encoding, callback);
+                fs.readFile(path, encoding as "utf8", callback);
         });
     }
 

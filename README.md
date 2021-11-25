@@ -1,6 +1,6 @@
 # TGrid
 ## Introduction
-![TGrid logo](https://raw.githubusercontent.com/samchon/logos/master/tgrid.svg)
+![TGrid logo](https://raw.githubusercontent.com/samchon/logos/master/tgrid.svg?token=ADEMSNNIG7RZUVW6IAEVQYTBT4NDA)
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/samchon/tgrid/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/tgrid.svg)](https://www.npmjs.com/package/tgrid)

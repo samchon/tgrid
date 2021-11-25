@@ -97,7 +97,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         }
         catch (exp)
         {
-            error = exp;
+            error = exp as Error;
         }
 
         // REMOVE THE TEMPORARY FILE

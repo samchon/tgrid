@@ -24,7 +24,7 @@ export async function test_web_reject(): Promise<void>
         }
         catch (exp)
         {
-            error = exp;
+            error = exp as Error;
         }
         await server.close();
         

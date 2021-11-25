@@ -58,7 +58,7 @@ export class WorkerServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private header_: Singleton<Header>;
+    private header_: Singleton<Promise<Header>>;
 
     /* ----------------------------------------------------------------
         CONSTRUCTOR

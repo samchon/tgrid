@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: npm install
+      - run: npm install --force
       - run: npm run compile
       - run: npm run bundle
       - run: npm run test:browser
