@@ -41,7 +41,7 @@
     "puppeteer": "^10.1.0",
     "source-map-support": "^0.5.19",
     "ts-node": "^10.1.0",
-    "typedoc": "^0.21.9",
+    "typedoc": "^0.22.10",
     "typescript": "^4.5.2",
     "whatwg-fetch": "^3.6.2"
   },
