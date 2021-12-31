@@ -3,10 +3,10 @@
   "description": "Grid Computing Framework for TypeScript",
   "author": {
     "name": "Jeongho Nam",
-    "email": "samchon@samchon.org",
-    "url": "http://samchon.org"
+    "email": "samchon.github@gmail.com",
+    "url": "https://github.com/samchon"
   },
-  "version": "0.8.4",
+  "version": "0.8.5",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -23,9 +23,8 @@
     "test:node": "node dist/test/node"
   },
   "dependencies": {
-    "bthreads": "^0.5.1",
     "serialize-error": "^4.1.0",
-    "tstl": "^2.5.0",
+    "tstl": "^2.5.2",
     "uuid": "^3.4.0",
     "ws": "^7.5.3"
   },
@@ -45,10 +44,10 @@
     "typescript": "^4.5.2",
     "whatwg-fetch": "^3.6.2"
   },
-  "homepage": "https://github.com/samchon/tgrid#readme",
+  "homepage": "https://tgrid.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/samchon/tgrid.git"
+    "url": "https://github.com/samchon/tgrid"
   },
   "bugs": {
     "url": "https://github.com/samchon/tgrid/issues"
