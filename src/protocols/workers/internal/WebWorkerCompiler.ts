@@ -8,15 +8,15 @@ import { IWorkerCompiler } from "./IWebCompiler";
 /**
  * @hidden
  */
-class _WebWorkerCompiler implements IWorkerCompiler
+export const WebWorkerCompiler: IWorkerCompiler =
 {
-    public async compile(content: string): Promise<string>
+    compile: async content =>
     {
         const blob: Blob = new Blob([content], { type: "application/javascript" });
         return window.URL.createObjectURL(blob);
-    }
+    },
 
-    public async remove(url: string): Promise<void>
+    remove: async url =>
     {
         // THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
         try
@@ -24,12 +24,10 @@ class _WebWorkerCompiler implements IWorkerCompiler
             window.URL.revokeObjectURL(url);
         }
         catch {}
-    }
+    },
 
-    public execute(jsFile: string): Worker
+    execute: jsFile =>
     {
         return new Worker(jsFile);
     }
 }
-
-export = new _WebWorkerCompiler();

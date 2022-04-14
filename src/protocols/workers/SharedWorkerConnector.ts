@@ -9,7 +9,7 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
 import { Invoke } from "../../components/Invoke";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IReject } from "./internal/IReject";
-import WebCompiler from "./internal/web-worker";
+import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 import { once } from "../internal/once";
 
 import { DomainError } from "tstl/exception/DomainError";
@@ -284,7 +284,7 @@ export namespace SharedWorkerConnector
      */
     export function compile(content: string): Promise<string>
     {
-        return WebCompiler.compile(content);
+        return WebWorkerCompiler.compile(content);
     }
 
     /**
@@ -294,6 +294,6 @@ export namespace SharedWorkerConnector
      */
     export function remove(url: string): Promise<void>
     {
-        return WebCompiler.remove(url);
+        return WebWorkerCompiler.remove(url);
     }
 }

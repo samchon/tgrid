@@ -11,7 +11,7 @@ if (is_node() === true)
 /**
  * @hidden
  */
-class ThreadPort
+export class ThreadPort
 {
     public static postMessage(message: any): void
     {
@@ -33,14 +33,13 @@ class ThreadPort
 
     public static get document(): Document | undefined
     {
-        return (thread.parentPort === null)
+        return !thread.parentPort
             ? null! as Document // NOT WORKER
             : undefined;
     }
 
     public static is_worker_server(): boolean
     {
-        return thread.parentPort !== undefined;
+        return !!thread.parentPort;
     }
 }
-export = ThreadPort;

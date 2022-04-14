@@ -6,7 +6,7 @@
 /**
  * @hidden
  */
-class ProcessChannel
+export class ProcessChannel
 {
     public static postMessage(message: any): void
     {
@@ -28,7 +28,6 @@ class ProcessChannel
 
     public static is_worker_server(): boolean
     {
-        return global.process.send !== undefined;
+        return !!global.process.send;
     }
 }
-export = ProcessChannel;

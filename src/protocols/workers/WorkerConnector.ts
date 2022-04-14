@@ -14,6 +14,8 @@ import { IWorkerCompiler } from "./internal/IWebCompiler";
 import { DomainError } from "tstl/exception/DomainError";
 import { is_node } from "tstl/utility/node";
 import { sleep_until } from "tstl/thread/global";
+import { NodeWorkerCompiler } from "./internal/NodeWorkerCompiler";
+import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 
 /**
  * Worker Connector.
@@ -47,10 +49,32 @@ export class WorkerConnector<Header, Provider extends object | null>
     extends ConnectorBase<Header, Provider>
     implements IWorkerSystem
 {
+    private readonly compiler_: IWorkerCompiler;
+
     /**
      * @hidden
      */
     private worker_?: Worker;
+
+    /**
+     * Initializer Constructor.
+     * 
+     * @param header An object containing initialization data like activation.
+     * @param provider An object providing features for remote system.
+     * @param type You can specify the worker mode when NodeJS. Default is "thread".
+     */
+    public constructor
+        (
+            header: Header, 
+            provider: Provider, 
+            type: "thread" | "process" = "thread"
+        )
+    {
+        super(header, provider);
+        this.compiler_ = is_node()
+            ? new NodeWorkerCompiler(type)
+            : WebWorkerCompiler;
+    }
 
     /* ----------------------------------------------------------------
         CONNECTIONS
@@ -84,7 +108,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         this._Test_connection("compile");
 
         // COMPILATION
-        const path: string = await Compiler.compile(content);
+        const path: string = await this.compiler_.compile(content);
         let error: Error | null = null; // FOR LAZY-THROWING
 
         //----
@@ -101,7 +125,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         }
 
         // REMOVE THE TEMPORARY FILE
-        await Compiler.remove(path);
+        await this.compiler_.remove(path);
 
         // LAZY THROWING
         if (error !== null)
@@ -174,7 +198,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         try
         {
             // EXECUTE THE WORKER
-            this.worker_ = Compiler.execute
+            this.worker_ = this.compiler_.execute
             (
                 jsFile, 
                 is_node() === true
@@ -325,13 +349,3 @@ export namespace WorkerConnector
         execArgv: string[];
     }
 }
-
-//----
-// CAPSULIZATION
-//----
-/**
- * @hidden
- */
-const Compiler: IWorkerCompiler = is_node()
-    ? require("./internal/node-worker")
-    : require("./internal/web-worker");
