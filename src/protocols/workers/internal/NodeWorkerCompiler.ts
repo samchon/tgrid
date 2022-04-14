@@ -8,13 +8,23 @@ import { v4 } from "uuid";
 
 import { FileSystem } from "./FileSystem";
 import { IWorkerCompiler } from "./IWebCompiler";
+import { ProcessWorker } from "./processes/ProcessWorker";
 import { ThreadWorker } from "./threads/ThreadWorker";
 
 /**
  * @hidden
  */
-class _NodeWorkerCompiler implements IWorkerCompiler
+export class NodeWorkerCompiler implements IWorkerCompiler
 {
+    private factory_: Creator<ProcessWorker | ThreadWorker>;
+
+    public constructor(type: "process" | "thread")
+    {
+        this.factory_ = (type === "process")
+            ? ProcessWorker
+            : ThreadWorker;
+    }
+
     public async compile(content: string): Promise<string>
     {
         let path: string = `${tmpdir().split("\\").join("/")}/tgrid`;
@@ -37,7 +47,7 @@ class _NodeWorkerCompiler implements IWorkerCompiler
 
     public execute(jsFile: string, execArgv: string[] | undefined): Worker
     {
-        return new ThreadWorker(jsFile, execArgv) as any;
+        return new this.factory_(jsFile, execArgv) as any;
     }
 
     public async remove(path: string): Promise<void>
@@ -51,4 +61,7 @@ class _NodeWorkerCompiler implements IWorkerCompiler
     }
 }
 
-export = new _NodeWorkerCompiler();
+type Creator<T extends object> =
+{
+    new(...args: any[]): T;
+};

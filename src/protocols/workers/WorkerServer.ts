@@ -16,6 +16,8 @@ import { RuntimeError } from "tstl/exception/RuntimeError";
 import { Singleton } from "tstl/thread/Singleton";
 import { sleep_until } from "tstl/thread/global";
 import { is_node } from "tstl/utility/node";
+import { ThreadPort } from "./internal/threads/ThreadPort";
+import { ProcessChannel } from "./internal/processes/ProcessChannel";
 
 /**
  * Worker Server.
@@ -53,6 +55,11 @@ export class WorkerServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
+    private channel_: IFeature;
+
+    /**
+     * @hidden
+     */
     private state_: WorkerServer.State;
 
     /**
@@ -65,15 +72,22 @@ export class WorkerServer<Header, Provider extends object | null>
     ---------------------------------------------------------------- */
     /**
      * Default Constructor.
+     * 
+     * @param type You can specify the worker mode when NodeJS. Default is "thread".
      */
     public constructor()
     {
         super(undefined);
 
+        this.channel_ = is_node()
+            ? ThreadPort.is_worker_server()
+                ? ThreadPort
+                : ProcessChannel
+            : (self as any);
         this.state_ = WorkerServer.State.NONE;
         this.header_ = new Singleton(async () =>
         {
-            g.postMessage(WorkerServer.State.OPENING);
+            this.channel_.postMessage(WorkerServer.State.OPENING);
 
             const data: string = await this._Handshake("getHeader");
             const wrapper: IHeaderWrapper<Header> = JSON.parse(data);
@@ -102,7 +116,7 @@ export class WorkerServer<Header, Provider extends object | null>
             if (self.document !== undefined)
                 throw new DomainError("Error on WorkerServer.open(): this is not Worker.");    
         }
-        else if (g.is_worker_server() === false)
+        else if (this.channel_.is_worker_server() === false)
             throw new DomainError("Error on WorkerServer.open(): this is not Worker.");
         else if (this.state_ !== WorkerServer.State.NONE)
             throw new DomainError("Error on WorkerServer.open(): the server has been opened yet.");
@@ -115,8 +129,8 @@ export class WorkerServer<Header, Provider extends object | null>
         await this.header_.get();
 
         // SUCCESS
-        g.onmessage = this._Handle_message.bind(this);
-        g.postMessage(WorkerServer.State.OPEN);
+        this.channel_.onmessage = this._Handle_message.bind(this);
+        this.channel_.postMessage(WorkerServer.State.OPEN);
 
         this.state_ = WorkerServer.State.OPEN;
     }
@@ -142,8 +156,8 @@ export class WorkerServer<Header, Provider extends object | null>
             // DO CLOSE
             setTimeout(() =>
             {
-                g.postMessage(WorkerServer.State.CLOSING);
-                g.close();
+                this.channel_.postMessage(WorkerServer.State.CLOSING);
+                this.channel_.close();
             });
         }
         this.state_ = WorkerServer.State.CLOSED;
@@ -188,7 +202,7 @@ export class WorkerServer<Header, Provider extends object | null>
                     }
                 });
 
-            g.onmessage = once(evt =>
+            this.channel_.onmessage = once(evt =>
             {
                 if (expired === false)
                 {
@@ -207,7 +221,7 @@ export class WorkerServer<Header, Provider extends object | null>
      */
     protected sendData(invoke: Invoke): void
     {
-        g.postMessage(JSON.stringify(invoke));
+        this.channel_.postMessage(JSON.stringify(invoke));
     }
 
     /**
@@ -260,13 +274,6 @@ export namespace WorkerServer
 //----
 // POLYFILL
 //----
-/**
- * @hidden
- */
-const g: IFeature = is_node()
-    ? require("./internal/threads/ThreadPort")
-    : self;
-
 /**
  * @hidden
  */
