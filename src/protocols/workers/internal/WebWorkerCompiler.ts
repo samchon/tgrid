@@ -3,7 +3,7 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import { IWorkerCompiler } from "./IWebCompiler";
+import { IWorkerCompiler } from "./IWorkerCompiler";
 
 /**
  * @hidden

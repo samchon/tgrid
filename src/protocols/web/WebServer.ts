@@ -3,10 +3,15 @@
  * @module tgrid.protocols.web
  */
 //----------------------------------------------------------------
-import http from "http";
-import https from "https";
-import net from "net";
-import WebSocket from "ws";
+import type __http from "http";
+import type __https from "https";
+import type __net from "net";
+import type __WebSocket from "ws";
+import { is_node } from "tstl/utility/node";
+
+const http: typeof __http = is_node() ? require("http") : null!;
+const https: typeof __https = is_node() ? require("https") : null!;
+const WebSocket: typeof __WebSocket = is_node() ? require("ws") : null!;
 
 import { WebAcceptor } from "./WebAcceptor";
 import { IServer } from "../internal/IServer";
@@ -51,17 +56,17 @@ export class WebServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private options_?: https.ServerOptions;
+    private options_?: __https.ServerOptions;
 
     /**
      * @hidden
      */
-    private server_: http.Server | https.Server;
+    private server_: __http.Server | __https.Server;
 
     /**
      * @hidden
      */
-    private protocol_: WebSocket.Server;
+    private protocol_: __WebSocket.Server;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -145,11 +150,11 @@ export class WebServer<Header, Provider extends object | null>
         // OPEN SERVER
         //----
         // PROTOCOL - ADAPTOR & ACCEPTOR
-        this.server_.on("upgrade", (request: http.IncomingMessage, netSocket: net.Socket, header: Buffer) =>
+        this.server_.on("upgrade", (request: __http.IncomingMessage, netSocket: __net.Socket, header: Buffer) =>
         {
             this.protocol_.handleUpgrade(request, netSocket, header, webSocket =>
             {
-                webSocket.once("message", async (data: WebSocket.Data) =>
+                webSocket.once("message", async (data: __WebSocket.Data) =>
                 {
                     // @todo: custom code is required
                     if (typeof data !== "string")

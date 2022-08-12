@@ -3,6 +3,12 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
+import { DomainError } from "tstl/exception/DomainError";
+import { RuntimeError } from "tstl/exception/RuntimeError";
+import { Singleton } from "tstl/thread/Singleton";
+import { sleep_until } from "tstl/thread/global";
+import { is_node } from "tstl/utility/node";
+
 import { Communicator } from "../../components/Communicator";
 import { IServer } from "../internal/IServer";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
@@ -11,11 +17,6 @@ import { Invoke } from "../../components/Invoke";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 
-import { DomainError } from "tstl/exception/DomainError";
-import { RuntimeError } from "tstl/exception/RuntimeError";
-import { Singleton } from "tstl/thread/Singleton";
-import { sleep_until } from "tstl/thread/global";
-import { is_node } from "tstl/utility/node";
 import { ThreadPort } from "./internal/threads/ThreadPort";
 import { ProcessChannel } from "./internal/processes/ProcessChannel";
 

@@ -3,15 +3,15 @@
  * @module tgrid.protocols.web
  */
 //----------------------------------------------------------------
-import http from "http";
-import WebSocket from "ws";
+import type __http from "http";
+import type __WebSocket from "ws";
+import { DomainError } from "tstl/exception/DomainError";
 
 import { AcceptorBase } from "../internal/AcceptorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 
 import { Invoke } from "../../components/Invoke";
 
-import { DomainError } from "tstl/exception/DomainError";
 import { WebError } from "./WebError";
 
 /**
@@ -49,12 +49,12 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private request_: http.IncomingMessage;
+    private request_: __http.IncomingMessage;
 
     /**
      * @hidden
      */
-    private socket_: WebSocket;
+    private socket_: __WebSocket;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -63,7 +63,7 @@ export class WebAcceptor<Header, Provider extends object | null>
      * @internal
      */
     public static create<Header, Provider extends object | null>
-        (request: http.IncomingMessage, socket: WebSocket, header: Header): WebAcceptor<Header, Provider>
+        (request: __http.IncomingMessage, socket: __WebSocket, header: Header): WebAcceptor<Header, Provider>
     {
         return new WebAcceptor(request, socket, header);
     }
@@ -71,7 +71,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private constructor(request: http.IncomingMessage, socket: WebSocket, header: Header)
+    private constructor(request: __http.IncomingMessage, socket: __WebSocket, header: Header)
     {
         super(header);
         
@@ -214,7 +214,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private _Handle_message(data: WebSocket.Data): void
+    private _Handle_message(data: __WebSocket.Data): void
     {
         if (typeof data === "string")
         {

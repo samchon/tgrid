@@ -6,7 +6,7 @@
     "email": "samchon.github@gmail.com",
     "url": "https://github.com/samchon"
   },
-  "version": "0.8.6",
+  "version": "0.8.7-dev.20220812",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {

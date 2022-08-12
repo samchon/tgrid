@@ -10,7 +10,7 @@ import { Invoke } from "../../components/Invoke";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 
-import { IWorkerCompiler } from "./internal/IWebCompiler";
+import { IWorkerCompiler } from "./internal/IWorkerCompiler";
 import { DomainError } from "tstl/exception/DomainError";
 import { is_node } from "tstl/utility/node";
 import { sleep_until } from "tstl/thread/global";

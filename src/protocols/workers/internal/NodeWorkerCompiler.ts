@@ -3,11 +3,14 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import { tmpdir } from "os";
+import type __os from "os";
+import { is_node } from "tstl/utility/node";
 import { v4 } from "uuid";
 
+const os: typeof __os = is_node() ? require("os") : null!;
+
 import { FileSystem } from "./FileSystem";
-import { IWorkerCompiler } from "./IWebCompiler";
+import { IWorkerCompiler } from "./IWorkerCompiler";
 import { ProcessWorker } from "./processes/ProcessWorker";
 import { ThreadWorker } from "./threads/ThreadWorker";
 
@@ -27,7 +30,7 @@ export class NodeWorkerCompiler implements IWorkerCompiler
 
     public async compile(content: string): Promise<string>
     {
-        let path: string = `${tmpdir().split("\\").join("/")}/tgrid`;
+        let path: string = `${os.tmpdir().split("\\").join("/")}/tgrid`;
         if (await FileSystem.exists(path) === false)
             await FileSystem.mkdir(path);
 

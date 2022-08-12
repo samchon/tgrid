@@ -3,7 +3,10 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import fs from "fs";
+import { is_node } from "tstl/utility/node";
+
+import type __fs from "fs";
+const fs: typeof __fs = is_node() ? require("fs") : null!;
 
 /**
  * @hidden
@@ -35,7 +38,7 @@ export namespace FileSystem
         });
     }
 
-    export function lstat(path: string): Promise<fs.Stats>
+    export function lstat(path: string): Promise<__fs.Stats>
     {
         return new Promise((resolve, reject) =>
         {

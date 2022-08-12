@@ -1,19 +1,17 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import type _thread from "worker_threads";
+import type __thread from "worker_threads";
 import { is_node } from "tstl/utility/node";
 
-let thread: typeof _thread = null!;
-if (is_node() === true)
-    thread = require("worker_threads");
+const thread: typeof __thread = is_node() ? require("worker_threads") : null!;
 
 /**
  * @hidden
  */
 export class ThreadWorker
 {
-    private readonly worker_: _thread.Worker;
+    private readonly worker_: __thread.Worker;
     
     public constructor(jsFile: string, execArgv: string[] | undefined)
     {
