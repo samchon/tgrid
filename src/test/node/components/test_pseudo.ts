@@ -17,7 +17,7 @@ class PseudoCommunicator<Provider> extends Communicator<Provider>
     }
 
     protected inspectReady(): Error | null { return null; }
-    protected sendData(invoke: Invoke): void { this.sender_(invoke); }
+    protected async sendData(invoke: Invoke): Promise<void> { this.sender_(invoke); }
     public reply(invoke: Invoke): void { this.replyData(invoke); }
 }
 

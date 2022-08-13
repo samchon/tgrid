@@ -3,10 +3,9 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import { is_node } from "tstl/utility/node";
+import type fs from "fs";
+import { NodeModule } from "../../../utils/internal/NodeModule";
 
-import type __fs from "fs";
-const fs: typeof __fs = is_node() ? require("fs") : null!;
 
 /**
  * @hidden
@@ -16,19 +15,21 @@ export namespace FileSystem
     /* ----------------------------------------------------------------
         ACCESSORS
     ---------------------------------------------------------------- */
-    export function exists(path: string): Promise<boolean>
+    export async function exists(path: string): Promise<boolean>
     {
+        const { exists } = await NodeModule.fs.get();
         return new Promise(resolve =>
         {
-            fs.exists(path, resolve);
+            exists(path, resolve);
         });
     }
 
-    export function dir(path: string): Promise<string[]>
+    export async function dir(path: string): Promise<string[]>
     {
+        const { readdir } = await NodeModule.fs.get();
         return new Promise((resolve, reject) =>
         {
-            fs.readdir(path, (err, ret) =>
+            readdir(path, (err, ret) =>
             {
                 if (err)
                     reject(err);
@@ -38,11 +39,12 @@ export namespace FileSystem
         });
     }
 
-    export function lstat(path: string): Promise<__fs.Stats>
+    export async function lstat(path: string): Promise<fs.Stats>
     {
+        const { lstat } = await NodeModule.fs.get();
         return new Promise((resolve, reject) =>
         {
-            fs.lstat(path, (err, stat) =>
+            lstat(path, (err, stat) =>
             {
                 if (err)
                     reject(err);
@@ -55,8 +57,9 @@ export namespace FileSystem
     export function read(path: string): Promise<Buffer>;
     export function read(path: string, encoding: string): Promise<string>;
 
-    export function read(path: string, encoding?: string): Promise<Buffer | string>
+    export async function read(path: string, encoding?: string): Promise<Buffer | string>
     {
+        const { readFile } = await NodeModule.fs.get();
         return new Promise((resolve, reject) => 
         {
             const callback = (err: NodeJS.ErrnoException | null, ret: Buffer | string) =>
@@ -67,9 +70,9 @@ export namespace FileSystem
                     resolve(ret);
             };
             if (encoding === undefined)
-                fs.readFile(path, callback);
+                readFile(path, callback);
             else
-                fs.readFile(path, encoding as "utf8", callback);
+                readFile(path, encoding as "utf8", callback);
         });
     }
 
@@ -82,11 +85,12 @@ export namespace FileSystem
             await _Mkdir(path);
     }
 
-    function _Mkdir(path: string): Promise<void>
+    async function _Mkdir(path: string): Promise<void>
     {
+        const { mkdir } = await NodeModule.fs.get();
         return new Promise((resolve, reject) =>
         {
-            fs.mkdir(path, err =>
+            mkdir(path, err =>
             {
                 if (err)
                     reject(err);
@@ -96,8 +100,9 @@ export namespace FileSystem
         });
     }
 
-    export function write(path: string, content: string | Buffer): Promise<void>
+    export async function write(path: string, content: string | Buffer): Promise<void>
     {
+        const { writeFile } = await NodeModule.fs.get();
         return new Promise((resolve, reject) =>
         {
             const callback = (err: NodeJS.ErrnoException | null) =>
@@ -108,17 +113,18 @@ export namespace FileSystem
                     resolve();
             };
             if (content instanceof Buffer)
-                fs.writeFile(path, content, callback);
+                writeFile(path, content, callback);
             else
-                fs.writeFile(path, content, "utf8", callback);
+                writeFile(path, content, "utf8", callback);
         });
     }
 
-    export function unlink(path: string): Promise<void>
+    export async function unlink(path: string): Promise<void>
     {
+        const { unlink } = await NodeModule.fs.get();
         return new Promise((resolve, reject) =>
         {
-            fs.unlink(path, err =>
+            unlink(path, err =>
             {
                 if (err)
                     reject(err);

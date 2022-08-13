@@ -3,19 +3,20 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { ConnectorBase } from "../internal/ConnectorBase";
-
-import { Invoke } from "../../components/Invoke";
-import { IHeaderWrapper } from "../internal/IHeaderWrapper";
-import { once } from "../internal/once";
-
-import { IWorkerCompiler } from "./internal/IWorkerCompiler";
 import { DomainError } from "tstl/exception/DomainError";
 import { is_node } from "tstl/utility/node";
 import { sleep_until } from "tstl/thread/global";
+
+import { Invoke } from "../../components/Invoke";
+
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
+import { IWorkerCompiler } from "./internal/IWorkerCompiler";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
+import { ConnectorBase } from "../internal/ConnectorBase";
 import { NodeWorkerCompiler } from "./internal/NodeWorkerCompiler";
 import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
+import { once } from "../internal/once";
+import { Singleton } from "tstl/thread/Singleton";
 
 /**
  * Worker Connector.
@@ -49,7 +50,7 @@ export class WorkerConnector<Header, Provider extends object | null>
     extends ConnectorBase<Header, Provider>
     implements IWorkerSystem
 {
-    private readonly compiler_: IWorkerCompiler;
+    private readonly compiler_: Singleton<Promise<IWorkerCompiler>>;
 
     /**
      * @hidden
@@ -71,9 +72,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         )
     {
         super(header, provider);
-        this.compiler_ = is_node()
-            ? new NodeWorkerCompiler(type)
-            : WebWorkerCompiler;
+        this.compiler_ = new Singleton(() => is_node() ? NodeWorkerCompiler(type) : WebWorkerCompiler());
     }
 
     /* ----------------------------------------------------------------
@@ -108,7 +107,8 @@ export class WorkerConnector<Header, Provider extends object | null>
         this._Test_connection("compile");
 
         // COMPILATION
-        const path: string = await this.compiler_.compile(content);
+        const compiler: IWorkerCompiler = await this.compiler_.get();
+        const path: string = await compiler.compile(content);
         let error: Error | null = null; // FOR LAZY-THROWING
 
         //----
@@ -125,7 +125,7 @@ export class WorkerConnector<Header, Provider extends object | null>
         }
 
         // REMOVE THE TEMPORARY FILE
-        await this.compiler_.remove(path);
+        await compiler.remove(path);
 
         // LAZY THROWING
         if (error !== null)
@@ -198,7 +198,8 @@ export class WorkerConnector<Header, Provider extends object | null>
         try
         {
             // EXECUTE THE WORKER
-            this.worker_ = this.compiler_.execute
+            const compiler: IWorkerCompiler = await this.compiler_.get();
+            this.worker_ = await compiler.execute
             (
                 jsFile, 
                 is_node() === true
@@ -296,7 +297,7 @@ export class WorkerConnector<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    protected sendData(invoke: Invoke): void
+    protected async sendData(invoke: Invoke): Promise<void>
     {
         this.worker_!.postMessage(JSON.stringify(invoke));
     }

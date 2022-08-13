@@ -172,7 +172,7 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    protected sendData(invoke: Invoke): void
+    protected async sendData(invoke: Invoke): Promise<void>
     {
         this.port_.postMessage(JSON.stringify(invoke));
     }

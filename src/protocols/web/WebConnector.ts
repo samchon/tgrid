@@ -3,17 +3,18 @@
  * @module tgrid.protocols.web
  */
 //----------------------------------------------------------------
-import { ConnectorBase } from "../internal/ConnectorBase";
-import { IWebCommunicator } from "./internal/IWebCommunicator";
-
-import { Invoke } from "../../components/Invoke";
-import { IHeaderWrapper } from "../internal/IHeaderWrapper";
-import { once } from "../internal/once";
-
 import { DomainError } from "tstl/exception/DomainError";
-import { WebError } from "./WebError";
 import { is_node } from "tstl/utility/node";
 import { sleep_for } from "tstl/thread/global";
+
+import { Invoke } from "../../components/Invoke";
+import { WebError } from "./WebError";
+
+import { ConnectorBase } from "../internal/ConnectorBase";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
+import { once } from "../internal/once";
+import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
 
 /**
  * Web Socket Connector.
@@ -91,7 +92,8 @@ export class WebConnector<Header, Provider extends object | null>
         try
         {
             // DO CONNNECT
-            this.socket_ = new g.WebSocket(url);
+            const factory = is_node() ? await WebSocketPolyfill() as any : self.WebSocket;
+            this.socket_ = new factory(url);
             await this._Wait_connection();
             
             // SEND HEADERS
@@ -248,7 +250,7 @@ export class WebConnector<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    protected sendData(invoke: Invoke): void
+    protected async sendData(invoke: Invoke): Promise<void>
     {
         this.socket_!.send(JSON.stringify(invoke));
     }
@@ -299,25 +301,4 @@ export namespace WebConnector
          */
         timeout: number;
     }
-}
-
-//----
-// POLYFILL
-//----
-/**
- * @hidden
- */
-const g: IFeature = is_node()
-    ? require("./internal/websocket-polyfill")
-    : <any>self;
-
-/**
- * @hidden
- */
-interface IFeature
-{
-    WebSocket: WebSocket &
-    {
-        new(url: string, protocols?: string | string[]): WebSocket;
-    };
 }

@@ -3,38 +3,42 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import type __cp from "child_process";
-import { is_node } from "tstl/utility/node";
-
-const cp: typeof __cp = is_node() ? require("child_process") : null!;
+import type cp from "child_process";
+import { NodeModule } from "../../../../utils/internal/NodeModule";
+import { IWorkerCompiler } from "../IWorkerCompiler";
 
 /**
  * @hidden
  */
-export class ProcessWorker
+export async function ProcessWorker(): Promise<IWorkerCompiler.Creator>
 {
-    private process_: __cp.ChildProcess;
+    const { fork } = await NodeModule.cp.get();
 
-    public constructor(jsFile: string, execArgv: string[] | undefined)
-    {
-        this.process_ = cp.fork(jsFile, { execArgv });
-    }
+    class ProcessWorker {
+        private process_: cp.ChildProcess;
 
-    public terminate(): void
-    {
-        this.process_.kill();
-    }
-
-    public set onmessage(listener: (event: MessageEvent) => void)
-    {
-        this.process_.on("message", message =>
+        public constructor(jsFile: string, execArgv: string[] | undefined)
         {
-            listener({data: message} as MessageEvent);
-        });
-    }
+            this.process_ = fork(jsFile, { execArgv });
+        }
 
-    public postMessage(message: any): void
-    {
-        this.process_.send(message);
-    }
+        public terminate(): void
+        {
+            this.process_.kill();
+        }
+
+        public set onmessage(listener: (event: MessageEvent) => void)
+        {
+            this.process_.on("message", message =>
+            {
+                listener({data: message} as MessageEvent);
+            });
+        }
+
+        public postMessage(message: any): void
+        {
+            this.process_.send(message);
+        }
+    };
+    return <any>ProcessWorker as IWorkerCompiler.Creator;
 }

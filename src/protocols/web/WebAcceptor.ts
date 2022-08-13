@@ -3,8 +3,8 @@
  * @module tgrid.protocols.web
  */
 //----------------------------------------------------------------
-import type __http from "http";
-import type __WebSocket from "ws";
+import type http from "http";
+import type WebSocket from "ws";
 import { DomainError } from "tstl/exception/DomainError";
 
 import { AcceptorBase } from "../internal/AcceptorBase";
@@ -49,12 +49,12 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private request_: __http.IncomingMessage;
+    private request_: http.IncomingMessage;
 
     /**
      * @hidden
      */
-    private socket_: __WebSocket;
+    private socket_: WebSocket;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -63,7 +63,7 @@ export class WebAcceptor<Header, Provider extends object | null>
      * @internal
      */
     public static create<Header, Provider extends object | null>
-        (request: __http.IncomingMessage, socket: __WebSocket, header: Header): WebAcceptor<Header, Provider>
+        (request: http.IncomingMessage, socket: WebSocket, header: Header): WebAcceptor<Header, Provider>
     {
         return new WebAcceptor(request, socket, header);
     }
@@ -71,7 +71,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private constructor(request: __http.IncomingMessage, socket: __WebSocket, header: Header)
+    private constructor(request: http.IncomingMessage, socket: WebSocket, header: Header)
     {
         super(header);
         
@@ -206,7 +206,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    protected sendData(invoke: Invoke): void
+    protected async sendData(invoke: Invoke): Promise<void>
     {
         this.socket_.send(JSON.stringify(invoke));
     }
@@ -214,7 +214,7 @@ export class WebAcceptor<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private _Handle_message(data: __WebSocket.Data): void
+    private _Handle_message(data: WebSocket.Data): void
     {
         if (typeof data === "string")
         {

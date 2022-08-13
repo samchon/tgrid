@@ -155,7 +155,7 @@ export abstract class Communicator<Provider>
      */
     private _Call_function(name: string, ...params: any[]): Promise<any>
     {
-        return new Promise((resolve, reject) =>
+        return new Promise(async (resolve, reject) =>
         {
             // READY TO SEND ?
             const error: Error | null = this.inspectReady("Communicator._Call_fuction");
@@ -178,7 +178,7 @@ export abstract class Communicator<Provider>
 
             // DO SEND WITH PROMISE
             this.promises_.emplace(invoke.uid, new Pair(resolve, reject));
-            this.sendData(invoke);
+            await this.sendData(invoke);
         });
     }
 
@@ -345,11 +345,11 @@ export abstract class Communicator<Provider>
             const parameters: any[] = invoke.parameters.map(p => p.value);
             const ret: any = await func(...parameters);
 
-            this._Send_return(uid, true, ret);
+            await this._Send_return(uid, true, ret);
         }
         catch (exp)
         {
-            this._Send_return(uid, false, exp);
+            await this._Send_return(uid, false, exp);
         }
     }
 
@@ -380,12 +380,12 @@ export abstract class Communicator<Provider>
      * 
      * @param invoke Structured data to send.
      */
-    protected abstract sendData(invoke: Invoke): void;
+    protected abstract sendData(invoke: Invoke): Promise<void>;
 
     /**
      * @hidden
      */
-    private _Send_return(uid: number, flag: boolean, val: any): void
+    private async _Send_return(uid: number, flag: boolean, val: any): Promise<void>
     {
         // SPECIAL LOGIC FOR ERROR -> FOR CLEAR JSON ENCODING
         if (flag === false && val instanceof Error)
@@ -397,11 +397,11 @@ export abstract class Communicator<Provider>
         }
 
         // RETURNS
-        let ret: Invoke.IReturn = {
+        const ret: Invoke.IReturn = {
             uid: uid, 
             success: flag, 
             value: val
         };
-        this.sendData(ret);
+        await this.sendData(ret);
     }
 }

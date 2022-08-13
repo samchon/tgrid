@@ -1,38 +1,41 @@
 //================================================================ 
 /** @module tgrid.protocols.workers */
 //================================================================
-import type __thread from "worker_threads";
-import { is_node } from "tstl/utility/node";
-
-const thread: typeof __thread = is_node() ? require("worker_threads") : null!;
+import type thread from "worker_threads";
+import { NodeModule } from "../../../../utils/internal/NodeModule";
+import { IWorkerCompiler } from "../IWorkerCompiler";
 
 /**
  * @hidden
  */
-export class ThreadWorker
+export async function ThreadWorker(): Promise<IWorkerCompiler.Creator>
 {
-    private readonly worker_: __thread.Worker;
-    
-    public constructor(jsFile: string, execArgv: string[] | undefined)
-    {
-        this.worker_ = new thread.Worker(jsFile, { execArgv });
-    }
-
-    public terminate(): void
-    {
-        this.worker_.terminate();
-    }
-
-    public set onmessage(listener: (event: MessageEvent) => void)
-    {
-        this.worker_.on("message", value =>
+    const { Worker } = await NodeModule.thread.get();
+    class ThreadWorker {
+        private readonly worker_:thread.Worker;
+        
+        public constructor(jsFile: string, execArgv: string[] | undefined)
         {
-            listener({data: value} as MessageEvent);
-        });
-    }
+            this.worker_ = new Worker(jsFile, { execArgv });
+        }
 
-    public postMessage(message: any): void
-    {
-        this.worker_.postMessage(message);
+        public terminate(): void
+        {
+            this.worker_.terminate();
+        }
+
+        public set onmessage(listener: (event: MessageEvent) => void)
+        {
+            this.worker_.on("message", value =>
+            {
+                listener({data: value} as MessageEvent);
+            });
+        }
+
+        public postMessage(message: any): void
+        {
+            this.worker_.postMessage(message);
+        }
     }
+    return <any>ThreadWorker as IWorkerCompiler.Creator;
 }

@@ -3,15 +3,11 @@
  * @module tgrid.protocols.web
  */
 //----------------------------------------------------------------
-import type __http from "http";
-import type __https from "https";
-import type __net from "net";
-import type __WebSocket from "ws";
+import type http from "http";
+import type https from "https";
+import type net from "net";
+import type WebSocket from "ws";
 import { is_node } from "tstl/utility/node";
-
-const http: typeof __http = is_node() ? require("http") : null!;
-const https: typeof __https = is_node() ? require("https") : null!;
-const WebSocket: typeof __WebSocket = is_node() ? require("ws") : null!;
 
 import { WebAcceptor } from "./WebAcceptor";
 import { IServer } from "../internal/IServer";
@@ -19,6 +15,7 @@ import { IServer } from "../internal/IServer";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
+import { NodeModule } from "../../utils/internal/NodeModule";
 
 /**
  * Web Socket Server.
@@ -56,17 +53,17 @@ export class WebServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private options_?: __https.ServerOptions;
+    private options_: https.ServerOptions | null;
 
     /**
      * @hidden
      */
-    private server_: __http.Server | __https.Server;
+    private server_: http.Server | https.Server | null;
 
     /**
      * @hidden
      */
-    private protocol_: __WebSocket.Server;
+    private protocol_: WebSocket.Server | null;
 
     /* ----------------------------------------------------------------
         CONSTRUCTORS
@@ -90,18 +87,18 @@ export class WebServer<Header, Provider extends object | null>
 
     public constructor(key?: string, cert?: string)
     {
+        if (is_node() === false)
+            throw new DomainError("Error on WebServer.constructor(): only available in NodeJS.");
+
         // PREPARE SREVER INSTANCE
-        if (key)
-        {
-            this.options_ = ({ key: key, cert: cert });
-            this.server_ = https.createServer(this.options_);
-        }
-        else
-            this.server_ = http.createServer();
+        this.options_ = !!key && !!cert
+            ? { key, cert }
+            : null;
 
         // INITIALIZE STATUS & PROTOCOL
         this.state_ = WebServer.State.NONE;
-        this.protocol_ = new WebSocket.Server({ noServer: true });
+        this.server_ = null;
+        this.protocol_ = null;
     }
 
     /**
@@ -137,11 +134,12 @@ export class WebServer<Header, Provider extends object | null>
         else if (this.state_ === WebServer.State.CLOSING)
             throw new RuntimeError("Error on WebServer.open(): it's on closing.");
         
-        // RE-OPEN ?
-        else if (this.state_ === WebServer.State.CLOSED)
-            this.server_ = this.server_ instanceof http.Server
-                ? http.createServer()
-                : https.createServer(this.options_!);
+        // DO OPEN
+        else if (this.server_ === null || this.state_ === WebServer.State.CLOSED)
+            this.server_ = this.options_ !== null
+                ? (await NodeModule.https.get()).createServer(this.options_!)
+                : (await NodeModule.http.get()).createServer()
+        this.protocol_ = new (await NodeModule.ws.get()).default.Server({ noServer:true });
 
         // SET STATE
         this.state_ = WebServer.State.OPENING;
@@ -150,11 +148,11 @@ export class WebServer<Header, Provider extends object | null>
         // OPEN SERVER
         //----
         // PROTOCOL - ADAPTOR & ACCEPTOR
-        this.server_.on("upgrade", (request: __http.IncomingMessage, netSocket: __net.Socket, header: Buffer) =>
+        this.server_.on("upgrade", (request: http.IncomingMessage, netSocket: net.Socket, header: Buffer) =>
         {
-            this.protocol_.handleUpgrade(request, netSocket, header, webSocket =>
+            this.protocol_!.handleUpgrade(request, netSocket, header, webSocket =>
             {
-                webSocket.once("message", async (data: __WebSocket.Data) =>
+                webSocket.once("message", async (data: WebSocket.Data) =>
                 {
                     // @todo: custom code is required
                     if (typeof data !== "string")
@@ -176,7 +174,7 @@ export class WebServer<Header, Provider extends object | null>
         });
 
         // FINALIZATION
-        await this._Open(port);
+        await WebServer._Open(this.server_, port, state => this.state_ = state);
     }
 
     /**
@@ -203,25 +201,30 @@ export class WebServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private _Open(port: number): Promise<void>
+    private static _Open
+        (
+            server: http.Server | https.Server, 
+            port: number, 
+            setState: (state:WebServer.State) =>void
+        ): Promise<void>
     {
         return new Promise((resolve, reject) =>
         {
             // PREPARE RETURNS
-            this.server_.on("listening", () =>
+            server.on("listening", () =>
             {
-                this.state_ = WebServer.State.OPEN;
-                this.server_.on("error", () => {});
+                setState(WebServer.State.OPEN);
+                server.on("error", () => {});
                 resolve();
             });
-            this.server_.on("error", error =>
+            server.on("error", error =>
             {
-                this.state_ = WebServer.State.NONE;
+                setState(WebServer.State.NONE);
                 reject(error);
             });
 
             // DO OPEN - START PROVIDE
-            this.server_.listen(port);
+            server.listen(port);
         });
     }
 
@@ -232,9 +235,9 @@ export class WebServer<Header, Provider extends object | null>
     {
         return new Promise(resolve =>
         {
-            this.protocol_.close(() =>
+            this.protocol_!.close(() =>
             {
-                this.server_.close(() =>
+                this.server_!.close(() =>
                 {
                     resolve();
                 });

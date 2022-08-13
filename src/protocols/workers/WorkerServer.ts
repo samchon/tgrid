@@ -56,7 +56,7 @@ export class WorkerServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    private channel_: IFeature;
+    private channel_: Singleton<Promise<IFeature>>;
 
     /**
      * @hidden
@@ -80,15 +80,20 @@ export class WorkerServer<Header, Provider extends object | null>
     {
         super(undefined);
 
-        this.channel_ = is_node()
-            ? ThreadPort.is_worker_server()
-                ? ThreadPort
-                : ProcessChannel
-            : (self as any);
+        this.channel_ = new Singleton(async () => 
+        {
+            if (is_node() === false)
+                return <any>self as IFeature;
+
+            const threadPort = await ThreadPort();
+            return threadPort.is_worker_server()
+                ? <any>threadPort as IFeature
+                : ProcessChannel as IFeature;
+        });
         this.state_ = WorkerServer.State.NONE;
         this.header_ = new Singleton(async () =>
         {
-            this.channel_.postMessage(WorkerServer.State.OPENING);
+            (await this.channel_.get()).postMessage(WorkerServer.State.OPENING);
 
             const data: string = await this._Handshake("getHeader");
             const wrapper: IHeaderWrapper<Header> = JSON.parse(data);
@@ -117,7 +122,7 @@ export class WorkerServer<Header, Provider extends object | null>
             if (self.document !== undefined)
                 throw new DomainError("Error on WorkerServer.open(): this is not Worker.");    
         }
-        else if (this.channel_.is_worker_server() === false)
+        else if ((await this.channel_.get()).is_worker_server() === false)
             throw new DomainError("Error on WorkerServer.open(): this is not Worker.");
         else if (this.state_ !== WorkerServer.State.NONE)
             throw new DomainError("Error on WorkerServer.open(): the server has been opened yet.");
@@ -130,8 +135,9 @@ export class WorkerServer<Header, Provider extends object | null>
         await this.header_.get();
 
         // SUCCESS
-        this.channel_.onmessage = this._Handle_message.bind(this);
-        this.channel_.postMessage(WorkerServer.State.OPEN);
+        const channel = await this.channel_.get();
+        channel.onmessage = this._Handle_message.bind(this);
+        channel.postMessage(WorkerServer.State.OPEN);
 
         this.state_ = WorkerServer.State.OPEN;
     }
@@ -155,10 +161,11 @@ export class WorkerServer<Header, Provider extends object | null>
             await this.destructor();
             
             // DO CLOSE
-            setTimeout(() =>
+            setTimeout(async () =>
             {
-                this.channel_.postMessage(WorkerServer.State.CLOSING);
-                this.channel_.close();
+                const channel = await this.channel_.get();
+                channel.postMessage(WorkerServer.State.CLOSING);
+                channel.close();
             });
         }
         this.state_ = WorkerServer.State.CLOSED;
@@ -188,7 +195,7 @@ export class WorkerServer<Header, Provider extends object | null>
      */
     private _Handshake(method: string, timeout?: number, until?: Date): Promise<any>
     {
-        return new Promise((resolve, reject) =>
+        return new Promise(async (resolve, reject) =>
         {
             let completed: boolean = false;
             let expired: boolean = false;
@@ -203,7 +210,7 @@ export class WorkerServer<Header, Provider extends object | null>
                     }
                 });
 
-            this.channel_.onmessage = once(evt =>
+            (await this.channel_.get()).onmessage = once(evt =>
             {
                 if (expired === false)
                 {
@@ -220,9 +227,9 @@ export class WorkerServer<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    protected sendData(invoke: Invoke): void
+    protected async sendData(invoke: Invoke): Promise<void>
     {
-        this.channel_.postMessage(JSON.stringify(invoke));
+        (await this.channel_.get()).postMessage(JSON.stringify(invoke));
     }
 
     /**

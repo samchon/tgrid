@@ -224,7 +224,7 @@ export class SharedWorkerConnector<Header, Provider extends object | null>
     /**
      * @hidden
      */
-    protected sendData(invoke: Invoke): void
+    protected async sendData(invoke: Invoke): Promise<void>
     {
         this.port_!.postMessage(JSON.stringify(invoke));
     }
@@ -282,9 +282,10 @@ export namespace SharedWorkerConnector
      * @param content Source code
      * @return Temporary URL.
      */
-    export function compile(content: string): Promise<string>
+    export async function compile(content: string): Promise<string>
     {
-        return WebWorkerCompiler.compile(content);
+        const { compile } = await WebWorkerCompiler();
+        return compile(content);
     }
 
     /**
@@ -292,8 +293,9 @@ export namespace SharedWorkerConnector
      * 
      * @param url Temporary URL.
      */
-    export function remove(url: string): Promise<void>
+    export async function remove(url: string): Promise<void>
     {
-        return WebWorkerCompiler.remove(url);
+        const { remove } = await WebWorkerCompiler()
+        await remove(url);
     }
 }
