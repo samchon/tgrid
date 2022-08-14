@@ -1,45 +1,23 @@
-//================================================================ 
+//================================================================
 /** @module tgrid.protocols.workers */
 //================================================================
-import type _thread from "worker_threads";
-import { is_node } from "tstl/utility/node";
-
-let thread: typeof _thread = null!;
-if (is_node() === true)
-    thread = require("worker_threads");
+import { NodeModule } from "../../../../utils/internal/NodeModule";
 
 /**
  * @hidden
  */
-export class ThreadPort
-{
-    public static postMessage(message: any): void
-    {
-        thread.parentPort!.postMessage(message);
-    }
-
-    public static close(): void
-    {
-        global.process.exit(0);
-    }
-
-    public static set onmessage(listener: (event: MessageEvent) => void)
-    {
-        thread.parentPort!.on("message", msg =>
-        {
-            listener({data: msg} as MessageEvent);
-        });
-    }
-
-    public static get document(): Document | undefined
-    {
-        return !thread.parentPort
-            ? null! as Document // NOT WORKER
-            : undefined;
-    }
-
-    public static is_worker_server(): boolean
-    {
-        return !!thread.parentPort;
-    }
+export async function ThreadPort() {
+    const { parentPort } = await NodeModule.thread.get();
+    return {
+        postMessage: (message: any) => parentPort!.postMessage(message),
+        close: () => global.process.exit(0),
+        onmessage: (listener: (event: MessageEvent) => void) =>
+            parentPort!.on("message", (message) =>
+                listener({ data: message } as MessageEvent),
+            ),
+        document: parentPort
+            ? (null! as Document) // NOT WORKER
+            : undefined,
+        is_worker_server: () => !!parentPort,
+    };
 }

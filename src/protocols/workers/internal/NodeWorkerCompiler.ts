@@ -1,41 +1,36 @@
-/** 
+/**
  * @packageDocumentation
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import { tmpdir } from "os";
 import { v4 } from "uuid";
+import { NodeModule } from "../../../utils/internal/NodeModule";
 
 import { FileSystem } from "./FileSystem";
-import { IWorkerCompiler } from "./IWebCompiler";
+import { IWorkerCompiler } from "./IWorkerCompiler";
 import { ProcessWorker } from "./processes/ProcessWorker";
 import { ThreadWorker } from "./threads/ThreadWorker";
 
 /**
  * @hidden
  */
-export class NodeWorkerCompiler implements IWorkerCompiler
-{
-    private factory_: Creator<ProcessWorker | ThreadWorker>;
-
-    public constructor(type: "process" | "thread")
-    {
-        this.factory_ = (type === "process")
-            ? ProcessWorker
-            : ThreadWorker;
-    }
-
-    public async compile(content: string): Promise<string>
-    {
-        let path: string = `${tmpdir().split("\\").join("/")}/tgrid`;
-        if (await FileSystem.exists(path) === false)
+export const NodeWorkerCompiler = async (
+    type: "process" | "thread",
+): Promise<IWorkerCompiler> => ({
+    execute: async (jsFile, execArg) => {
+        const factory =
+            type === "process" ? await ProcessWorker() : await ThreadWorker();
+        return (<any>new factory(jsFile, execArg)) as Worker;
+    },
+    compile: async (content) => {
+        const os = await NodeModule.os.get();
+        let path: string = `${os.tmpdir().split("\\").join("/")}/tgrid`;
+        if ((await FileSystem.exists(path)) === false)
             await FileSystem.mkdir(path);
 
-        while (true)
-        {
-            const myPath: string = `${path}/${v4()}.js`; 
-            if (await FileSystem.exists(myPath) === false)
-            {
+        while (true) {
+            const myPath: string = `${path}/${v4()}.js`;
+            if ((await FileSystem.exists(myPath)) === false) {
                 path = myPath;
                 break;
             }
@@ -43,25 +38,14 @@ export class NodeWorkerCompiler implements IWorkerCompiler
 
         await FileSystem.write(path, content);
         return path;
-    }
-
-    public execute(jsFile: string, execArgv: string[] | undefined): Worker
-    {
-        return new this.factory_(jsFile, execArgv) as any;
-    }
-
-    public async remove(path: string): Promise<void>
-    {
-        // THE FILE CAN BE REMOVED BY OS AUTOMATICALLY
-        try
-        {
-            await FileSystem.unlink(path);
-        }
-        catch {}
-    }
-}
-
-type Creator<T extends object> =
-{
-    new(...args: any[]): T;
-};
+    },
+    remove: async (url) => {
+        try {
+            await FileSystem.unlink(url);
+        } catch {}
+    },
+    // public execute(jsFile: string, execArgv: string[] | undefined): Worker
+    // {
+    //     return new this.factory_(jsFile, execArgv) as any;
+    // }
+});

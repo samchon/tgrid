@@ -1,22 +1,20 @@
-/** 
+/**
  * @packageDocumentation
  * @module tgrid.components
  */
 //----------------------------------------------------------------
 /**
  * Message structure for RFC (Remote Function Call).
- * 
+ *
  * @author Jeongho Nam - https://github.com/samchon
  */
 export type Invoke = Invoke.IFunction | Invoke.IReturn;
 
-export namespace Invoke
-{
+export namespace Invoke {
     /**
      * Message for Requesting RFC.
      */
-    export interface IFunction extends IBase
-    {
+    export interface IFunction extends IBase {
         /**
          * Target function (sometimes calsuled in objects) to call.
          */
@@ -28,8 +26,7 @@ export namespace Invoke
         parameters: IParameter[];
     }
 
-    export interface IParameter
-    {
+    export interface IParameter {
         type: string;
         value: any;
     }
@@ -37,8 +34,7 @@ export namespace Invoke
     /**
      * Message for Returning RFC.
      */
-    export interface IReturn extends IBase
-    {
+    export interface IReturn extends IBase {
         /**
          * `true` -> return, `false` -> exception.
          */
@@ -53,8 +49,7 @@ export namespace Invoke
     /**
      * @hiden
      */
-    interface IBase
-    {
+    interface IBase {
         /**
          * Unique identifier.
          */

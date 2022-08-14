@@ -1,18 +1,18 @@
 import { WebServer } from "../../protocols/web/module";
 import { Calculator } from "../providers/Calculator";
 
-async function main(): Promise<void>
-{
-    const server: WebServer<{}, Calculator> = new WebServer();
+async function main(): Promise<void> {
+    const server: WebServer<object, Calculator> = new WebServer();
     let index: number = 0;
 
-    await server.open(10489, async acceptor =>
-    {
+    await server.open(10489, async (acceptor) => {
         await acceptor.accept(new Calculator());
-        
+
         await acceptor.join();
-        if (++index === 5)
-            await server.close();
+        if (++index === 5) await server.close();
     });
 }
-main();
+main().catch((exp) => {
+    console.log(exp);
+    process.exit(-1);
+});

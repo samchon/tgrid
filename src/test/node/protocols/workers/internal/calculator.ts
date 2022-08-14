@@ -5,26 +5,27 @@ import { Driver } from "../../../../../components/Driver";
 import { Simple } from "../../../../providers/Calculator";
 import { IScientific, IStatistics } from "../../../../controllers/ICalculator";
 
-class HierarchicalCalculator extends Simple
-{
+class HierarchicalCalculator extends Simple {
     // REMOTE CALCULATOR
     public scientific!: Driver<IScientific>;
     public statistics!: Driver<IStatistics>;
 }
 
-async function get<Controller extends object>
-    (path: string): Promise<Driver<Controller>>
-{
+async function get<Controller extends object>(
+    path: string,
+): Promise<Driver<Controller>> {
     // DO CONNECT
-    const connector: WorkerConnector<null, null> = new WorkerConnector(null, null);
+    const connector: WorkerConnector<null, null> = new WorkerConnector(
+        null,
+        null,
+    );
     await connector.connect(path);
 
     // RETURN DRIVER
     return connector.getDriver<Controller>();
 }
 
-async function main(): Promise<void>
-{
+async function main(): Promise<void> {
     // PREPARE REMOTE CALCULATOR
     const calc = new HierarchicalCalculator();
     calc.scientific = await get<IScientific>(__dirname + "/scientific.js");
@@ -34,4 +35,7 @@ async function main(): Promise<void>
     const server = new WorkerServer();
     await server.open(calc);
 }
-main();
+main().catch((exp) => {
+    console.log(exp);
+    process.exit(-1);
+});
