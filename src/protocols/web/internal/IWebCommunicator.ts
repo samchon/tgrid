@@ -1,29 +1,28 @@
-/** 
+/**
  * @packageDocumentation
  * @module tgrid.protocols.web
  */
 //----------------------------------------------------------------
 /**
  * Common interface for websocket communicators
- * 
+ *
  * @author Jeongho Nam - https://github.com/samchon
  */
-export interface IWebCommunicator
-{
+export interface IWebCommunicator {
     /**
      * Close connection.
-     * 
+     *
      * Close connection with the remote websocket system.
-     * 
-     * It destories all RFCs (remote function calls) between this and remote websocket system 
-     * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction 
+     *
+     * It destories all RFCs (remote function calls) between this and remote websocket system
+     * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
      * causes all incompleted RFCs to throw exceptions.
-     * 
-     * If parametric *code* and *reason* are specified, it means the disconnection is 
+     *
+     * If parametric *code* and *reason* are specified, it means the disconnection is
      * abnormal and it would throw special exceptions (`WebError`) to the incompleted RFCs.
-     * 
+     *
      * @param code Closing code.
      * @param reason Reason why.
      */
-    close(code?: number, reason?: string): Promise<void>
+    close(code?: number, reason?: string): Promise<void>;
 }

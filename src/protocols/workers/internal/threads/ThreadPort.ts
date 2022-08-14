@@ -1,4 +1,4 @@
-//================================================================ 
+//================================================================
 /** @module tgrid.protocols.workers */
 //================================================================
 import { NodeModule } from "../../../../utils/internal/NodeModule";
@@ -11,11 +11,13 @@ export async function ThreadPort() {
     return {
         postMessage: (message: any) => parentPort!.postMessage(message),
         close: () => global.process.exit(0),
-        onmessage: (listener: (event: MessageEvent) => void) => 
-            parentPort!.on("message", message => listener({ data: message } as MessageEvent)),
+        onmessage: (listener: (event: MessageEvent) => void) =>
+            parentPort!.on("message", (message) =>
+                listener({ data: message } as MessageEvent),
+            ),
         document: parentPort
-        ? null! as Document // NOT WORKER
-        : undefined,
-        is_worker_server: () => !!parentPort
+            ? (null! as Document) // NOT WORKER
+            : undefined,
+        is_worker_server: () => !!parentPort,
     };
 }

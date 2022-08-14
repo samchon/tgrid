@@ -13,45 +13,38 @@ const PORT = 10101;
 /* ----------------------------------------------------------------
     CLIENT
 ---------------------------------------------------------------- */
-class Client
-{
+class Client {
     private name_!: string;
     private connector_!: WebConnector<null, IChatPrinter>;
     private scripts_!: IScript[];
 
     private service_!: Driver<IChatService>;
 
-    public async participate(name: string): Promise<void>
-    {
+    public async participate(name: string): Promise<void> {
         // ASSIGN MEMBERS
         this.name_ = name;
-        this.connector_ = new WebConnector
-        (null, {
-            print: (name: string, message: string): void =>
-            {
+        this.connector_ = new WebConnector(null, {
+            print: (name: string, message: string): void => {
                 this.scripts_.push({ name: name, message: message });
-            }
+            },
         });
         this.service_ = this.connector_.getDriver<IChatService>();
         this.scripts_ = [];
-        
+
         // PREPARE INTERACTION
         await this.connector_.connect("http://127.0.0.1:" + PORT);
         await this.service_.setName(name);
     }
 
-    public async shout(): Promise<void>
-    {
-        for (const script of IScript.SCENARIO)
-        {
+    public async shout(): Promise<void> {
+        for (const script of IScript.SCENARIO) {
             await sleep_for(50);
             if (script.name === this.name_)
                 await this.service_.talk(script.message);
         }
     }
 
-    public async close(): Promise<IScript[]>
-    {
+    public async close(): Promise<IScript[]> {
         await this.connector_.close();
         return this.scripts_;
     }
@@ -60,30 +53,26 @@ class Client
 /* ----------------------------------------------------------------
     SERVER
 ---------------------------------------------------------------- */
-class Server
-{
-    private server_!: WebServer<{}, IChatService>;
+class Server {
+    private server_!: WebServer<object, IChatService>;
     private scripts_!: IScript[];
 
-    public async open(): Promise<void>
-    {
+    public async open(): Promise<void> {
         this.server_ = new WebServer();
         this.scripts_ = [];
 
-        await this.server_.open(PORT, async acceptor =>
-        {
+        await this.server_.open(PORT, async (acceptor) => {
             const service: ChatService = new ChatService();
             service.assign(acceptor.getDriver<IChatPrinter>(), this.scripts_);
 
             await acceptor.accept(service);
             await acceptor.join();
-            
+
             service.destroy();
         });
     }
 
-    public async close(): Promise<IScript[]>
-    {
+    public async close(): Promise<IScript[]> {
         await this.server_.close();
         return this.scripts_;
     }
@@ -92,16 +81,14 @@ class Server
 /* ----------------------------------------------------------------
     MAIN
 ---------------------------------------------------------------- */
-export async function test_web_chat(): Promise<void>
-{
+export async function test_web_chat(): Promise<void> {
     // OPEN SERVER
     const server: Server = new Server();
     await server.open();
 
     // PREPARE CLIENTS
     const clients: Client[] = [];
-    for (const name of IScript.PEOPLE)
-    {
+    for (const name of IScript.PEOPLE) {
         const c: Client = new Client();
         await c.participate(name);
 
@@ -110,13 +97,11 @@ export async function test_web_chat(): Promise<void>
 
     // START CHATTING
     const promiseList: Promise<void>[] = [];
-    for (const c of clients)
-        promiseList.push(c.shout());
+    for (const c of clients) promiseList.push(c.shout());
     await Promise.all(promiseList);
 
     // VALIDATIONS
-    for (const c of clients)
-    {
+    for (const c of clients) {
         const scripts: IScript[] = await c.close();
         IScript.validate(scripts);
     }

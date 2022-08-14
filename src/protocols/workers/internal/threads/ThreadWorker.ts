@@ -1,4 +1,4 @@
-//================================================================ 
+//================================================================
 /** @module tgrid.protocols.workers */
 //================================================================
 import type thread from "worker_threads";
@@ -8,34 +8,28 @@ import { IWorkerCompiler } from "../IWorkerCompiler";
 /**
  * @hidden
  */
-export async function ThreadWorker(): Promise<IWorkerCompiler.Creator>
-{
+export async function ThreadWorker(): Promise<IWorkerCompiler.Creator> {
     const { Worker } = await NodeModule.thread.get();
     class ThreadWorker {
-        private readonly worker_:thread.Worker;
-        
-        public constructor(jsFile: string, execArgv: string[] | undefined)
-        {
+        private readonly worker_: thread.Worker;
+
+        public constructor(jsFile: string, execArgv: string[] | undefined) {
             this.worker_ = new Worker(jsFile, { execArgv });
         }
 
-        public terminate(): void
-        {
-            this.worker_.terminate();
+        public terminate(): void {
+            this.worker_.terminate().catch(() => {});
         }
 
-        public set onmessage(listener: (event: MessageEvent) => void)
-        {
-            this.worker_.on("message", value =>
-            {
-                listener({data: value} as MessageEvent);
+        public set onmessage(listener: (event: MessageEvent) => void) {
+            this.worker_.on("message", (value) => {
+                listener({ data: value } as MessageEvent);
             });
         }
 
-        public postMessage(message: any): void
-        {
+        public postMessage(message: any): void {
             this.worker_.postMessage(message);
         }
     }
-    return <any>ThreadWorker as IWorkerCompiler.Creator;
+    return (<any>ThreadWorker) as IWorkerCompiler.Creator;
 }

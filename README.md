@@ -54,7 +54,7 @@ import { CompositeCalculator } from "../../providers/Calculator";
 
 async function main(): Promise<void>
 {
-    const server: WebServer<{}, CompositeCalculator> = new WebServer();
+    const server: WebServer<object, CompositeCalculator> = new WebServer();
     await server.open(10102, async acceptor =>
     {
         await acceptor.accept(new CompositeCalculator());

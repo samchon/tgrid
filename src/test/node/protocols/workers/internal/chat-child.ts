@@ -5,8 +5,7 @@ import { IChatService } from "../../../../controllers/IChatService";
 
 import { sleep_for } from "tstl/thread/global";
 
-async function main(): Promise<void>
-{
+async function main(): Promise<void> {
     //----
     // PREPARATIONS
     //----
@@ -18,26 +17,23 @@ async function main(): Promise<void>
     const myName: string = (await server.getHeader()).name;
     const service: Driver<IChatService> = server.getDriver<IChatService>();
 
-    await server.open
-    ({
-        shout: async () =>
-        {
-            for (const script of IScript.SCENARIO)
-            {
+    await server.open({
+        shout: async () => {
+            for (const script of IScript.SCENARIO) {
                 await sleep_for(50);
-                if (script.name === myName)
-                    await service.talk(script.message);
+                if (script.name === myName) await service.talk(script.message);
             }
         },
-        print: (name: string, message: string) =>
-        {
+        print: (name: string, message: string) => {
             scripts.push({ name: name, message: message });
         },
-        validate: () =>
-        {
+        validate: () => {
             IScript.validate(scripts);
-        }
+        },
     });
     await service.setName(myName);
 }
-main();
+main().catch((exp) => {
+    console.log(exp);
+    process.exit(-1);
+});

@@ -1,4 +1,4 @@
-/** 
+/**
  * @packageDocumentation
  * @module tgrid.protocols.workers
  */
@@ -8,21 +8,18 @@ import { IWorkerCompiler } from "./IWorkerCompiler";
 /**
  * @hidden
  */
-export const WebWorkerCompiler = async (): Promise<IWorkerCompiler> =>
-({
-    compile: async content =>
-    {
-        const blob: Blob = new Blob([content], { type: "application/javascript" });
+export const WebWorkerCompiler = async (): Promise<IWorkerCompiler> => ({
+    compile: async (content) => {
+        const blob: Blob = new Blob([content], {
+            type: "application/javascript",
+        });
         return window.URL.createObjectURL(blob);
     },
-    remove: async url =>
-    {
+    remove: async (url) => {
         // THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
-        try
-        {
+        try {
             window.URL.revokeObjectURL(url);
-        }
-        catch {}
+        } catch {}
     },
-    execute: async jsFile => new Worker(jsFile)
+    execute: async (jsFile) => new Worker(jsFile),
 });

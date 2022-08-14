@@ -1,6 +1,6 @@
-/** 
+/**
  * @packageDocumentation
- * @module tgrid 
+ * @module tgrid
  */
 //----------------------------------------------------------------
 import * as components from "./components/module";

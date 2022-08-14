@@ -7,31 +7,26 @@ import { IChatPrinter } from "../controllers/IChatPrinter";
 import { IScript } from "../controllers/IScript";
 import { DomainError } from "tstl/exception/DomainError";
 
-export class ChatService implements IChatService
-{
-    private static participants_: HashMap<string, Driver<IChatPrinter>> = new HashMap();
+export class ChatService implements IChatService {
+    private static participants_: HashMap<string, Driver<IChatPrinter>> =
+        new HashMap();
     private scripts_!: IScript[];
     private driver_!: Driver<IChatPrinter>;
 
     private name_?: string;
 
-    public assign(driver: Driver<IChatPrinter>, scripts: IScript[]): void
-    {
+    public assign(driver: Driver<IChatPrinter>, scripts: IScript[]): void {
         this.driver_ = driver;
         this.scripts_ = scripts;
     }
 
-    public destroy(): void
-    {
-        if (this.name_)
-            ChatService.participants_.erase(this.name_);
+    public destroy(): void {
+        if (this.name_) ChatService.participants_.erase(this.name_);
     }
 
-    public setName(str: string): boolean
-    {
-        if (ChatService.participants_.has(str))
-            return false; // DUPLICATED NAME
-        
+    public setName(str: string): boolean {
+        if (ChatService.participants_.has(str)) return false; // DUPLICATED NAME
+
         // SET NAME AND ENROLL IT TO DICTIONARY
         this.name_ = str;
         ChatService.participants_.emplace(str, this.driver_);
@@ -40,14 +35,11 @@ export class ChatService implements IChatService
         return true;
     }
 
-    public talk(content: string): void
-    {
-        if (!this.name_)
-            throw new DomainError("No name");
+    public talk(content: string): void {
+        if (!this.name_) throw new DomainError("No name");
 
         // INFORM TO EVERYBODY
-        for (const it of ChatService.participants_)
-        {
+        for (const it of ChatService.participants_) {
             const driver: Driver<IChatPrinter> = it.second;
 
             // INFORM IT TO CLIENT

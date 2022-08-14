@@ -7,8 +7,7 @@ import { equal } from "tstl/algorithm/iterations";
 import { URLVariables } from "../../../utils/URLVariables";
 
 type Element = Pair<string, string>;
-interface IAuthor
-{
+interface IAuthor {
     name: string;
     age: number;
     git: string;
@@ -19,8 +18,7 @@ interface IAuthor
     [key: string]: any;
 }
 
-function test_global(author: IAuthor): void
-{
+function test_global(author: IAuthor): void {
     //----
     // STRINGIFY & PARSE
     //----
@@ -43,13 +41,12 @@ function test_global(author: IAuthor): void
             throw new DomainError("Error on URLVariables.parse().");
 }
 
-function test_class(author: IAuthor): void
-{
+function test_class(author: IAuthor): void {
     //----
     // GENERATE URL-VARIABLES OBJECT
     //----
     const dict: URLVariables = new URLVariables();
-    
+
     // FILL ELEMENTS
     dict.set("name", author.name);
     dict.set("age", String(author.age)); // MUST BE STRING
@@ -64,7 +61,7 @@ function test_class(author: IAuthor): void
     //----
     // VALIDATIONS
     //----
-    // CREATE A NEW URL-VARIABLES OBJECT 
+    // CREATE A NEW URL-VARIABLES OBJECT
     // BY PARSING THE URL-ENCODED STRING
     const vars: URLVariables = new URLVariables(url_encoded_str);
 
@@ -73,13 +70,13 @@ function test_class(author: IAuthor): void
         throw new LengthError("Size are different.");
 
     // ALL ELEMENTS ARE EQUAL
-    const equality: boolean = equal
-    (
-        dict.begin(), dict.end(), vars.begin(), 
-        function (x: Element, y: Element): boolean
-        {
+    const equality: boolean = equal(
+        dict.begin(),
+        dict.end(),
+        vars.begin(),
+        function (x: Element, y: Element): boolean {
             return x.first === y.first && x.second === y.second;
-        }
+        },
     );
     if (equality === false)
         throw new InvalidArgument("Elements are different.");
@@ -89,16 +86,14 @@ function test_class(author: IAuthor): void
         throw new DomainError("Error on URLVariables.toString().");
 }
 
-export function test_url_variables(): void
-{
-    const author: IAuthor = 
-    {
+export function test_url_variables(): void {
+    const author: IAuthor = {
         name: "Samchon (Jeongho Nam)",
         age: 29,
         git: "https://github.com/samchon/tstl",
         homepage: "http://samchon.org",
         memo: "Hello, I'm the best programmer in Korea.",
-        is_crazy: true
+        is_crazy: true,
     };
     test_global(author);
     test_class(author);

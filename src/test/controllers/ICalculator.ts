@@ -5,50 +5,44 @@ import { randint } from "tstl/algorithm/random";
 import { Driver } from "../../components/Driver";
 import { Calculator } from "../providers/Calculator";
 
-export interface ICalculator 
-    extends ISimple
-{
+export interface ICalculator extends ISimple {
     scientific: IScientific;
     statistics: IStatistics;
 }
 
-export interface ISimple
-{
+export interface ISimple {
     plus(x: number, y: number): number;
     minus(x: number, y: number): number;
     multiplies(x: number, y: number): number;
     divides(x: number, y: number): number;
 }
-export interface IScientific
-{
+export interface IScientific {
     pow(x: number, y: number): number;
     sqrt(x: number): number;
     log(x: number, y: number): number;
 }
-export interface IStatistics
-{
+export interface IStatistics {
     mean(...elems: number[]): number;
     stdev(...elems: number[]): number;
 }
 
-export namespace ICalculator
-{
-    export async function main(driver: Driver<ICalculator>): Promise<void>
-    {
+export namespace ICalculator {
+    export async function main(driver: Driver<ICalculator>): Promise<void> {
         // VALIDATOR
         const validator: Calculator = new Calculator();
 
         // CALL FUNCTIONS IN SERVER FROM CLIENT
-        for (let i: number = 0; i < 100; ++i)
-            await validate(driver, validator);
+        for (let i: number = 0; i < 100; ++i) await validate(driver, validator);
 
         // EXCEPTION THROWN BY THE SERVER
-        if (await get_exception(driver) === null)
+        if ((await get_exception(driver)) === null)
             throw new DomainError("Throwing exception doesn't work.");
     }
 
-    async function validate(driver: Driver<ICalculator>, validator: Calculator): Promise<void>
-    {
+    async function validate(
+        driver: Driver<ICalculator>,
+        validator: Calculator,
+    ): Promise<void> {
         if (driver === <any>validator)
             throw new InvalidArgument("Mistaken arguments.");
 
@@ -60,20 +54,17 @@ export namespace ICalculator
         // CALL FUNCTION & GET ANSWER
         const ret: number = await method(driver, x, y);
         const answer: number = method(validator, x, y) as number;
-        
+
         // VALIDATE
-        if (ret !== answer)
-            throw new DomainError("Error on function calling.");
+        if (ret !== answer) throw new DomainError("Error on function calling.");
     }
 
-    export async function get_exception(driver: Driver<ICalculator>): Promise<string | null>
-    {
-        try 
-        { 
-            await driver.divides(2, 0); 
-        }
-        catch (exp) 
-        {
+    export async function get_exception(
+        driver: Driver<ICalculator>,
+    ): Promise<string | null> {
+        try {
+            await driver.divides(2, 0);
+        } catch (exp) {
             return (exp as Error).message;
         }
         return null;
@@ -88,12 +79,12 @@ export namespace ICalculator
         (calc, x, y) => calc.scientific.log(x, y),
         (calc, x) => calc.scientific.sqrt(x),
         (calc, x, y) => calc.statistics.mean(x, y),
-        (calc, x, y) => calc.statistics.stdev(x, y)
+        (calc, x, y) => calc.statistics.stdev(x, y),
     ];
 
-    interface IMethod
-    {
-        (calculator: Calculator | Driver<ICalculator>, x: number, y: number): number | Promise<number>;
+    interface IMethod {
+        (calculator: Calculator | Driver<ICalculator>, x: number, y: number):
+            | number
+            | Promise<number>;
     }
 }
-
