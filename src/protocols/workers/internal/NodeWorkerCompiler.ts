@@ -3,11 +3,8 @@
  * @module tgrid.protocols.workers
  */
 //----------------------------------------------------------------
-import type __os from "os";
-import { is_node } from "tstl/utility/node";
 import { v4 } from "uuid";
-
-const os: typeof __os = is_node() ? require("os") : null!;
+import { NodeModule } from "../../../utils/internal/NodeModule";
 
 import { FileSystem } from "./FileSystem";
 import { IWorkerCompiler } from "./IWorkerCompiler";
@@ -26,6 +23,7 @@ export const NodeWorkerCompiler = async (
         return (<any>new factory(jsFile, execArg)) as Worker;
     },
     compile: async (content) => {
+        const os = await NodeModule.os.get();
         let path: string = `${os.tmpdir().split("\\").join("/")}/tgrid`;
         if ((await FileSystem.exists(path)) === false)
             await FileSystem.mkdir(path);

@@ -11,6 +11,6 @@ export namespace NodeModule {
     export const http = new Singleton(() => import("http"));
     export const https = new Singleton(() => import("https"));
     export const os = new Singleton(() => import("os"));
-    export const ws = new Singleton<Promise<typeof __ws>>(() => import("ws"));
     export const thread = new Singleton(() => import("worker_threads"));
+    export const ws = new Singleton<Promise<typeof __ws>>(() => import("ws"));
 }
