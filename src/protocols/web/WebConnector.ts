@@ -125,9 +125,9 @@ export class WebConnector<Header, Provider extends object | null>
             }
         } catch (exp) {
             this.state_ = WebConnector.State.NONE;
-            if (this.socket_!.readyState === WebConnector.State.OPEN) {
-                this.socket_!.onclose = () => {};
-                this.socket_!.close();
+            if (this.socket_ && this.socket_.readyState === WebConnector.State.OPEN) {
+                this.socket_.onclose = () => {};
+                this.socket_.close();
             }
             throw exp;
         }
