@@ -6,7 +6,7 @@
     "email": "samchon.github@gmail.com",
     "url": "https://github.com/samchon"
   },
-  "version": "0.8.8",
+  "version": "0.8.9",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
@@ -26,7 +26,6 @@
     "test:node": "node dist/test/node"
   },
   "dependencies": {
-    "import2": "^1.0.0",
     "serialize-error": "^4.1.0",
     "tstl": "^2.5.13",
     "uuid": "^9.0.0",
