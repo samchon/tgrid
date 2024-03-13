@@ -1,9 +1,3 @@
-/* eslint-disable */
-/**
- * @packageDocumentation
- * @module tgrid.typings
- */
-//----------------------------------------------------------------
 import { Parametric } from "./Parametric";
 import { Primitive } from "./Primitive";
 
@@ -20,33 +14,33 @@ import { Primitive } from "./Primitive";
  * @author Jeongho Nam - https://github.com/samchon
  */
 export type Functional<
-    Method extends Function,
-    UseParametric extends boolean = false,
+  Method extends Function,
+  UseParametric extends boolean = false,
 > = (Method extends (...args: infer Params) => infer Ret
-    ? Ret extends Promise<infer PromiseRet>
-        ? (
-              ...args: FunctionalParams<Params, UseParametric>
-          ) => Promise<Primitive<PromiseRet>>
-        : (
-              ...args: FunctionalParams<Params, UseParametric>
-          ) => Promise<Primitive<Ret>>
-    : (...args: any[]) => Promise<any>) &
-    IRemoteFunction;
+  ? Ret extends Promise<infer PromiseRet>
+    ? (
+        ...args: FunctionalParams<Params, UseParametric>
+      ) => Promise<Primitive<PromiseRet>>
+    : (
+        ...args: FunctionalParams<Params, UseParametric>
+      ) => Promise<Primitive<Ret>>
+  : (...args: any[]) => Promise<any>) &
+  IRemoteFunction;
 
 /**
  * @hidden
  */
 type FunctionalParams<
-    Params extends any[],
-    UseParametric extends boolean,
+  Params extends any[],
+  UseParametric extends boolean,
 > = UseParametric extends true ? Parametric<Params> : Params;
 
 /**
  * Restrictions for Remote Function
  */
 type IRemoteFunction = {
-    /**
-     * Remote Function does not allow it.
-     */
-    [P in keyof Function | "Symbol"]: never;
+  /**
+   * Remote Function does not allow it.
+   */
+  [P in keyof Function | "Symbol"]: never;
 };

@@ -1,9 +1,6 @@
-/**
- * @packageDocumentation
- * @module tgrid.protocols.workers
- */
-//----------------------------------------------------------------
-import * as workers from "./module";
+export * from "./WorkerServer";
+export * from "./WorkerConnector";
 
-export default workers;
-export * from "./module";
+export * from "./SharedWorkerServer";
+export * from "./SharedWorkerAcceptor";
+export * from "./SharedWorkerConnector";

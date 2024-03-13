@@ -1,22 +1,17 @@
 /**
- * @packageDocumentation
- * @module tgrid.protocols
- */
-//----------------------------------------------------------------
-/**
  * @hidden
  */
 export interface IHeaderWrapper<Headers> {
-    header: Headers;
+  header: Headers;
 }
 
 /**
  * @hidden
  */
 export namespace IHeaderWrapper {
-    export function wrap<Header>(header: Header): IHeaderWrapper<Header> {
-        return {
-            header: header,
-        };
-    }
+  export function wrap<Header>(header: Header): IHeaderWrapper<Header> {
+    return {
+      header: header,
+    };
+  }
 }

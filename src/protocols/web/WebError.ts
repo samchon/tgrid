@@ -1,8 +1,3 @@
-/**
- * @packageDocumentation
- * @module tgrid.protocols.web
- */
-//----------------------------------------------------------------
 import { DomainError } from "tstl/exception/DomainError";
 
 /**
@@ -12,16 +7,16 @@ import { DomainError } from "tstl/exception/DomainError";
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebError extends DomainError {
-    public readonly status: number;
+  public readonly status: number;
 
-    /**
-     * Initializer Constructor.
-     *
-     * @param status Status code.
-     * @param message Detailed message, the reaason why.
-     */
-    public constructor(status: number, message: string) {
-        super(message);
-        this.status = status;
-    }
+  /**
+   * Initializer Constructor.
+   *
+   * @param status Status code.
+   * @param message Detailed message, the reaason why.
+   */
+  public constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
 }
