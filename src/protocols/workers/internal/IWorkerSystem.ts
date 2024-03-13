@@ -1,9 +1,4 @@
 /**
- * @packageDocumentation
- * @module tgrid.protocols.workers
- */
-//----------------------------------------------------------------
-/**
  * Common interface for communicators based on `Worker`.
  *
  * #### Why workers be network systems?
@@ -22,14 +17,14 @@
  * @author Jeongho Nam - https://github.com/samchon
  */
 export interface IWorkerSystem {
-    /**
-     * Close connection.
-     *
-     * Close connection between the remote worker system.
-     *
-     * It destroies all RFCs (remote function calls) between this and the remote system
-     * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
-     * causes all incompleted RFCs to throw exceptions.
-     */
-    close(): Promise<void>;
+  /**
+   * Close connection.
+   *
+   * Close connection between the remote worker system.
+   *
+   * It destroies all RFCs (remote function calls) between this and the remote system
+   * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
+   * causes all incompleted RFCs to throw exceptions.
+   */
+  close(): Promise<void>;
 }

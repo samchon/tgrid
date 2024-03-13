@@ -1,17 +1,8 @@
-# ======================================================
-#    CUSTOM IGNORE
-# ======================================================
-node_modules/
-dist/
 .cache/
 .parcel-cache/
+bin/
+lib/
+node_modules/
 
+bundle/*.js
 package-lock.json
-
-#----
-# COMPILED FILES
-#----
-*.js
-*.js.map
-*.d.ts
-*.d.ts.map

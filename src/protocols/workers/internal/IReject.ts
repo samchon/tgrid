@@ -1,12 +1,7 @@
 /**
- * @packageDocumentation
- * @module tgrid.protocols.workers
- */
-//----------------------------------------------------------------
-/**
  * @hidden
  */
 export interface IReject {
-    name: "reject";
-    message: string;
+  name: "reject";
+  message: string;
 }

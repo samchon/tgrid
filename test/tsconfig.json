@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../bin",
+    "paths": {
+      "tgrid": ["../src"],
+      "tgrid/lib/*": ["../src/*"],
+    }
+  },
+  "include": [
+    "./", 
+    "../src",
+  ],
+}

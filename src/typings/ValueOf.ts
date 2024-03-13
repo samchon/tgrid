@@ -1,34 +1,29 @@
-/* eslint-disable */
-/**
- * @packageDocumentation
- * @module tgrid.typings
- */
-//----------------------------------------------------------------
 /**
  * Get origin value type.
  *
  * @template Instance Target instance
  * @author Jeongho Nam - https://github.com/samchon
  */
-export type ValueOf<Instance> = is_value_of<Instance, Boolean> extends true
+export type ValueOf<Instance> =
+  is_value_of<Instance, Boolean> extends true
     ? boolean
     : is_value_of<Instance, Number> extends true
-    ? number
-    : is_value_of<Instance, String> extends true
-    ? string
-    : Instance;
+      ? number
+      : is_value_of<Instance, String> extends true
+        ? string
+        : Instance;
 
 type is_value_of<
-    Instance,
-    Object extends IValueOf<any>,
+  Instance,
+  Object extends IValueOf<any>,
 > = Instance extends Object
-    ? Object extends IValueOf<infer Primitive>
-        ? Instance extends Primitive
-            ? false
-            : true // not Primitive, but Object
-        : false // cannot be
-    : false;
+  ? Object extends IValueOf<infer Primitive>
+    ? Instance extends Primitive
+      ? false
+      : true // not Primitive, but Object
+    : false // cannot be
+  : false;
 
 interface IValueOf<T> {
-    valueOf(): T;
+  valueOf(): T;
 }

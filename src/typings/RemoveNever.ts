@@ -1,8 +1,3 @@
-/**
- * @packageDocumentation
- * @module tgrid.typings
- */
-//----------------------------------------------------------------
 import { SpecialFields } from "./SpecialFields";
 
 /**
