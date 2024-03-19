@@ -8,12 +8,12 @@ export const WebWorkerCompiler = async (): Promise<IWorkerCompiler> => ({
     const blob: Blob = new Blob([content], {
       type: "application/javascript",
     });
-    return window.URL.createObjectURL(blob);
+    return self.URL.createObjectURL(blob);
   },
   remove: async (url) => {
     // THE FILE CAN BE REMOVED BY BROWSER AUTOMATICALLY
     try {
-      window.URL.revokeObjectURL(url);
+      self.URL.revokeObjectURL(url);
     } catch {}
   },
   execute: async (jsFile) => new Worker(jsFile),
