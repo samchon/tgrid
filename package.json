@@ -1,6 +1,6 @@
 {
   "name": "tgrid",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "description": "Grid Computing Framework for TypeScript",
@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "import2": "^1.0.3",
-    "serialize-error": "^4.1.0",
     "tstl": "^2.5.16",
     "ws": "^7.5.3"
   },

@@ -5,11 +5,9 @@ import { Pair } from "tstl/utility/Pair";
 import { HashMap } from "tstl/container/HashMap";
 import { ConditionVariable } from "tstl/thread/ConditionVariable";
 
-import { Exception } from "tstl/exception/Exception";
 import { DomainError } from "tstl/exception/DomainError";
 import { RuntimeError } from "tstl/exception/RuntimeError";
-
-import serializeError from "serialize-error";
+import { serializeError } from "../utils/internal/serializeError";
 
 /**
  * The basic communicator.
@@ -371,21 +369,18 @@ export abstract class Communicator<Provider> {
    */
   private async _Send_return(
     uid: number,
-    flag: boolean,
-    val: any,
+    success: boolean,
+    value: any,
   ): Promise<void> {
     // SPECIAL LOGIC FOR ERROR -> FOR CLEAR JSON ENCODING
-    if (flag === false && val instanceof Error) {
-      if (typeof (val as Exception).toJSON === "function")
-        val = (val as Exception).toJSON();
-      else val = serializeError(val);
-    }
+    if (success === false && value instanceof Error)
+      value = serializeError(value);
 
     // RETURNS
     const ret: Invoke.IReturn = {
-      uid: uid,
-      success: flag,
-      value: val,
+      uid,
+      success,
+      value,
     };
     await this.sendData(ret);
   }

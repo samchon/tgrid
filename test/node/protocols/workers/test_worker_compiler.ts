@@ -4,21 +4,13 @@ import cp from "child_process";
 import { ICalculator } from "../../../controllers/ICalculator";
 import { WorkerConnector } from "tgrid";
 
-export function test_worker_connect(): Promise<void> {
-  return _Test_worker(
-    (worker) =>
-      worker.connect(__dirname + "/../../../browser/worker-server.js"),
-    "process",
-  );
-}
-
-export async function test_worker_compile(): Promise<void> {
+export async function test_worker_compiler(): Promise<void> {
   const PATH = __dirname + "/../../../../../bundle/worker-server.js";
   if (fs.existsSync(PATH) === false) cp.execSync("npm run bundle");
 
   await _Test_worker(
     (worker) => worker.compile(fs.readFileSync(PATH, "utf8")),
-    "thread",
+    "process",
   );
 }
 

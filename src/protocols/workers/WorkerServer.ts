@@ -73,13 +73,12 @@ export class WorkerServer<Header, Provider extends object | null>
    */
   public constructor() {
     super(undefined);
-
     this.channel_ = new Singleton(async () => {
+      // BROWSER CASE
       if (is_node() === false) return (<any>self) as IFeature;
 
-      const threadPort = await ThreadPort();
-      return threadPort.is_worker_server()
-        ? ((<any>threadPort) as IFeature)
+      return (await ThreadPort.isWorkerThread())
+        ? ((await ThreadPort()) as IFeature)
         : (ProcessChannel as IFeature);
     });
     this.state_ = WorkerServer.State.NONE;
@@ -88,7 +87,6 @@ export class WorkerServer<Header, Provider extends object | null>
 
       const data: string = await this._Handshake("getHeader");
       const wrapper: IHeaderWrapper<Header> = JSON.parse(data);
-
       return wrapper.header;
     });
   }
@@ -130,7 +128,7 @@ export class WorkerServer<Header, Provider extends object | null>
 
     // SUCCESS
     const channel = await this.channel_.get();
-    channel.onmessage = this._Handle_message.bind(this);
+    channel.onmessage = (evt) => this._Handle_message(evt);
     channel.postMessage(WorkerServer.State.OPEN);
 
     this.state_ = WorkerServer.State.OPEN;
