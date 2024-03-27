@@ -45,6 +45,9 @@ export class WorkerConnector<Header, Provider extends object | null>
   extends ConnectorBase<Header, Provider>
   implements IWorkerSystem
 {
+  /**
+   * @hidden
+   */
   private readonly compiler_: Singleton<Promise<IWorkerCompiler>>;
 
   /**
@@ -55,18 +58,22 @@ export class WorkerConnector<Header, Provider extends object | null>
   /**
    * Initializer Constructor.
    *
+   * For reference, you're planning to run a bundled JavaScript file,
+   * and you're using the NodeJS environment, you can't use the `"thread"`
+   * mode. You've to use the `"process"` mode instead.
+   *
    * @param header An object containing initialization data like activation.
    * @param provider An object providing features for remote system.
-   * @param type You can specify the worker mode when NodeJS. Default is "thread".
+   * @param type You can specify the worker mode when NodeJS. Default is "process".
    */
   public constructor(
     header: Header,
     provider: Provider,
-    type: "thread" | "process" = "thread",
+    type?: "thread" | "process",
   ) {
     super(header, provider);
     this.compiler_ = new Singleton(() =>
-      is_node() ? NodeWorkerCompiler(type) : WebWorkerCompiler(),
+      is_node() ? NodeWorkerCompiler(type ?? "process") : WebWorkerCompiler(),
     );
   }
 

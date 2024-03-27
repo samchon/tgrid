@@ -1,11 +1,11 @@
+import fs from "fs";
 import { WorkerConnector } from "tgrid";
-import { FileSystem } from "tgrid/lib/protocols/workers/internal/FileSystem";
 import { sleep_for } from "tstl/thread";
 
 const FILE_PATH = __dirname + "/log.dat";
 
 export async function test_worker_join(): Promise<void> {
-  await FileSystem.write(FILE_PATH, "NOT YET");
+  await fs.promises.writeFile(FILE_PATH, "NOT YET", "utf8");
 
   const connector: WorkerConnector<null, null> = new WorkerConnector(
     null,
@@ -13,13 +13,14 @@ export async function test_worker_join(): Promise<void> {
   );
   await connector.connect(__dirname + "/internal/join.js");
 
-  sleep_for(100)
+  sleep_for(1_000)
     .then(() => connector.close())
     .catch(() => {});
   await connector.join();
 
-  const content: string = await FileSystem.read(FILE_PATH, "utf8");
-  await FileSystem.unlink(FILE_PATH);
+  await sleep_for(50);
+  const content: string = await fs.promises.readFile(FILE_PATH, "utf8");
+  await fs.promises.unlink(FILE_PATH);
 
   if (content !== "WorkerServer.join()")
     throw new Error("Error on WorkerServer.join()");

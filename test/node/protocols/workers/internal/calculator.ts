@@ -15,6 +15,7 @@ async function get<Controller extends object>(
   const connector: WorkerConnector<null, null> = new WorkerConnector(
     null,
     null,
+    "process",
   );
   await connector.connect(path);
 

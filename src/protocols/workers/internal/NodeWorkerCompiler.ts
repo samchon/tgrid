@@ -28,7 +28,6 @@ export const NodeWorkerCompiler = async (
         break;
       }
     }
-
     await FileSystem.write(path, content);
     return path;
   },

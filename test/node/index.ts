@@ -8,22 +8,23 @@ interface IModule {
 }
 
 async function iterate(path: string): Promise<void> {
-  const file_list: string[] = fs.readdirSync(path);
-  for (const file of file_list) {
-    const current_path: string = path + "/" + file;
-    const stat: fs.Stats = fs.lstatSync(current_path);
+  for (const file of await fs.promises.readdir(path)) {
+    const location: string = path + "/" + file;
+    const stat: fs.Stats = await fs.promises.lstat(location);
+
+    if (file === "utils") console.log(location, stat.isDirectory());
 
     if (stat.isDirectory() === true && file !== "internal") {
-      await iterate(current_path);
+      await iterate(location);
       continue;
     } else if (
       file.substr(-3) !== ".js" ||
-      current_path === __dirname + "/index.js"
+      location === __dirname + "/index.js"
     )
       continue;
 
     const external: IModule = await import(
-      current_path.substr(0, current_path.length - 3)
+      location.substr(0, location.length - 3)
     );
     for (const key in external)
       if (key.substr(0, 5) === "test_") {
