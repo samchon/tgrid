@@ -1,7 +1,4 @@
-import { DomainError } from "tstl/exception/DomainError";
-import { InvalidArgument } from "tstl/exception/InvalidArgument";
-import { randint } from "tstl/algorithm/random";
-
+import { DomainError, InvalidArgument, randint } from "tstl";
 import { Calculator } from "../providers/Calculator";
 import { Driver } from "tgrid";
 

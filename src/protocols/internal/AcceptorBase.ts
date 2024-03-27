@@ -1,7 +1,5 @@
+import { DomainError, RuntimeError } from "tstl";
 import { Communicator } from "../../components/Communicator";
-
-import { DomainError } from "tstl/exception/DomainError";
-import { RuntimeError } from "tstl/exception/RuntimeError";
 
 /**
  * Basic Acceptor.

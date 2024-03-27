@@ -1,7 +1,7 @@
 import { IScript } from "../../../../controllers/IScript";
 import { IChatService } from "../../../../controllers/IChatService";
 
-import { sleep_for } from "tstl/thread/global";
+import { sleep_for } from "tstl";
 import { Driver, WorkerServer } from "tgrid";
 
 async function main(): Promise<void> {

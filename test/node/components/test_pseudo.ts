@@ -1,5 +1,5 @@
 import { Communicator, Invoke, Driver } from "tgrid";
-import { InvalidArgument } from "tstl/exception/InvalidArgument";
+import { InvalidArgument } from "tstl";
 
 import { Calculator } from "../../providers/Calculator";
 import { ICalculator } from "../../controllers/ICalculator";

@@ -1,6 +1,6 @@
 import type http from "http";
 import type WebSocket from "ws";
-import { DomainError } from "tstl/exception/DomainError";
+import { DomainError } from "tstl";
 
 import { AcceptorBase } from "../internal/AcceptorBase";
 import { IWebCommunicator } from "./internal/IWebCommunicator";

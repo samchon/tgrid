@@ -1,7 +1,3 @@
-import { DomainError } from "tstl/exception/DomainError";
-import { is_node } from "tstl/utility/node";
-import { sleep_for } from "tstl/thread/global";
-
 import { Invoke } from "../../components/Invoke";
 import { WebError } from "./WebError";
 
@@ -10,6 +6,7 @@ import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { once } from "../internal/once";
 import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
+import { DomainError, is_node, sleep_for } from "tstl";
 
 /**
  * Web Socket Connector.
