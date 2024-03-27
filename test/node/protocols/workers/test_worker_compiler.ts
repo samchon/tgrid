@@ -1,12 +1,12 @@
 import fs from "fs";
-import cp from "child_process";
 
 import { ICalculator } from "../../../controllers/ICalculator";
 import { WorkerConnector } from "tgrid";
+import { TestBundler } from "../../../browser/TestBundler";
 
 export async function test_worker_compiler(): Promise<void> {
   const PATH = __dirname + "/../../../../../bundle/worker-server.js";
-  if (fs.existsSync(PATH) === false) cp.execSync("npm run bundle");
+  if (fs.existsSync(PATH) === false) await TestBundler.execute();
 
   await _Test_worker(
     (worker) => worker.compile(fs.readFileSync(PATH, "utf8")),
