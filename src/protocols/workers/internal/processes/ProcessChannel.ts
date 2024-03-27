@@ -1,22 +1,24 @@
+import { NodeModule } from "../../../../utils/internal/NodeModule";
+
 /**
  * @hidden
  */
 export class ProcessChannel {
   public static postMessage(message: any): void {
-    (global.process as Required<NodeJS.Process>).send(message);
+    NodeModule.process().send!(message);
   }
 
   public static close(): void {
-    global.process.exit();
+    NodeModule.process().exit();
   }
 
   public static set onmessage(listener: (event: MessageEvent) => void) {
-    global.process.on("message", (msg) => {
+    NodeModule.process().on("message", (msg) => {
       listener({ data: msg } as MessageEvent);
     });
   }
 
   public static is_worker_server(): boolean {
-    return !!global.process.send;
+    return !!NodeModule.process().send;
   }
 }
