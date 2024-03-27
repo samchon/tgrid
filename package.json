@@ -1,6 +1,6 @@
 {
   "name": "tgrid",
-  "version": "0.9.3",
+  "version": "0.9.7",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "description": "Grid Computing Framework for TypeScript",
@@ -24,8 +24,7 @@
   "dependencies": {
     "import2": "^1.0.3",
     "serialize-error": "^4.1.0",
-    "tstl": "^2.5.13",
-    "uuid": "^9.0.1",
+    "tstl": "^2.5.16",
     "ws": "^7.5.3"
   },
   "devDependencies": {
@@ -33,7 +32,6 @@
     "@types/browserify": "^12.0.40",
     "@types/node": "^20.11.26",
     "@types/puppeteer": "^7.0.4",
-    "@types/uuid": "^9.0.8",
     "@types/ws": "^7.4.7",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",

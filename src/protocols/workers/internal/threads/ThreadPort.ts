@@ -8,9 +8,10 @@ import { NodeModule } from "../../../../utils/internal/NodeModule";
  */
 export async function ThreadPort() {
   const { parentPort } = await NodeModule.thread.get();
+  const process = NodeModule.process();
   return {
     postMessage: (message: any) => parentPort!.postMessage(message),
-    close: () => global.process.exit(0),
+    close: () => process.exit(0),
     onmessage: (listener: (event: MessageEvent) => void) =>
       parentPort!.on("message", (message) =>
         listener({ data: message } as MessageEvent),
