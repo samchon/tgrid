@@ -1,4 +1,4 @@
-import { InvalidArgument } from "tstl/exception/InvalidArgument";
+import { InvalidArgument } from "tstl";
 
 import { ICalculator } from "../controllers/ICalculator";
 import { complete } from "./internal";

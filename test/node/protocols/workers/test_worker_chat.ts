@@ -1,5 +1,4 @@
-import { DomainError } from "tstl/exception/DomainError";
-import { LengthError } from "tstl/exception/LengthError";
+import { LengthError, DomainError } from "tstl";
 
 export interface IScript {
   name: string;

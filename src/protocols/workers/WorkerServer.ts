@@ -1,9 +1,3 @@
-import { DomainError } from "tstl/exception/DomainError";
-import { RuntimeError } from "tstl/exception/RuntimeError";
-import { Singleton } from "tstl/thread/Singleton";
-import { sleep_until } from "tstl/thread/global";
-import { is_node } from "tstl/utility/node";
-
 import { Communicator } from "../../components/Communicator";
 import { IServer } from "../internal/IServer";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
@@ -14,6 +8,13 @@ import { once } from "../internal/once";
 
 import { ThreadPort } from "./internal/threads/ThreadPort";
 import { ProcessChannel } from "./internal/processes/ProcessChannel";
+import {
+  Singleton,
+  is_node,
+  DomainError,
+  sleep_until,
+  RuntimeError,
+} from "tstl";
 
 /**
  * Worker Server.

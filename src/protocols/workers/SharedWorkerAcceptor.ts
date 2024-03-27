@@ -3,7 +3,7 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 import { Invoke } from "../../components/Invoke";
 import { IReject } from "./internal/IReject";
-import { DomainError } from "tstl/exception/DomainError";
+import { DomainError } from "tstl";
 
 /**
  * SharedWorker acceptor for client.

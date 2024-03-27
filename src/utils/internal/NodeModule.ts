@@ -8,7 +8,7 @@ import type * as __ws from "ws";
 import type * as __process from "process";
 
 import import2 from "import2";
-import { Singleton } from "tstl/thread/Singleton";
+import { Singleton } from "tstl";
 
 export namespace NodeModule {
   export const cp: Singleton<Promise<typeof __cp>> = new Singleton(() =>

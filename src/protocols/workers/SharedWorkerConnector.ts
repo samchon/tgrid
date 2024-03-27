@@ -6,10 +6,7 @@ import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IReject } from "./internal/IReject";
 import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 import { once } from "../internal/once";
-
-import { DomainError } from "tstl/exception/DomainError";
-import { RuntimeError } from "tstl/exception/RuntimeError";
-import { sleep_until } from "tstl/thread/global";
+import { DomainError, RuntimeError, sleep_until } from "tstl";
 
 /**
  * SharedWorker Connector

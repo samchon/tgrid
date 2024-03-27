@@ -1,6 +1,6 @@
 import fs from "fs";
 import { WorkerConnector } from "tgrid";
-import { sleep_for } from "tstl/thread";
+import { sleep_for } from "tstl";
 
 const FILE_PATH = __dirname + "/log.dat";
 

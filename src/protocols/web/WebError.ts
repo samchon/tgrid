@@ -1,4 +1,4 @@
-import { DomainError } from "tstl/exception/DomainError";
+import { DomainError } from "tstl";
 
 /**
  * Web Socket Error.

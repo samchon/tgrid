@@ -1,11 +1,12 @@
-import { Vector } from "tstl/container/Vector";
-import { Mutex } from "tstl/thread/Mutex";
-import { DomainError } from "tstl/exception/DomainError";
-import { RuntimeError } from "tstl/exception/RuntimeError";
-
-import { is_sorted } from "tstl/algorithm/sorting";
-import { sleep_for } from "tstl/thread/global";
 import { Driver, WebConnector, WebServer } from "tgrid";
+import {
+  Mutex,
+  Vector,
+  sleep_for,
+  RuntimeError,
+  is_sorted,
+  DomainError,
+} from "tstl";
 
 const PORT: number = 10101;
 const COUNT: number = 10;

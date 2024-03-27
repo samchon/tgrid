@@ -1,11 +1,10 @@
 import { IChatService } from "../controllers/IChatService";
 
-import { HashMap } from "tstl/container/HashMap";
 import { IChatPrinter } from "../controllers/IChatPrinter";
 
 import { IScript } from "../controllers/IScript";
-import { DomainError } from "tstl/exception/DomainError";
 import { Driver } from "tgrid";
+import { HashMap, DomainError } from "tstl";
 
 export class ChatService implements IChatService {
   private static participants_: HashMap<string, Driver<IChatPrinter>> =

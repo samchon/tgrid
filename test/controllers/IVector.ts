@@ -1,6 +1,5 @@
-import { DomainError } from "tstl/exception/DomainError";
-import { randint } from "tstl/algorithm/random";
 import { Driver } from "tgrid";
+import { randint, DomainError } from "tstl";
 
 export interface IVector<T> {
   size(): T;

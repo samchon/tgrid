@@ -1,7 +1,3 @@
-import { DomainError } from "tstl/exception/DomainError";
-import { is_node } from "tstl/utility/node";
-import { sleep_until } from "tstl/thread/global";
-
 import { Invoke } from "../../components/Invoke";
 
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
@@ -11,7 +7,7 @@ import { ConnectorBase } from "../internal/ConnectorBase";
 import { NodeWorkerCompiler } from "./internal/NodeWorkerCompiler";
 import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 import { once } from "../internal/once";
-import { Singleton } from "tstl/thread/Singleton";
+import { Singleton, is_node, DomainError, sleep_until } from "tstl";
 
 /**
  * Worker Connector.

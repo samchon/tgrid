@@ -1,8 +1,15 @@
 {
   "name": "tgrid",
-  "version": "0.9.8",
+  "version": "0.10.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.js",
+      "import": "./lib/index.mjs"
+    }
+  },
   "description": "Grid Computing Framework for TypeScript",
   "author": {
     "name": "Jeongho Nam",
@@ -12,7 +19,7 @@
   "scripts": {
     "api": "typedoc src --excludeNotDocumented -out ../tgrid.com/docs/api",
     "build": "npm run build:main && npm run build:test",
-    "build:main": "rimraf lib && tsc",
+    "build:main": "rimraf lib && tsc && rollup -c",
     "build:test": "rimraf bin && tsc --project test/tsconfig.json",
     "dev": "npm run build:test -- --watch",
     "prepare": "ts-patch install",
@@ -23,10 +30,12 @@
   },
   "dependencies": {
     "import2": "^1.0.3",
-    "tstl": "^2.5.16",
+    "tstl": "3.0.0",
     "ws": "^7.5.3"
   },
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/browserify": "^12.0.40",
     "@types/node": "^20.11.26",
@@ -41,11 +50,13 @@
     "prettier": "^3.2.5",
     "puppeteer": "^22.4.1",
     "rimraf": "^5.0.5",
+    "rollup": "^4.13.1",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.1.2",
+    "tslib": "^2.6.2",
     "typedoc": "^0.25.12",
-    "typescript": "^5.4.2",
+    "typescript": "^5.4.3",
     "typescript-transform-paths": "^3.4.7",
     "whatwg-fetch": "^3.6.2"
   },

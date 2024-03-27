@@ -3,10 +3,7 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
-
-import { DomainError } from "tstl/exception/DomainError";
-import { HashSet } from "tstl/container/HashSet";
-import { is_node } from "tstl/utility/node";
+import { HashSet, is_node, DomainError } from "tstl";
 
 /**
  * SharedWorker server.
