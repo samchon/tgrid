@@ -1,4 +1,4 @@
-import { LengthError, DomainError } from "tstl";
+import { DomainError, LengthError } from "tstl";
 
 export interface IScript {
   name: string;

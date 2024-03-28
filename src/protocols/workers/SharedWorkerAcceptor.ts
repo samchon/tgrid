@@ -1,9 +1,9 @@
-import { AcceptorBase } from "../internal/AcceptorBase";
-import { IWorkerSystem } from "./internal/IWorkerSystem";
+import { DomainError } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
+import { AcceptorBase } from "../internal/AcceptorBase";
 import { IReject } from "./internal/IReject";
-import { DomainError } from "tstl";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
 
 /**
  * SharedWorker acceptor for client.

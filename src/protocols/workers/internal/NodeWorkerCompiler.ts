@@ -1,5 +1,4 @@
 import { NodeModule } from "../../../utils/internal/NodeModule";
-
 import { FileSystem } from "./FileSystem";
 import { IWorkerCompiler } from "./IWorkerCompiler";
 import { ProcessWorker } from "./processes/ProcessWorker";

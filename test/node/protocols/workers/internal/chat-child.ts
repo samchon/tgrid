@@ -1,8 +1,8 @@
-import { IScript } from "../../../../controllers/IScript";
-import { IChatService } from "../../../../controllers/IChatService";
-
-import { sleep_for } from "tstl";
 import { Driver, WorkerServer } from "tgrid";
+import { sleep_for } from "tstl";
+
+import { IChatService } from "../../../../controllers/IChatService";
+import { IScript } from "../../../../controllers/IScript";
 
 async function main(): Promise<void> {
   //----

@@ -1,8 +1,8 @@
-import { Communicator, Invoke, Driver } from "tgrid";
+import { Communicator, Driver, Invoke } from "tgrid";
 import { InvalidArgument } from "tstl";
 
-import { Calculator } from "../../providers/Calculator";
 import { ICalculator } from "../../controllers/ICalculator";
+import { Calculator } from "../../providers/Calculator";
 
 class PseudoCommunicator<Provider> extends Communicator<Provider> {
   private sender_: (invoke: Invoke) => void;

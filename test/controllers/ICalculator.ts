@@ -1,6 +1,7 @@
-import { DomainError, InvalidArgument, randint } from "tstl";
-import { Calculator } from "../providers/Calculator";
 import { Driver } from "tgrid";
+import { DomainError, InvalidArgument, randint } from "tstl";
+
+import { Calculator } from "../providers/Calculator";
 
 export interface ICalculator extends ISimple {
   scientific: IScientific;

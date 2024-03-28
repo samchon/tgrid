@@ -1,7 +1,7 @@
 import {
   ICalculator,
-  ISimple,
   IScientific,
+  ISimple,
   IStatistics,
 } from "../controllers/ICalculator";
 

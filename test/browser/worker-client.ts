@@ -1,8 +1,8 @@
+import { WorkerConnector } from "tgrid";
 import "whatwg-fetch";
 
 import { ICalculator } from "../controllers/ICalculator";
 import { complete } from "./internal";
-import { WorkerConnector } from "tgrid";
 
 async function get_source(): Promise<string> {
   let url: string = location.href;

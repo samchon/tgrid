@@ -1,4 +1,5 @@
 import { WorkerServer } from "tgrid";
+
 import { Statistics } from "../../../../providers/Calculator";
 
 async function main(): Promise<void> {

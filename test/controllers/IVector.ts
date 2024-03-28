@@ -1,5 +1,5 @@
 import { Driver } from "tgrid";
-import { randint, DomainError } from "tstl";
+import { DomainError, randint } from "tstl";
 
 export interface IVector<T> {
   size(): T;

@@ -1,14 +1,13 @@
 import type http from "http";
 import type https from "https";
 import type net from "net";
+import { DomainError, RuntimeError, is_node } from "tstl";
 import type WebSocket from "ws";
 
-import { WebAcceptor } from "./WebAcceptor";
-import { IServer } from "../internal/IServer";
-
-import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { NodeModule } from "../../utils/internal/NodeModule";
-import { is_node, DomainError, RuntimeError } from "tstl";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
+import { IServer } from "../internal/IServer";
+import { WebAcceptor } from "./WebAcceptor";
 
 /**
  * Web Socket Server.

@@ -1,12 +1,12 @@
-import { Invoke } from "../../components/Invoke";
-import { WebError } from "./WebError";
+import { DomainError, is_node, sleep_for } from "tstl";
 
+import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
-import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { once } from "../internal/once";
+import { WebError } from "./WebError";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
-import { DomainError, is_node, sleep_for } from "tstl";
 
 /**
  * Web Socket Connector.

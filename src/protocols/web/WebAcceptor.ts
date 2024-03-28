@@ -1,13 +1,11 @@
 import type http from "http";
-import type WebSocket from "ws";
 import { DomainError } from "tstl";
-
-import { AcceptorBase } from "../internal/AcceptorBase";
-import { IWebCommunicator } from "./internal/IWebCommunicator";
+import type WebSocket from "ws";
 
 import { Invoke } from "../../components/Invoke";
-
+import { AcceptorBase } from "../internal/AcceptorBase";
 import { WebError } from "./WebError";
+import { IWebCommunicator } from "./internal/IWebCommunicator";
 
 /**
  * Web Socket Acceptor.

@@ -1,20 +1,19 @@
-import { Communicator } from "../../components/Communicator";
-import { IServer } from "../internal/IServer";
-import { IWorkerSystem } from "./internal/IWorkerSystem";
-
-import { Invoke } from "../../components/Invoke";
-import { IHeaderWrapper } from "../internal/IHeaderWrapper";
-import { once } from "../internal/once";
-
-import { ThreadPort } from "./internal/threads/ThreadPort";
-import { ProcessChannel } from "./internal/processes/ProcessChannel";
 import {
+  DomainError,
+  RuntimeError,
   Singleton,
   is_node,
-  DomainError,
   sleep_until,
-  RuntimeError,
 } from "tstl";
+
+import { Communicator } from "../../components/Communicator";
+import { Invoke } from "../../components/Invoke";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
+import { IServer } from "../internal/IServer";
+import { once } from "../internal/once";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
+import { ProcessChannel } from "./internal/processes/ProcessChannel";
+import { ThreadPort } from "./internal/threads/ThreadPort";
 
 /**
  * Worker Server.

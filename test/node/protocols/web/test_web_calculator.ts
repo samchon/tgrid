@@ -1,9 +1,9 @@
-import { Calculator } from "../../../providers/Calculator";
+import { Driver, WebConnector, WebServer } from "tgrid";
+import { Vector } from "tstl";
+
 import { ICalculator } from "../../../controllers/ICalculator";
 import { IVector } from "../../../controllers/IVector";
-
-import { Vector } from "tstl";
-import { Driver, WebConnector, WebServer } from "tgrid";
+import { Calculator } from "../../../providers/Calculator";
 
 const PORT: number = 10101;
 
