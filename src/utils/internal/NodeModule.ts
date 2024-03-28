@@ -2,13 +2,12 @@ import type * as __cp from "child_process";
 import type * as __fs from "fs";
 import type * as __http from "http";
 import type * as __https from "https";
+import import2 from "import2";
 import type * as __os from "os";
+import type * as __process from "process";
+import { Singleton } from "tstl";
 import type * as __thread from "worker_threads";
 import type * as __ws from "ws";
-import type * as __process from "process";
-
-import import2 from "import2";
-import { Singleton } from "tstl";
 
 export namespace NodeModule {
   export const cp: Singleton<Promise<typeof __cp>> = new Singleton(() =>

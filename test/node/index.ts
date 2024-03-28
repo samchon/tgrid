@@ -1,7 +1,7 @@
-﻿const EXTENSION = __filename.substr(-2);
-if (EXTENSION === "js") require("source-map-support").install();
+﻿import fs from "fs";
 
-import fs from "fs";
+const EXTENSION = __filename.substr(-2);
+if (EXTENSION === "js") require("source-map-support").install();
 
 interface IModule {
   [key: string]: () => Promise<void>;

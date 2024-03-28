@@ -1,9 +1,9 @@
 import { Driver, WebConnector, WebServer } from "tgrid";
 import { sleep_for } from "tstl";
 
-import { IScript } from "../../../controllers/IScript";
 import { IChatPrinter } from "../../../controllers/IChatPrinter";
 import { IChatService } from "../../../controllers/IChatService";
+import { IScript } from "../../../controllers/IScript";
 import { ChatService } from "../../../providers/ChatService";
 
 const PORT = 10101;

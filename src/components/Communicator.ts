@@ -1,14 +1,14 @@
-import { Driver } from "../typings/Driver";
-import { Invoke } from "./Invoke";
-
-import { serializeError } from "../utils/internal/serializeError";
 import {
+  ConditionVariable,
+  DomainError,
   HashMap,
   Pair,
-  ConditionVariable,
   RuntimeError,
-  DomainError,
 } from "tstl";
+
+import { Driver } from "../typings/Driver";
+import { serializeError } from "../utils/internal/serializeError";
+import { Invoke } from "./Invoke";
 
 /**
  * The basic communicator.

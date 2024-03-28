@@ -1,13 +1,13 @@
-import { Invoke } from "../../components/Invoke";
+import { DomainError, Singleton, is_node, sleep_until } from "tstl";
 
+import { Invoke } from "../../components/Invoke";
+import { ConnectorBase } from "../internal/ConnectorBase";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
+import { once } from "../internal/once";
 import { IWorkerCompiler } from "./internal/IWorkerCompiler";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { ConnectorBase } from "../internal/ConnectorBase";
 import { NodeWorkerCompiler } from "./internal/NodeWorkerCompiler";
 import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
-import { once } from "../internal/once";
-import { Singleton, is_node, DomainError, sleep_until } from "tstl";
 
 /**
  * Worker Connector.

@@ -1,4 +1,5 @@
 import type cp from "child_process";
+
 import { NodeModule } from "../../../../utils/internal/NodeModule";
 import { IWorkerCompiler } from "../IWorkerCompiler";
 

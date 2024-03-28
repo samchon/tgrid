@@ -1,12 +1,12 @@
-import { ConnectorBase } from "../internal/ConnectorBase";
-import { IWorkerSystem } from "./internal/IWorkerSystem";
+import { DomainError, RuntimeError, sleep_until } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
+import { ConnectorBase } from "../internal/ConnectorBase";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
-import { IReject } from "./internal/IReject";
-import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 import { once } from "../internal/once";
-import { DomainError, RuntimeError, sleep_until } from "tstl";
+import { IReject } from "./internal/IReject";
+import { IWorkerSystem } from "./internal/IWorkerSystem";
+import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 
 /**
  * SharedWorker Connector

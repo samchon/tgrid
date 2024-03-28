@@ -1,6 +1,7 @@
-import { Simple } from "../../../../providers/Calculator";
-import { IScientific, IStatistics } from "../../../../controllers/ICalculator";
 import { Driver, WorkerConnector, WorkerServer } from "tgrid";
+
+import { IScientific, IStatistics } from "../../../../controllers/ICalculator";
+import { Simple } from "../../../../providers/Calculator";
 
 class HierarchicalCalculator extends Simple {
   // REMOTE CALCULATOR

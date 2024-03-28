@@ -1,10 +1,9 @@
-import { IChatService } from "../controllers/IChatService";
+import { Driver } from "tgrid";
+import { DomainError, HashMap } from "tstl";
 
 import { IChatPrinter } from "../controllers/IChatPrinter";
-
+import { IChatService } from "../controllers/IChatService";
 import { IScript } from "../controllers/IScript";
-import { Driver } from "tgrid";
-import { HashMap, DomainError } from "tstl";
 
 export class ChatService implements IChatService {
   private static participants_: HashMap<string, Driver<IChatPrinter>> =

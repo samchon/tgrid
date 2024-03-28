@@ -1,11 +1,11 @@
 import { Driver, WebConnector, WebServer } from "tgrid";
 import {
-  Mutex,
-  Vector,
-  sleep_for,
-  RuntimeError,
-  is_sorted,
   DomainError,
+  Mutex,
+  RuntimeError,
+  Vector,
+  is_sorted,
+  sleep_for,
 } from "tstl";
 
 const PORT: number = 10101;

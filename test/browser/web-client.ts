@@ -1,8 +1,8 @@
+import { Driver, WebConnector } from "tgrid";
 import { InvalidArgument } from "tstl";
 
 import { ICalculator } from "../controllers/ICalculator";
 import { complete } from "./internal";
-import { Driver, WebConnector } from "tgrid";
 
 window.onload = async () => {
   for (let i: number = 0; i < 5; ++i) {

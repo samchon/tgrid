@@ -1,8 +1,8 @@
 import fs from "fs";
-
-import { ICalculator } from "../../../controllers/ICalculator";
 import { WorkerConnector } from "tgrid";
+
 import { TestBundler } from "../../../browser/TestBundler";
+import { ICalculator } from "../../../controllers/ICalculator";
 
 export async function test_worker_compiler(): Promise<void> {
   const PATH = __dirname + "/../../../../../bundle/worker-server.js";

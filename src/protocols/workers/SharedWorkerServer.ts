@@ -1,9 +1,9 @@
-import { IServer } from "../internal/IServer";
-import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
+import { DomainError, HashSet, is_node } from "tstl";
 
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
+import { IServer } from "../internal/IServer";
 import { once } from "../internal/once";
-import { HashSet, is_node, DomainError } from "tstl";
+import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
 
 /**
  * SharedWorker server.
