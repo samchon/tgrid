@@ -31,7 +31,10 @@ export namespace NodeModule {
   export const ws: Singleton<Promise<typeof __ws>> = new Singleton(
     () => import("ws"),
   );
-  export const process: Singleton<typeof __process> = new Singleton(() =>
-    is_node() ? global.process : undefined!,
-  );
+  export const process = () => {
+    if (__global === undefined) throw new Error("Not a node environment");
+    return __global.process;
+  };
 }
+
+const __global = is_node() ? global : undefined;
