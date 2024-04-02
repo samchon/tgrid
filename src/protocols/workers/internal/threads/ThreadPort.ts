@@ -12,7 +12,7 @@ export async function ThreadPort() {
   const { parentPort } = await NodeModule.thread.get();
   if (!parentPort) throw new Error("This is not a worker thread.");
 
-  const process = NodeModule.process();
+  const process = NodeModule.process.get();
   class ThreadPort {
     public static postMessage(message: any): void {
       parentPort!.postMessage(message);

@@ -5,7 +5,7 @@ import type * as __https from "https";
 import import2 from "import2";
 import type * as __os from "os";
 import type * as __process from "process";
-import { Singleton } from "tstl";
+import { Singleton, is_node } from "tstl";
 import type * as __thread from "worker_threads";
 import type * as __ws from "ws";
 
@@ -31,10 +31,7 @@ export namespace NodeModule {
   export const ws: Singleton<Promise<typeof __ws>> = new Singleton(
     () => import("ws"),
   );
-  export const process = () => __global.process;
+  export const process: Singleton<typeof __process> = new Singleton(() =>
+    is_node() ? global.process : undefined!,
+  );
 }
-
-/**
- * @internal
- */
-const __global = global;
