@@ -4,6 +4,7 @@ import type WebSocket from "ws";
 
 import { Invoke } from "../../components/Invoke";
 import { AcceptorBase } from "../internal/AcceptorBase";
+import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { WebError } from "./WebError";
 import { IWebCommunicator } from "./internal/IWebCommunicator";
 
@@ -52,15 +53,27 @@ export class WebAcceptor<Header, Provider extends object | null>
   /* ----------------------------------------------------------------
     CONSTRUCTORS
   ---------------------------------------------------------------- */
-  /**
-   * @internal
-   */
-  public static create<Header, Provider extends object | null>(
+  public static upgrade<Header, Provider extends object | null>(
     request: http.IncomingMessage,
     socket: WebSocket,
-    header: Header,
-  ): WebAcceptor<Header, Provider> {
-    return new WebAcceptor(request, socket, header);
+    handler?: (acceptor: WebAcceptor<Header, Provider>) => Promise<any>,
+  ): void {
+    socket.once("message", async (data: WebSocket.Data) => {
+      // @todo: custom code is required
+      if (typeof data !== "string") socket.close();
+      else
+        try {
+          const wrapper: IHeaderWrapper<Header> = JSON.parse(data as string);
+          const acceptor: WebAcceptor<Header, Provider> = new WebAcceptor(
+            request,
+            socket,
+            wrapper.header,
+          );
+          if (handler !== undefined) await handler(acceptor);
+        } catch (exp) {
+          socket.close();
+        }
+    });
   }
 
   /**

@@ -5,7 +5,6 @@ import { DomainError, RuntimeError, is_node } from "tstl";
 import type WebSocket from "ws";
 
 import { NodeModule } from "../../utils/internal/NodeModule";
-import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IServer } from "../internal/IServer";
 import { WebAcceptor } from "./WebAcceptor";
 
@@ -150,28 +149,8 @@ export class WebServer<Header, Provider extends object | null>
         netSocket: net.Socket,
         header: Buffer,
       ) => {
-        this.protocol_!.handleUpgrade(
-          request,
-          netSocket,
-          header,
-          (webSocket) => {
-            webSocket.once("message", async (data: WebSocket.Data) => {
-              // @todo: custom code is required
-              if (typeof data !== "string") webSocket.close();
-
-              try {
-                const wrapper: IHeaderWrapper<Header> = JSON.parse(
-                  data as string,
-                );
-                const acceptor: WebAcceptor<Header, Provider> =
-                  WebAcceptor.create(request, webSocket, wrapper.header);
-
-                await handler(acceptor);
-              } catch (exp) {
-                webSocket.close();
-              }
-            });
-          },
+        this.protocol_!.handleUpgrade(request, netSocket, header, (socket) =>
+          WebAcceptor.upgrade(request, socket, handler),
         );
       },
     );

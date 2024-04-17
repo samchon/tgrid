@@ -1,6 +1,6 @@
 {
   "name": "tgrid",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "exports": {
@@ -29,6 +29,9 @@
     "test:node": "node bin/test/node"
   },
   "dependencies": {
+    "@types/node": "^20.11.30",
+    "@types/websocket": "^1.0.10",
+    "@types/ws": "^7.4.7",
     "import2": "^1.0.3",
     "tstl": "3.0.0",
     "ws": "^7.5.3"
@@ -38,9 +41,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/browserify": "^12.0.40",
-    "@types/node": "^20.11.26",
     "@types/puppeteer": "^7.0.4",
-    "@types/ws": "^7.4.7",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "browserify": "^17.0.0",
