@@ -42,10 +42,15 @@ import { ThreadPort } from "./internal/threads/ThreadPort";
  *
  * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerServer<Header, Provider extends object | null>
-  extends Communicator<Provider | undefined>
+export class WorkerServer<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >
+  extends Communicator<Provider | undefined, Remote>
   implements IWorkerSystem, IServer<WorkerServer.State>
 {
   /**

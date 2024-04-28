@@ -9,12 +9,13 @@ async function main(): Promise<void> {
   // PREPARATIONS
   //----
   // OPEN SERVER
-  const server: WorkerServer<{ name: string }, object> = new WorkerServer();
+  const server: WorkerServer<{ name: string }, object, IChatService> =
+    new WorkerServer();
   const scripts: IScript[] = [];
 
   // PREPARE ASSETS
   const myName: string = (await server.getHeader()).name;
-  const service: Driver<IChatService> = server.getDriver<IChatService>();
+  const service: Driver<IChatService> = server.getDriver();
 
   await server.open({
     shout: async () => {

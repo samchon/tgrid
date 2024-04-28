@@ -21,12 +21,14 @@ import { Communicator } from "../../components/Communicator";
  *
  * @template Header Type of the header containing initial data.
  * @template Provider Type of features provided for the remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export abstract class AcceptorBase<
   Header,
   Provider extends object | null,
-> extends Communicator<Provider | null | undefined> {
+  Remote extends object | null,
+> extends Communicator<Provider | undefined, Remote> {
   /**
    * @hidden
    */

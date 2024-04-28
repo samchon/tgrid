@@ -7,7 +7,7 @@ const FILE_PATH = __dirname + "/log.dat";
 export async function test_worker_join(): Promise<void> {
   await fs.promises.writeFile(FILE_PATH, "NOT YET", "utf8");
 
-  const connector: WorkerConnector<null, null> = new WorkerConnector(
+  const connector: WorkerConnector<null, null, null> = new WorkerConnector(
     null,
     null,
   );

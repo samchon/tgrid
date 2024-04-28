@@ -3,7 +3,7 @@ import { WorkerServer } from "tgrid";
 import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void> {
-  const server: WorkerServer<object, Calculator> = new WorkerServer();
+  const server: WorkerServer<object, Calculator, null> = new WorkerServer();
   await server.open(new Calculator());
 }
 main().catch((exp) => {

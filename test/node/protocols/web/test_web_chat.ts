@@ -13,7 +13,7 @@ CLIENT
 ---------------------------------------------------------------- */
 class Client {
   private name_!: string;
-  private connector_!: WebConnector<null, IChatPrinter>;
+  private connector_!: WebConnector<null, IChatPrinter, IChatService>;
   private scripts_!: IScript[];
 
   private service_!: Driver<IChatService>;
@@ -26,7 +26,7 @@ class Client {
         this.scripts_.push({ name: name, message: message });
       },
     });
-    this.service_ = this.connector_.getDriver<IChatService>();
+    this.service_ = this.connector_.getDriver();
     this.scripts_ = [];
 
     // PREPARE INTERACTION
@@ -51,7 +51,7 @@ class Client {
   SERVER
 ---------------------------------------------------------------- */
 class Server {
-  private server_!: WebServer<object, IChatService>;
+  private server_!: WebServer<object, IChatService, IChatPrinter>;
   private scripts_!: IScript[];
 
   public async open(): Promise<void> {
@@ -60,7 +60,7 @@ class Server {
 
     await this.server_.open(PORT, async (acceptor) => {
       const service: ChatService = new ChatService();
-      service.assign(acceptor.getDriver<IChatPrinter>(), this.scripts_);
+      service.assign(acceptor.getDriver(), this.scripts_);
 
       await acceptor.accept(service);
       await acceptor.join();

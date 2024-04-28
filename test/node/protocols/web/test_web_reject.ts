@@ -3,7 +3,7 @@ import { WebConnector, WebServer } from "tgrid";
 const PORT = 10101;
 
 export async function test_web_reject(): Promise<void> {
-  const server = new WebServer<null, null>();
+  const server: WebServer<null, null, null> = new WebServer();
 
   // TEST RE-USABILITY TOO
   for (let i: number = 0; i < 5; ++i) {
@@ -11,7 +11,10 @@ export async function test_web_reject(): Promise<void> {
       await acceptor.reject(1001, "Rejected by test automation program.");
     });
 
-    const connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebConnector<null, null, null> = new WebConnector(
+      null,
+      null,
+    );
     let error: Error | null = null;
 
     try {

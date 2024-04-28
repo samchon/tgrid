@@ -29,10 +29,13 @@ class Provider {
 }
 
 async function _Test_client(): Promise<void> {
-  const connector: WebConnector<null, null> = new WebConnector(null, null);
+  const connector: WebConnector<null, null, Provider> = new WebConnector(
+    null,
+    null,
+  );
   await connector.connect(`ws://127.0.0.1:${PORT}`);
 
-  const driver: Driver<Provider> = connector.getDriver<Provider>();
+  const driver: Driver<Provider> = connector.getDriver();
   await driver.mutex.lock();
   {
     const index: number = await driver.getIndex();
@@ -50,7 +53,7 @@ export async function test_web_mutex(): Promise<void> {
   // PREPARES
   //----
   // OPEN SERVER
-  const server: WebServer<object, Provider> = new WebServer();
+  const server: WebServer<object, Provider, null> = new WebServer();
   const mutex: Mutex = new Mutex();
   const vector: Vector<number> = new Vector();
   let index: number = 0;

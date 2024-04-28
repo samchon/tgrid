@@ -13,15 +13,12 @@ async function get<Controller extends object>(
   path: string,
 ): Promise<Driver<Controller>> {
   // DO CONNECT
-  const connector: WorkerConnector<null, null> = new WorkerConnector(
-    null,
-    null,
-    "process",
-  );
+  const connector: WorkerConnector<null, null, Controller> =
+    new WorkerConnector(null, null, "process");
   await connector.connect(path);
 
   // RETURN DRIVER
-  return connector.getDriver<Controller>();
+  return connector.getDriver();
 }
 
 async function main(): Promise<void> {

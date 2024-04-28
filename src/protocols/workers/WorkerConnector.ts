@@ -35,10 +35,15 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  *
  * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WorkerConnector<Header, Provider extends object | null>
-  extends ConnectorBase<Header, Provider>
+export class WorkerConnector<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >
+  extends ConnectorBase<Header, Provider, Remote>
   implements IWorkerSystem
 {
   /**

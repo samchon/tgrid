@@ -34,10 +34,15 @@ import { IWebCommunicator } from "./internal/IWebCommunicator";
  *
  * @template Header Type of the header containing initial data.
  * @template Provider Type of features provided for the remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebAcceptor<Header, Provider extends object | null>
-  extends AcceptorBase<Header, Provider>
+export class WebAcceptor<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >
+  extends AcceptorBase<Header, Provider, Remote>
   implements IWebCommunicator
 {
   /**
@@ -53,10 +58,14 @@ export class WebAcceptor<Header, Provider extends object | null>
   /* ----------------------------------------------------------------
     CONSTRUCTORS
   ---------------------------------------------------------------- */
-  public static upgrade<Header, Provider extends object | null>(
+  public static upgrade<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >(
     request: http.IncomingMessage,
     socket: WebSocket,
-    handler?: (acceptor: WebAcceptor<Header, Provider>) => Promise<any>,
+    handler?: (acceptor: WebAcceptor<Header, Provider, Remote>) => Promise<any>,
   ): void {
     socket.once("message", async (data: WebSocket.Data) => {
       // @todo: custom code is required
@@ -64,11 +73,8 @@ export class WebAcceptor<Header, Provider extends object | null>
       else
         try {
           const wrapper: IHeaderWrapper<Header> = JSON.parse(data as string);
-          const acceptor: WebAcceptor<Header, Provider> = new WebAcceptor(
-            request,
-            socket,
-            wrapper.header,
-          );
+          const acceptor: WebAcceptor<Header, Provider, Remote> =
+            new WebAcceptor(request, socket, wrapper.header);
           if (handler !== undefined) await handler(acceptor);
         } catch (exp) {
           socket.close();

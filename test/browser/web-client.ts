@@ -6,7 +6,10 @@ import { complete } from "./internal";
 
 window.onload = async () => {
   for (let i: number = 0; i < 5; ++i) {
-    const connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebConnector<null, null, ICalculator> = new WebConnector(
+      null,
+      null,
+    );
     await connector.connect("ws://127.0.0.1:10489");
 
     const driver: Driver<ICalculator> = connector.getDriver();

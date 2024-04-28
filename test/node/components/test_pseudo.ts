@@ -4,7 +4,10 @@ import { InvalidArgument } from "tstl";
 import { ICalculator } from "../../controllers/ICalculator";
 import { Calculator } from "../../providers/Calculator";
 
-class PseudoCommunicator<Provider> extends Communicator<Provider> {
+class PseudoCommunicator<Provider extends object | null> extends Communicator<
+  Provider,
+  ICalculator
+> {
   private sender_: (invoke: Invoke) => void;
 
   public constructor(sender: (invoke: Invoke) => void, provider: Provider) {

@@ -33,10 +33,14 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
  *
  * @template Header Type of the header containing initial data.
  * @template Provider Type of features provided for the remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerServer<Header, Provider extends object | null>
-  implements IServer<SharedWorkerServer.State>
+export class SharedWorkerServer<
+  Header,
+  Provider extends object | null,
+  Remote extends object | null,
+> implements IServer<SharedWorkerServer.State>
 {
   /**
    * @hidden
@@ -46,7 +50,7 @@ export class SharedWorkerServer<Header, Provider extends object | null>
   /**
    * @hidden
    */
-  private acceptors_: HashSet<SharedWorkerAcceptor<Header, Provider>>;
+  private acceptors_: HashSet<SharedWorkerAcceptor<Header, Provider, Remote>>;
 
   /* ----------------------------------------------------------------
     CONSTRUCTOR
@@ -75,7 +79,7 @@ export class SharedWorkerServer<Header, Provider extends object | null>
    */
   public async open(
     handler: (
-      acceptor: SharedWorkerAcceptor<Header, Provider>,
+      acceptor: SharedWorkerAcceptor<Header, Provider, Remote>,
     ) => Promise<void>,
   ): Promise<void> {
     // TEST CONDITION
@@ -130,7 +134,7 @@ export class SharedWorkerServer<Header, Provider extends object | null>
    */
   private _Handle_connect(
     port: MessagePort,
-    handler: (acceptor: SharedWorkerAcceptor<Header, Provider>) => any,
+    handler: (acceptor: SharedWorkerAcceptor<Header, Provider, Remote>) => any,
   ): void {
     port.onmessage = once((evt) => {
       // ARGUMENTS
@@ -138,7 +142,7 @@ export class SharedWorkerServer<Header, Provider extends object | null>
 
       // CREATE ACCEPTOR
       /* eslint-disable */
-      let acceptor: SharedWorkerAcceptor<Header, Provider>;
+      let acceptor: SharedWorkerAcceptor<Header, Provider, Remote>;
       acceptor = SharedWorkerAcceptor.create(port, wrapper.header, () => {
         this.acceptors_.erase(acceptor);
       });
