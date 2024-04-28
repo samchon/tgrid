@@ -24,12 +24,13 @@ async function must_be_error(
 }
 
 export async function test_security(): Promise<void> {
-  const server: WebServer<object, CustomCalculator> = new WebServer();
+  const server: WebServer<object, CustomCalculator, null> = new WebServer();
   await server.open(10101, async (acceptor) => {
     await acceptor.accept(new CustomCalculator());
   });
 
-  const connector: WebConnector<null, null> = new WebConnector(null, null);
+  const connector: WebConnector<null, null, CustomCalculator> =
+    new WebConnector(null, null);
   await connector.connect("ws://127.0.0.1:10101");
 
   const calc: Driver<CustomCalculator> = connector.getDriver();

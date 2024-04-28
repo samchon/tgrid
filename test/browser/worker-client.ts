@@ -13,12 +13,14 @@ async function get_source(): Promise<string> {
 }
 
 window.onload = async () => {
-  const worker: WorkerConnector<null, null> = new WorkerConnector(null, null);
+  const worker: WorkerConnector<null, null, ICalculator> = new WorkerConnector(
+    null,
+    null,
+  );
 
   for (let i: number = 0; i < 5; ++i) {
     await worker.compile(await get_source());
-
-    await ICalculator.main(worker.getDriver<ICalculator>());
+    await ICalculator.main(worker.getDriver());
     await worker.close();
   }
   complete();

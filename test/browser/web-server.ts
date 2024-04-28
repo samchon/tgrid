@@ -3,7 +3,7 @@ import { WebServer } from "tgrid";
 import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void> {
-  const server: WebServer<object, Calculator> = new WebServer();
+  const server: WebServer<object, Calculator, null> = new WebServer();
   let index: number = 0;
 
   await server.open(10489, async (acceptor) => {

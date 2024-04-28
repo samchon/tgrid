@@ -25,9 +25,13 @@ import { Invoke } from "./Invoke";
  *   - {@link sendData}
  *
  * @template Provider Type of features provided for remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export abstract class Communicator<Provider> {
+export abstract class Communicator<
+  Provider extends object | null | undefined,
+  Remote extends object | null,
+> {
   /**
    * @hidden
    */
@@ -205,7 +209,7 @@ export abstract class Communicator<Provider> {
    * @return A Driver for the RFC.
    */
   public getDriver<
-    Controller extends object,
+    Controller extends NonNullable<Remote> = NonNullable<Remote>,
     UseParametric extends boolean = false,
   >(): Driver<Controller, UseParametric> {
     return this.driver_ as Driver<Controller, UseParametric>;

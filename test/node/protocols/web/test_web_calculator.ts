@@ -11,7 +11,7 @@ export async function test_web_calculator(): Promise<void> {
   //----
   // SERVER
   //----
-  const server: WebServer<object, Calculator | Vector<number>> =
+  const server: WebServer<object, Calculator | Vector<number>, null> =
     new WebServer();
   await server.open(PORT, async (acceptor) => {
     // SPEICFY PROVIDER
@@ -26,7 +26,8 @@ export async function test_web_calculator(): Promise<void> {
   //----
   // CLIENTS
   //----
-  const connector: WebConnector<null, null> = new WebConnector(null, null);
+  const connector: WebConnector<null, null, ICalculator | IVector<number>> =
+    new WebConnector(null, null);
 
   // const RE-USABILITY
   for (const path of ["calculator", "vector"])

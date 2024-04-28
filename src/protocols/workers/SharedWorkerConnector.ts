@@ -41,10 +41,15 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  *
  * @template Header Type of the header containing initial data.
  * @template Provider Type of features provided for the remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerConnector<Header, Provider extends object | null>
-  extends ConnectorBase<Header, Provider>
+export class SharedWorkerConnector<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >
+  extends ConnectorBase<Header, Provider, Remote>
   implements IWorkerSystem
 {
   /**

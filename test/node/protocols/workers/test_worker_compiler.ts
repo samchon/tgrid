@@ -15,10 +15,10 @@ export async function test_worker_compiler(): Promise<void> {
 }
 
 async function _Test_worker(
-  connect: (obj: WorkerConnector<null, null>) => Promise<void>,
+  connect: (obj: WorkerConnector<null, null, ICalculator>) => Promise<void>,
   type: "thread" | "process",
 ): Promise<void> {
-  const worker: WorkerConnector<null, null> = new WorkerConnector(
+  const worker: WorkerConnector<null, null, ICalculator> = new WorkerConnector(
     null,
     null,
     type,
@@ -27,7 +27,7 @@ async function _Test_worker(
   // TEST RE-USABILITY
   for (let i: number = 0; i < 5; ++i) {
     await connect(worker);
-    await ICalculator.main(worker.getDriver<ICalculator>());
+    await ICalculator.main(worker.getDriver());
     await worker.close();
   }
 }

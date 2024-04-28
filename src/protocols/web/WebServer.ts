@@ -31,10 +31,14 @@ import { WebAcceptor } from "./WebAcceptor";
  *
  * @template Header Type of header containing initialization data like activation.
  * @template Provider Type of features provided for the remote systems.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebServer<Header, Provider extends object | null>
-  implements IServer<WebServer.State>
+export class WebServer<
+  Header,
+  Provider extends object | null,
+  Remote extends object | null,
+> implements IServer<WebServer.State>
 {
   /**
    * @hidden
@@ -109,7 +113,7 @@ export class WebServer<Header, Provider extends object | null>
    */
   public async open(
     port: number,
-    handler: (acceptor: WebAcceptor<Header, Provider>) => Promise<void>,
+    handler: (acceptor: WebAcceptor<Header, Provider, Remote>) => Promise<void>,
   ): Promise<void> {
     //----
     // PRELIMINARIES

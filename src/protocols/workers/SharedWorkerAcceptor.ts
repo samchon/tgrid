@@ -30,10 +30,15 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
  *
  * @template Header Type of the header containing initial data.
  * @template Provider Type of features provided for the remote system.
+ * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class SharedWorkerAcceptor<Header, Provider extends object | null>
-  extends AcceptorBase<Header, Provider>
+export class SharedWorkerAcceptor<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >
+  extends AcceptorBase<Header, Provider, Remote>
   implements IWorkerSystem
 {
   /**
@@ -52,11 +57,15 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
   /**
    * @internal
    */
-  public static create<Header, Provider extends object | null>(
+  public static create<
+    Header,
+    Provider extends object | null,
+    Remote extends object | null,
+  >(
     port: MessagePort,
     header: Header,
     eraser: () => void,
-  ): SharedWorkerAcceptor<Header, Provider> {
+  ): SharedWorkerAcceptor<Header, Provider, Remote> {
     return new SharedWorkerAcceptor(port, header, eraser);
   }
 
@@ -112,7 +121,7 @@ export class SharedWorkerAcceptor<Header, Provider extends object | null>
   /**
    * @inheritDoc
    */
-  public async accept(provider: Provider | null = null): Promise<void> {
+  public async accept(provider: Provider): Promise<void> {
     // TEST CONDITION
     if (this.state_ !== SharedWorkerAcceptor.State.NONE)
       throw new DomainError(
