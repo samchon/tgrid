@@ -1,9 +1,9 @@
-import { WebConnector, WebServer } from "tgrid";
+import { WebSocketConnector, WebSocketServer } from "tgrid";
 
 const PORT = 10101;
 
 export async function test_web_reject(): Promise<void> {
-  const server: WebServer<null, null, null> = new WebServer();
+  const server: WebSocketServer<null, null, null> = new WebSocketServer();
 
   // TEST RE-USABILITY TOO
   for (let i: number = 0; i < 5; ++i) {
@@ -11,10 +11,8 @@ export async function test_web_reject(): Promise<void> {
       await acceptor.reject(1001, "Rejected by test automation program.");
     });
 
-    const connector: WebConnector<null, null, null> = new WebConnector(
-      null,
-      null,
-    );
+    const connector: WebSocketConnector<null, null, null> =
+      new WebSocketConnector(null, null);
     let error: Error | null = null;
 
     try {

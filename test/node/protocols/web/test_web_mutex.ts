@@ -1,4 +1,4 @@
-import { Driver, WebConnector, WebServer } from "tgrid";
+import { Driver, WebSocketConnector, WebSocketServer } from "tgrid";
 import {
   DomainError,
   Mutex,
@@ -29,10 +29,8 @@ class Provider {
 }
 
 async function _Test_client(): Promise<void> {
-  const connector: WebConnector<null, null, Provider> = new WebConnector(
-    null,
-    null,
-  );
+  const connector: WebSocketConnector<null, null, Provider> =
+    new WebSocketConnector(null, null);
   await connector.connect(`ws://127.0.0.1:${PORT}`);
 
   const driver: Driver<Provider> = connector.getDriver();
@@ -53,7 +51,7 @@ export async function test_web_mutex(): Promise<void> {
   // PREPARES
   //----
   // OPEN SERVER
-  const server: WebServer<object, Provider, null> = new WebServer();
+  const server: WebSocketServer<object, Provider, null> = new WebSocketServer();
   const mutex: Mutex = new Mutex();
   const vector: Vector<number> = new Vector();
   let index: number = 0;
