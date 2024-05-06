@@ -1,12 +1,10 @@
-import { DomainError } from "tstl";
-
 /**
  * Web Socket Error.
  *
  * @reference https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebError extends DomainError {
+export class WebSocketError extends Error {
   public readonly status: number;
 
   /**
@@ -17,6 +15,12 @@ export class WebError extends DomainError {
    */
   public constructor(status: number, message: string) {
     super(message);
+
+    // INHERITANCE POLYFILL
+    const proto = new.target.prototype;
+    if (Object.setPrototypeOf) Object.setPrototypeOf(this, proto);
+    else (this as any).__proto__ = proto;
+
     this.status = status;
   }
 }

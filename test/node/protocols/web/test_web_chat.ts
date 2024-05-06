@@ -1,4 +1,4 @@
-import { Driver, WebConnector, WebServer } from "tgrid";
+import { Driver, WebSocketConnector, WebSocketServer } from "tgrid";
 import { sleep_for } from "tstl";
 
 import { IChatPrinter } from "../../../controllers/IChatPrinter";
@@ -13,7 +13,7 @@ CLIENT
 ---------------------------------------------------------------- */
 class Client {
   private name_!: string;
-  private connector_!: WebConnector<null, IChatPrinter, IChatService>;
+  private connector_!: WebSocketConnector<null, IChatPrinter, IChatService>;
   private scripts_!: IScript[];
 
   private service_!: Driver<IChatService>;
@@ -21,7 +21,7 @@ class Client {
   public async participate(name: string): Promise<void> {
     // ASSIGN MEMBERS
     this.name_ = name;
-    this.connector_ = new WebConnector(null, {
+    this.connector_ = new WebSocketConnector(null, {
       print: (name: string, message: string): void => {
         this.scripts_.push({ name: name, message: message });
       },
@@ -51,11 +51,11 @@ class Client {
   SERVER
 ---------------------------------------------------------------- */
 class Server {
-  private server_!: WebServer<object, IChatService, IChatPrinter>;
+  private server_!: WebSocketServer<object, IChatService, IChatPrinter>;
   private scripts_!: IScript[];
 
   public async open(): Promise<void> {
-    this.server_ = new WebServer();
+    this.server_ = new WebSocketServer();
     this.scripts_ = [];
 
     await this.server_.open(PORT, async (acceptor) => {

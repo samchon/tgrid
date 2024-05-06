@@ -1,4 +1,4 @@
-import { Driver, WebConnector, WebServer } from "tgrid";
+import { Driver, WebSocketConnector, WebSocketServer } from "tgrid";
 import { Vector } from "tstl";
 
 import { ICalculator } from "../../../controllers/ICalculator";
@@ -11,8 +11,8 @@ export async function test_web_calculator(): Promise<void> {
   //----
   // SERVER
   //----
-  const server: WebServer<object, Calculator | Vector<number>, null> =
-    new WebServer();
+  const server: WebSocketServer<object, Calculator | Vector<number>, null> =
+    new WebSocketServer();
   await server.open(PORT, async (acceptor) => {
     // SPEICFY PROVIDER
     const provider = /calculator/.test(acceptor.path)
@@ -26,8 +26,11 @@ export async function test_web_calculator(): Promise<void> {
   //----
   // CLIENTS
   //----
-  const connector: WebConnector<null, null, ICalculator | IVector<number>> =
-    new WebConnector(null, null);
+  const connector: WebSocketConnector<
+    null,
+    null,
+    ICalculator | IVector<number>
+  > = new WebSocketConnector(null, null);
 
   // const RE-USABILITY
   for (const path of ["calculator", "vector"])

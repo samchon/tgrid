@@ -49,12 +49,12 @@ However, whatever [Grid Computing](#12-grid-computing) and *Remote Function Call
 
 #### [`composite-calculator/server.ts`](https://github.com/samchon/tgrid.examples/blob/master/src/projects/composite-calculator/server.ts)
 ```typescript
-import { WebServer } from "tgrid/protocols/web";
+import { WebSocketServer } from "tgrid/protocols/web";
 import { CompositeCalculator } from "../../providers/Calculator";
 
 async function main(): Promise<void>
 {
-    const server: WebServer<object, CompositeCalculator> = new WebServer();
+    const server: WebSocketServer<object, CompositeCalculator> = new WebSocketServer();
     await server.open(10102, async acceptor =>
     {
         await acceptor.accept(new CompositeCalculator());
@@ -65,7 +65,7 @@ main();
 
 #### [`composite-calculator/client.ts`](https://github.com/samchon/tgrid.examples/blob/master/src/projects/composite-calculator/client.ts)
 ```typescript
-import { WebConnector } from "tgrid/protocols/web/WebConnector";
+import { WebSocketConnector } from "tgrid/protocols/web/WebSocketConnector";
 import { Driver } from "tgrid/components/Driver";
 
 import { ICalculator } from "../../controllers/ICalculator";
@@ -75,7 +75,7 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    const connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebSocketConnector<null, null> = new WebSocketConnector(null, null);
     await connector.connect("ws://127.0.0.1:10102");
 
     //----
@@ -166,7 +166,7 @@ Let's assume a situation; There's a distributed processing system build by tradi
 Thus, with **TGrid** and [Remote Function Call](#13-remote-function-call), you can adapt compilation and type checking on the network system. It helps you to develop a network system safely and conveniently. Let's close this chapter with an example of *Safey Implementation*.
 
 ```typescript
-import { WebConnector } from "tgrid/protocols/web/WebConnector"
+import { WebSocketConnector } from "tgrid/protocols/web/WebSocketConnector"
 import { Driver } from "tgrid/components/Driver";
 
 interface ICalculator
@@ -184,7 +184,7 @@ async function main(): Promise<void>
     //----
     // CONNECTION
     //----
-    const connector: WebConnector<null, null> = new WebConnector(null, null);
+    const connector: WebSocketConnector<null, null> = new WebSocketConnector(null, null);
     await connector.connect("ws://127.0.0.1:10101");
 
     //----

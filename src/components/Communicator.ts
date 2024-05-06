@@ -14,7 +14,7 @@ import { Invoke } from "./Invoke";
  * The basic communicator.
  *
  * The `Communicator` is an abstract class taking full charge of network communication.
- * Protocolized communicators like {@link WebConnector} are realized by extending this
+ * Protocolized communicators like {@link WebSocketConnector} are realized by extending this
  * `Communicator` class.
  *
  * You want to make your own communicator using special protocol, extends this `Communicator`
