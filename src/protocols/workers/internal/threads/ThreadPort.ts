@@ -1,11 +1,7 @@
-//================================================================
-
-/** @module tgrid.protocols.workers */
-//================================================================
 import { NodeModule } from "../../../../utils/internal/NodeModule";
 
 /**
- * @hidden
+ * @internal
  */
 
 export async function ThreadPort() {
@@ -34,6 +30,10 @@ export async function ThreadPort() {
   }
   return ThreadPort;
 }
+
+/**
+ * @internal
+ */
 export namespace ThreadPort {
   export async function isWorkerThread(): Promise<boolean> {
     const { parentPort } = await NodeModule.thread.get();

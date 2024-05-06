@@ -1,6 +1,6 @@
 {
   "name": "tgrid",
-  "version": "1.0.0-dev.20240506",
+  "version": "1.0.0-dev.20240507",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "exports": {

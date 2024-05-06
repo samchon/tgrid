@@ -4,7 +4,7 @@ import { NodeModule } from "../../../../utils/internal/NodeModule";
 import { IWorkerCompiler } from "../IWorkerCompiler";
 
 /**
- * @hidden
+ * @internal
  */
 export async function ProcessWorker(): Promise<IWorkerCompiler.Creator> {
   const { fork } = await NodeModule.cp.get();

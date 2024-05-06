@@ -5,7 +5,7 @@ import { ProcessWorker } from "./processes/ProcessWorker";
 import { ThreadWorker } from "./threads/ThreadWorker";
 
 /**
- * @hidden
+ * @internal
  */
 export const NodeWorkerCompiler = async (
   type: "process" | "thread",
@@ -41,6 +41,9 @@ export const NodeWorkerCompiler = async (
   // }
 });
 
+/**
+ * @internal
+ */
 const uuid = () =>
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
