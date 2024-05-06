@@ -1,0 +1,49 @@
+import { Tabs, Tab } from 'nextra-theme-docs'
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
+![Sequence Diagram](/images/diagrams/sequence.png)
+
+## Communicator
+Communicates with a remote system.
+
+`Communicator` is a class taking full responsibility to network communication with remote system. You can register a Provider, an object would be provided to the remote system, to the `Communicator`. Also, [Driver](#driver)\<[Listener](#listener)\>, which can access to the remote system's [Provider](#provider), is created by this `Communicator`.
+
+For reference, actual `Communicator` is the top-level abstract class, and all the classes responsible for network communication in `TGrid` are inheriting from this `Communicator` class. Here is the list of every communicator classes in `TGrid`.
+
+  - [WebSocketConnector](./websocket#websocketconnector)
+  - [WebSocketAcceptor](./websocket#websocketacceptor)
+  - [SharedWorkerAcceptor](./worker#sharedworkeracceptor)
+  - [SharedWorkerConnector](./worker#sharedworkerconnector)
+  - [WorkerConnector](./worker#workerconnector)
+  - [WorkerServer](./worker#workerserver)
+
+
+
+
+## Provider
+Object provided for remote system.
+
+`Provider` is an object provided for the remote system.
+
+The remote system can call the `Provider`'s functions through [Driver](#driver)\<[Listener](#listener)\>.
+
+
+
+
+## Listener
+Interface of the remote system's [Provider](#provider).
+
+`Listener` is a type definition (interface is recommended) of the remote system's [Provider](#provider). If you wrap the `Listener` type into the [Driver](#driver)\<`Listener`\> through `Communicator.getDriver<Listener>()` method, you can call the functions of the remote system's [Provider](#provider) asynchronously.
+
+For reference, it is possible to using the original [Provider](#provider) type of the remote system, so that composing [Driver](#driver)\<[Provider](#provider)\> type. However, such way is not recommended due to the dependency problem. Instead, consider to defining the [Provider](#provider) class to implement the `Listener` interface type.
+
+
+
+
+## Driver
+Driver of Listener for RPC (Remote Procedure Call).
+
+`Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument [Listener](#listener) which means the type of remote system's [Provider](#provider), and you can remotely call the functions of the [Listener](#listener) asynchronously through the `Drive<Listener>` instance.
+
+When you call some function of [Listener](#listener) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments to the remote system through the [Communicator](#communicator). When the remote system replies the result of the function call, [Communicator](#communicator) `Driver<Listener>` resolves the promise of the function call expression with the result.

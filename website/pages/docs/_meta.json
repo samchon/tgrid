@@ -1,0 +1,20 @@
+{
+  "index": "🙋🏻‍♂️ Introduction",
+  "setup": "📦 Setup",
+  "-- tutorial": {
+    "type": "separator",
+    "title": "📖 Tutorial"
+  },
+  "features": "Features",
+  "examples": "Learn from Examples",
+  "projects": "Learn from Projects",
+  "-- appendix": {
+    "type": "separator",
+    "title": "🔗 Appendix"
+  },
+  "api": {
+    "title": "API Documents",
+    "href": "/api",
+    "newWindow": true
+  }
+}

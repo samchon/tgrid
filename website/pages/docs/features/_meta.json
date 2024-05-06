@@ -1,0 +1,6 @@
+{
+  "components": "Components",
+  "worker": "Worker Protocol",
+  "websocket": "WebSocket Protocol",
+  "nestjs": "NestJS WebSocket"
+}
