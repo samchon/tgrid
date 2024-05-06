@@ -1,14 +1,10 @@
-//================================================================
-
-/** @module tgrid.protocols.workers */
-//================================================================
 import type thread from "worker_threads";
 
 import { NodeModule } from "../../../../utils/internal/NodeModule";
 import { IWorkerCompiler } from "../IWorkerCompiler";
 
 /**
- * @hidden
+ * @internal
  */
 export async function ThreadWorker(): Promise<IWorkerCompiler.Creator> {
   const { Worker } = await NodeModule.thread.get();

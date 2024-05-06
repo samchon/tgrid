@@ -1,5 +1,5 @@
 /**
- * @hidden
+ * @internal
  */
 export function once<Func>(handler: Func): Func {
   let called: boolean = false;

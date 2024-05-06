@@ -1,7 +1,7 @@
 import { NodeModule } from "../../../../utils/internal/NodeModule";
 
 /**
- * @hidden
+ * @internal
  */
 export class ProcessChannel {
   public static postMessage(message: any): void {

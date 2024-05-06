@@ -3,7 +3,7 @@
  *
  * @author Jeongho Nam - https://github.com/samchon
  */
-export interface IWebCommunicator {
+export interface IWebSocketCommunicator {
   /**
    * Close connection.
    *
@@ -14,7 +14,7 @@ export interface IWebCommunicator {
    * causes all incompleted RFCs to throw exceptions.
    *
    * If parametric *code* and *reason* are specified, it means the disconnection is
-   * abnormal and it would throw special exceptions (`WebError`) to the incompleted RFCs.
+   * abnormal and it would throw special exceptions (`WebSocketError`) to the incompleted RFCs.
    *
    * @param code Closing code.
    * @param reason Reason why.

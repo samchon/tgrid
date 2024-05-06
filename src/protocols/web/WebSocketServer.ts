@@ -6,21 +6,21 @@ import type WebSocket from "ws";
 
 import { NodeModule } from "../../utils/internal/NodeModule";
 import { IServer } from "../internal/IServer";
-import { WebAcceptor } from "./WebAcceptor";
+import { WebSocketAcceptor } from "./WebSocketAcceptor";
 
 /**
  * Web Socket Server.
  *
  *  - available only in the NodeJS.
  *
- * The `WebServer` is a class who can open an websocket server. Clients connecting to the
- * `WebServer` would communicate with this server through {@link WebAcceptor} objects using
+ * The `WebSocketServer` is a class who can open an websocket server. Clients connecting to the
+ * `WebSocketServer` would communicate with this server through {@link WebSocketAcceptor} objects using
  * RFC (Remote Function Call).
  *
  * To open the websocket server, call the {@link open}() method with your callback function which
- * would be called whenever a {@link WebAcceptor} has been newly created ay a client's connection.
+ * would be called whenever a {@link WebSocketAcceptor} has been newly created ay a client's connection.
  *
- * Also, when declaring this {@link WebServer} type, you've to define two template arguments,
+ * Also, when declaring this {@link WebSocketServer} type, you've to define two template arguments,
  * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
  * client after the connection. I hope you and client not to omit it and utilize it as an
  * activation tool to enhance security.
@@ -34,16 +34,16 @@ import { WebAcceptor } from "./WebAcceptor";
  * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebServer<
+export class WebSocketServer<
   Header,
   Provider extends object | null,
   Remote extends object | null,
-> implements IServer<WebServer.State>
+> implements IServer<WebSocketServer.State>
 {
   /**
    * @hidden
    */
-  private state_: WebServer.State;
+  private state_: WebSocketServer.State;
 
   /**
    * @hidden
@@ -83,14 +83,14 @@ export class WebServer<
   public constructor(key?: string, cert?: string) {
     if (is_node() === false)
       throw new DomainError(
-        "Error on WebServer.constructor(): only available in NodeJS.",
+        "Error on WebSocketServer.constructor(): only available in NodeJS.",
       );
 
     // PREPARE SREVER INSTANCE
     this.options_ = !!key && !!cert ? { key, cert } : null;
 
     // INITIALIZE STATUS & PROTOCOL
-    this.state_ = WebServer.State.NONE;
+    this.state_ = WebSocketServer.State.NONE;
     this.server_ = null;
     this.protocol_ = null;
   }
@@ -100,37 +100,44 @@ export class WebServer<
    *
    * Open a server through the web-socket protocol, with its *port* number and *handler*
    * function determining whether to accept the client's connection or not. After the server has
-   * been opened, clients can connect to that websocket server by using the {@link WebConnector}
+   * been opened, clients can connect to that websocket server by using the {@link WebSocketConnector}
    * class.
    *
-   * When implementing the *handler* function with the {@link WebAcceptor} instance, calls the
-   * {@link WebAcceptor.accept} method if you want to accept the new client's connection.
+   * When implementing the *handler* function with the {@link WebSocketAcceptor} instance, calls the
+   * {@link WebSocketAcceptor.accept} method if you want to accept the new client's connection.
    * Otherwise you dont't want to accept the client and reject its connection, just calls the
-   * {@link WebAcceptor.reject} instead.
+   * {@link WebSocketAcceptor.reject} instead.
    *
    * @param port Port number to listen.
    * @param handler Callback function for client connection.
    */
   public async open(
     port: number,
-    handler: (acceptor: WebAcceptor<Header, Provider, Remote>) => Promise<void>,
+    handler: (
+      acceptor: WebSocketAcceptor<Header, Provider, Remote>,
+    ) => Promise<void>,
   ): Promise<void> {
     //----
     // PRELIMINARIES
     //----
     // POSSIBLE TO OPEN?
-    if (this.state_ === WebServer.State.OPEN)
+    if (this.state_ === WebSocketServer.State.OPEN)
       throw new DomainError(
-        "Error on WebServer.open(): it has already been opened.",
+        "Error on WebSocketServer.open(): it has already been opened.",
       );
-    else if (this.state_ === WebServer.State.OPENING)
+    else if (this.state_ === WebSocketServer.State.OPENING)
       throw new DomainError(
-        "Error on WebServer.open(): it's on opening, wait for a second.",
+        "Error on WebSocketServer.open(): it's on opening, wait for a second.",
       );
-    else if (this.state_ === WebServer.State.CLOSING)
-      throw new RuntimeError("Error on WebServer.open(): it's on closing.");
+    else if (this.state_ === WebSocketServer.State.CLOSING)
+      throw new RuntimeError(
+        "Error on WebSocketServer.open(): it's on closing.",
+      );
     // DO OPEN
-    else if (this.server_ === null || this.state_ === WebServer.State.CLOSED)
+    else if (
+      this.server_ === null ||
+      this.state_ === WebSocketServer.State.CLOSED
+    )
       this.server_ =
         this.options_ !== null
           ? (await NodeModule.https.get()).createServer(this.options_!)
@@ -140,7 +147,7 @@ export class WebServer<
     });
 
     // SET STATE
-    this.state_ = WebServer.State.OPENING;
+    this.state_ = WebSocketServer.State.OPENING;
 
     //----
     // OPEN SERVER
@@ -154,19 +161,23 @@ export class WebServer<
         header: Buffer,
       ) => {
         this.protocol_!.handleUpgrade(request, netSocket, header, (socket) =>
-          WebAcceptor.upgrade(request, socket, handler),
+          WebSocketAcceptor.upgrade(request, socket, handler),
         );
       },
     );
 
     // FINALIZATION
-    await WebServer._Open(this.server_, port, (state) => (this.state_ = state));
+    await WebSocketServer._Open(
+      this.server_,
+      port,
+      (state) => (this.state_ = state),
+    );
   }
 
   /**
    * Close server.
    *
-   * Close all connections between its remote clients ({@link WebConnector}s).
+   * Close all connections between its remote clients ({@link WebSocketConnector}s).
    *
    * It destories all RFCs (remote function calls) between this server and remote clients
    * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
@@ -174,15 +185,15 @@ export class WebServer<
    */
   public async close(): Promise<void> {
     // VALIDATION
-    if (this.state_ !== WebServer.State.OPEN)
+    if (this.state_ !== WebSocketServer.State.OPEN)
       throw new DomainError(
-        "Error on WebServer.close(): server is not opened.",
+        "Error on WebSocketServer.close(): server is not opened.",
       );
 
     // DO CLOSE
-    this.state_ = WebServer.State.CLOSING;
+    this.state_ = WebSocketServer.State.CLOSING;
     await this._Close();
-    this.state_ = WebServer.State.CLOSED;
+    this.state_ = WebSocketServer.State.CLOSED;
   }
 
   /**
@@ -191,17 +202,17 @@ export class WebServer<
   private static _Open(
     server: http.Server | https.Server,
     port: number,
-    setState: (state: WebServer.State) => void,
+    setState: (state: WebSocketServer.State) => void,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       // PREPARE RETURNS
       server.on("listening", () => {
-        setState(WebServer.State.OPEN);
+        setState(WebSocketServer.State.OPEN);
         server.on("error", () => {});
         resolve();
       });
       server.on("error", (error) => {
-        setState(WebServer.State.NONE);
+        setState(WebSocketServer.State.NONE);
         reject(error);
       });
 
@@ -233,13 +244,13 @@ export class WebServer<
    *
    * List of values are such like below:
    *
-   *   - `NONE`: The `{@link WebServer} instance is newly created, but did nothing yet.
-   *   - `OPENING`: The {@link WebServer.open} method is on running.
+   *   - `NONE`: The `{@link WebSocketServer} instance is newly created, but did nothing yet.
+   *   - `OPENING`: The {@link WebSocketServer.open} method is on running.
    *   - `OPEN`: The websocket server is online.
-   *   - `CLOSING`: The {@link WebServer.close} method is on running.
+   *   - `CLOSING`: The {@link WebSocketServer.close} method is on running.
    *   - `CLOSED`: The websocket server is offline.
    */
-  public get state(): WebServer.State {
+  public get state(): WebSocketServer.State {
     return this.state_;
   }
 }
@@ -247,9 +258,9 @@ export class WebServer<
 /**
  *
  */
-export namespace WebServer {
+export namespace WebSocketServer {
   /**
-   * Current state of the {@link WebServer}.
+   * Current state of the {@link WebSocketServer}.
    */
   export import State = IServer.State;
 }

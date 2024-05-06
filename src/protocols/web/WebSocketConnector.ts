@@ -4,25 +4,25 @@ import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
-import { WebError } from "./WebError";
-import { IWebCommunicator } from "./internal/IWebCommunicator";
+import { WebSocketError } from "./WebSocketError";
+import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
 import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
 
 /**
  * Web Socket Connector.
  *
- * The `WebConnector` is a communicator class who can connect to websocket server and
+ * The `WebSocketConnector` is a communicator class who can connect to websocket server and
  * interact with it using RFC (Remote Function Call).
  *
  * You can connect to the websocket server using {@link connect}() method. The interaction
- * would be started if the server is opened by {@link WebServer.open}() and the server
- * accepts your connection by {@link WebAcceptor.accept}().
+ * would be started if the server is opened by {@link WebSocketServer.open}() and the server
+ * accepts your connection by {@link WebSocketAcceptor.accept}().
  *
  * Note that, after you business has been completed, please close the connection using
- * {@link close}() or let the server to {@link WebAcceptor.close close itself}. If you don't
+ * {@link close}() or let the server to {@link WebSocketAcceptor.close close itself}. If you don't
  * close the connection in time, it may waste vulnerable resources of the server.
  *
- * Also, when declaring this {@link WebConnector} type, you've to define two template arguments,
+ * Also, when declaring this {@link WebSocketConnector} type, you've to define two template arguments,
  * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
  * client after the connection. I hope you and client not to omit it and utilize it as an
  * activation tool to enhance security.
@@ -36,13 +36,13 @@ import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
  * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
  * @author Jeongho Nam - https://github.com/samchon
  */
-export class WebConnector<
+export class WebSocketConnector<
     Header,
     Provider extends object | null,
     Remote extends object | null,
   >
   extends ConnectorBase<Header, Provider, Remote>
-  implements IWebCommunicator
+  implements IWebSocketCommunicator
 {
   /**
    * @hidden
@@ -57,7 +57,7 @@ export class WebConnector<
    *
    * Try connection to the remote websocket server with its address and waiting for the
    * server to accept the trial. If the server rejects your connection, then exception
-   * would be thrown (in *Promise.catch*, as `WebError`).
+   * would be thrown (in *Promise.catch*, as `WebSocketError`).
    *
    * After the connection and your business has been completed, don't forget to closing the
    * connection in time to prevent waste of the server resource.
@@ -67,28 +67,28 @@ export class WebConnector<
    */
   public async connect(
     url: string,
-    options: Partial<WebConnector.IConnectOptions> = {},
+    options: Partial<WebSocketConnector.IConnectOptions> = {},
   ): Promise<void> {
     // TEST CONDITION
-    if (this.socket_ && this.state !== WebConnector.State.CLOSED)
-      if (this.socket_.readyState === WebConnector.State.CONNECTING)
+    if (this.socket_ && this.state !== WebSocketConnector.State.CLOSED)
+      if (this.socket_.readyState === WebSocketConnector.State.CONNECTING)
         throw new DomainError(
-          "Error on WebConnector.connect(): already connecting.",
+          "Error on WebSocketConnector.connect(): already connecting.",
         );
-      else if (this.socket_.readyState === WebConnector.State.OPEN)
+      else if (this.socket_.readyState === WebSocketConnector.State.OPEN)
         throw new DomainError(
-          "Error on WebConnector.connect(): already connected.",
+          "Error on WebSocketConnector.connect(): already connected.",
         );
       else
         throw new DomainError(
-          "Error on WebConnector.connect(): already closing.",
+          "Error on WebSocketConnector.connect(): already closing.",
         );
 
     //----
     // CONNECTION
     //----
     // PREPARE ASSETS
-    this.state_ = WebConnector.State.CONNECTING;
+    this.state_ = WebSocketConnector.State.CONNECTING;
 
     try {
       // DO CONNNECT
@@ -104,23 +104,26 @@ export class WebConnector<
       // PROMISED HANDSHAKE
       if (
         (await this._Handshake(options.timeout)) !==
-        WebConnector.State.OPEN.toString()
+        WebSocketConnector.State.OPEN.toString()
       )
-        throw new WebError(
+        throw new WebSocketError(
           1008,
-          "Error on WebConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.",
+          "Error on WebSocketConnector.connect(): target server may not be opened by TGrid. It's not following the TGrid's own handshake rule.",
         );
 
       // SUCCESS
-      this.state_ = WebConnector.State.OPEN;
+      this.state_ = WebSocketConnector.State.OPEN;
       {
         this.socket_!.onmessage = this._Handle_message.bind(this);
         this.socket_!.onclose = this._Handle_close.bind(this);
         this.socket_!.onerror = () => {};
       }
     } catch (exp) {
-      this.state_ = WebConnector.State.NONE;
-      if (this.socket_ && this.socket_.readyState === WebConnector.State.OPEN) {
+      this.state_ = WebSocketConnector.State.NONE;
+      if (
+        this.socket_ &&
+        this.socket_.readyState === WebSocketConnector.State.OPEN
+      ) {
         this.socket_.onclose = () => {};
         this.socket_.close();
       }
@@ -135,10 +138,10 @@ export class WebConnector<
     return new Promise((resolve, reject) => {
       this.socket_!.onopen = () => resolve(this.socket_!);
       this.socket_!.onclose = once((evt) => {
-        reject(new WebError(evt.code, evt.reason));
+        reject(new WebSocketError(evt.code, evt.reason));
       });
       this.socket_!.onerror = once(() => {
-        reject(new WebError(1006, "Connection refused."));
+        reject(new WebSocketError(1006, "Connection refused."));
       });
     });
   }
@@ -158,7 +161,7 @@ export class WebConnector<
     const ret: Promise<void> = this.join();
 
     // DO CLOSE
-    this.state_ = WebConnector.State.CLOSING;
+    this.state_ = WebSocketConnector.State.CLOSING;
     this.socket_!.close(code, reason);
 
     // LAZY RETURN
@@ -181,9 +184,9 @@ export class WebConnector<
         sleep_for(timeout).then(() => {
           if (completed === false) {
             reject(
-              new WebError(
+              new WebSocketError(
                 1008,
-                `Error on WebConnector.connect(): target server is not sending handshake data over ${timeout} milliseconds.`,
+                `Error on WebSocketConnector.connect(): target server is not sending handshake data over ${timeout} milliseconds.`,
               ),
             );
             expired = true;
@@ -200,13 +203,13 @@ export class WebConnector<
       this.socket_!.onclose = once((evt) => {
         if (expired === false) {
           completed = true;
-          reject(new WebError(evt.code, evt.reason));
+          reject(new WebSocketError(evt.code, evt.reason));
         }
       });
       this.socket_!.onerror = once(() => {
         if (expired === false) {
           completed = true;
-          reject(new WebError(1006, "Connection refused."));
+          reject(new WebSocketError(1006, "Connection refused."));
         }
       });
     });
@@ -229,13 +232,13 @@ export class WebConnector<
    *
    * List of values are such like below:
    *
-   *   - `NONE`: The {@link WebConnector} instance is newly created, but did nothing yet.
-   *   - `CONNECTING`: The {@link WebConnector.connect} method is on running.
+   *   - `NONE`: The {@link WebSocketConnector} instance is newly created, but did nothing yet.
+   *   - `CONNECTING`: The {@link WebSocketConnector.connect} method is on running.
    *   - `OPEN`: The connection is online.
-   *   - `CLOSING`: The {@link WebConnector.close} method is on running.
+   *   - `CLOSING`: The {@link WebSocketConnector.close} method is on running.
    *   - `CLOSED`: The connection is offline.
    */
-  public get state(): WebConnector.State {
+  public get state(): WebSocketConnector.State {
     return this.state_;
   }
 
@@ -263,12 +266,12 @@ export class WebConnector<
    * @hidden
    */
   private async _Handle_close(event: CloseEvent): Promise<void> {
-    const error: WebError | undefined =
+    const error: WebSocketError | undefined =
       !event.code || event.code !== 1000
-        ? new WebError(event.code, event.reason)
+        ? new WebSocketError(event.code, event.reason)
         : undefined;
 
-    this.state_ = WebConnector.State.CLOSED;
+    this.state_ = WebSocketConnector.State.CLOSED;
     await this.destructor(error);
   }
 }
@@ -276,14 +279,14 @@ export class WebConnector<
 /**
  *
  */
-export namespace WebConnector {
+export namespace WebSocketConnector {
   /**
-   * Current state of the {@link WebConnector}.
+   * Current state of the {@link WebSocketConnector}.
    */
   export import State = ConnectorBase.State;
 
   /**
-   * Connection options for the {@link WebConnector.connect}.
+   * Connection options for the {@link WebSocketConnector.connect}.
    */
   export interface IConnectOptions {
     /**

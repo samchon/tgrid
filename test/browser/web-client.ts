@@ -1,4 +1,4 @@
-import { Driver, WebConnector } from "tgrid";
+import { Driver, WebSocketConnector } from "tgrid";
 import { InvalidArgument } from "tstl";
 
 import { ICalculator } from "../controllers/ICalculator";
@@ -6,10 +6,8 @@ import { complete } from "./internal";
 
 window.onload = async () => {
   for (let i: number = 0; i < 5; ++i) {
-    const connector: WebConnector<null, null, ICalculator> = new WebConnector(
-      null,
-      null,
-    );
+    const connector: WebSocketConnector<null, null, ICalculator> =
+      new WebSocketConnector(null, null);
     await connector.connect("ws://127.0.0.1:10489");
 
     const driver: Driver<ICalculator> = connector.getDriver();

@@ -9,6 +9,9 @@ import { Singleton, is_node } from "tstl";
 import type * as __thread from "worker_threads";
 import type * as __ws from "ws";
 
+/**
+ * @internal
+ */
 export namespace NodeModule {
   export const cp: Singleton<Promise<typeof __cp>> = new Singleton(() =>
     import2("child_process"),
@@ -37,4 +40,7 @@ export namespace NodeModule {
   };
 }
 
+/**
+ * @internal
+ */
 const __global = is_node() ? global : undefined;
