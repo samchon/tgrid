@@ -1,5 +1,5 @@
 /**
- * @hidden
+ * @internal
  */
 export interface IReject {
   name: "reject";

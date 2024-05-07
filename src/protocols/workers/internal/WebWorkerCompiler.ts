@@ -1,7 +1,7 @@
 import { IWorkerCompiler } from "./IWorkerCompiler";
 
 /**
- * @hidden
+ * @internal
  */
 export const WebWorkerCompiler = async (): Promise<IWorkerCompiler> => ({
   compile: async (content) => {

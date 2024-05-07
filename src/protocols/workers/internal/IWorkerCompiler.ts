@@ -1,5 +1,5 @@
 /**
- * @hidden
+ * @internal
  */
 export interface IWorkerCompiler {
   compile(content: string): Promise<string>;
@@ -8,7 +8,7 @@ export interface IWorkerCompiler {
 }
 
 /**
- * @hidden
+ * @internal
  */
 export namespace IWorkerCompiler {
   export type Creator = {

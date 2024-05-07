@@ -3,7 +3,7 @@ import type fs from "fs";
 import { NodeModule } from "../../../utils/internal/NodeModule";
 
 /**
- * @hidden
+ * @internal
  */
 export namespace FileSystem {
   /* ----------------------------------------------------------------
