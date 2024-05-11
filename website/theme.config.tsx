@@ -4,7 +4,7 @@ import React from "react";
 const config: DocsThemeConfig = {
   logo: () => (
     <>
-      <img src="/favicon/android-chrome-192x192.png" width={32} height={32} />
+      <img src="/favicon/android-chrome-192x192.png" width={36} height={36} />
       <span
         style={{
           fontWeight: "bold",
@@ -74,15 +74,15 @@ const config: DocsThemeConfig = {
         },
         {
           property: "og:title",
-          content: "Typia Guide Documents",
+          content: "TGrid Guide Documents",
         },
         {
           property: "og:description",
-          content: "Superfast Runtime Validator with only one line",
+          content: "TypeScript Grid Computing Framework.\n\nSupport RPC (Remote Procure Call) for WebSocket and Worker protocols",
         },
         {
           property: "og:site_name",
-          content: "Typia Guide Documents",
+          content: "TGrid Guide Documents",
         },
         {
           property: "og:url",
@@ -102,7 +102,7 @@ const config: DocsThemeConfig = {
         },
         {
           name: "twitter:description",
-          content: "Superfast Runtime Validator with only one line",
+          content: "TypeScript Grid Computing Framework.\n\nSupport RPC (Remote Procure Call) for WebSocket and Worker protocols",
         },
         {
           name: "twitter:site",
