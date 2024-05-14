@@ -18,31 +18,34 @@ import { ThreadPort } from "./internal/threads/ThreadPort";
 /**
  * Worker Server.
  *
- * The `WorkerServer` is a class representing a `Worker` server who can communicate with
- * remote client, parent and creator of the `Worker` (anyway {@link WorkerConnector}), using
- * RFC (Remote Function Call).
+ * The `WorkerServer` is a class representing a `Worker` server which communicate
+ * with client ({@link WorkerConnector}), through the RPC (Remote Procedure Call).
  *
- * Unlike other servers, `WorkerServer` can accept only a client ({@link WorkerConnector})
- * because the worker is dependent on its parent instance (web page, node or parent worker).
- * Thus, `WorkerServer` does not have any acceptor and communicates with client (its parent)
- * by itself.
+ * Unlike other servers, `WorkerServer` can accept only one client
+ * ({@link WorkerConnector}), because the `Worker` is dependent on its parent instance
+ * (web page, node or parent worker). Thus, `WorkerServer` does not have any acceptor
+ * and communicates with client (its parent) directly.
  *
- * To start communication with the remote client, call the {@link open}() method with special
- * `Provider`. After your business, don't forget terminating this worker using {@link close}()
- * or {@link WorkerConnector.close}() method. If you don't terminate it, then vulnerable
- * memory and communication channel would be kept and it may cause the memory leak.
+ * To start communication with the client, call the {@link open} method
+ * with `Provider` instance. After your business, don't forget {@link close cosing}
+ * this `Worker` instance. If the termination is performed by the
+ * {@link WorkerConnector}, you can wait the closing signal through the
+ * {@link join} method.
  *
- * Also, when declaring this {@link WorkerServer} type, you've to define two template arguments,
- * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
- * system after the connection.
+ * Also, when declaring this `WorkerServer` type, you've to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
+ * be same with the ones defined in the target {@link WorkerConnector} class
+ * (`Provider` and `Remote` must be reversed).
  *
- * The second template argument *Provider* represents the features provided for the remote system.
- * If you don't have any plan to provide any feature to the remote system, just declare it as
- * `null`.
+ * For reference, the first `Header` type repersents an initial data from the
+ * client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from server to client, and the other `Remote` means a provider from the
+ * client to server.
  *
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the client.
+ * @template Remote Type of features supported by client.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WorkerServer<
@@ -99,14 +102,14 @@ export class WorkerServer<
   /**
    * Open server with `Provider`.
    *
-   * Open worker server and start communication with the remote system
+   * Open worker server and start communication with the client
    * ({@link WorkerConnector}).
    *
-   * Note that, after your business, you should terminate this worker to prevent waste
-   * of memory leak. Close this worker by yourself ({@link close}) or let remote client to
-   * close this worker ({@link WorkerConnector.close}).
+   * Note that, after your business, you should terminate this worker to prevent
+   * waste of memory leak. Close this worker by yourself ({@link close}) or let
+   * client to close this worker ({@link WorkerConnector.close}).
    *
-   * @param provider An object providing featrues for the remote system.
+   * @param provider An object providing featrues for the client.
    */
   public async open(provider: Provider): Promise<void> {
     // TEST CONDITION

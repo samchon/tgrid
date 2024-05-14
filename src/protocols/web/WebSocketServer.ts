@@ -20,7 +20,7 @@ import { WebSocketAcceptor } from "./WebSocketAcceptor";
  *
  * To open the websocket server, call the {@link open} method with your callback
  * function which would be called whenever a {@link WebSocketAcceptor} has been
- * newly created ay a new client's connection.
+ * newly created by a new client's connection.
  *
  * Also, when declaring this {@link WebSocketServer} type, you have to define three
  * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments
@@ -30,7 +30,7 @@ import { WebSocketAcceptor } from "./WebSocketAcceptor";
  * For reference, the first `Header` type repersents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
- * provider from server to client, and other `Remote` means a provider from the
+ * provider from server to client, and the other `Remote` means a provider from the
  * remote client to server.
  *
  * @template Header Type of header containing initialization data like activation.

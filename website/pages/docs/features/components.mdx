@@ -110,20 +110,18 @@ export const webSocketClientMain = async () => {
   await remote.scientific.sqrt(2); // returns 1.41
   await remote.statistics.mean(1, 3, 9); // returns 4.33
 
-  console.log(stack);
+  console.log(...stack);
 };
 ```
 
 > Execution result:
 >
 > ```bash
-> [
->   { type: 'plus', input: [ 10, 20 ], output: 30 },
->   { type: 'multiplies', input: [ 3, 4 ], output: 12 },
->   { type: 'divides', input: [ 5, 3 ], output: 1.67 },
->   { type: 'sqrt', input: [ 2 ], output: 1.41 },
->   { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
-> ]
+> { type: 'plus', input: [ 10, 20 ], output: 30 }
+> { type: 'multiplies', input: [ 3, 4 ], output: 12 }
+> { type: 'divides', input: [ 5, 3 ], output: 1.67 }
+> { type: 'sqrt', input: [ 2 ], output: 1.41 }
+> { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
 > ```
 
 Driver of Listener for RPC (Remote Procedure Call).

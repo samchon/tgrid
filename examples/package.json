@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "websocket": "npx ts-node src/websocket/index.ts",
-    "websocket:server": "npx ts-node src/websocket/server.ts",
-    "websocket:client": "npx ts-node src/websocket/client.ts"
+    "start:websocket": "ts-node src/websocket",
+    "start:worker": "ts-node src/worker"
   },
   "keywords": [],
   "author": "",

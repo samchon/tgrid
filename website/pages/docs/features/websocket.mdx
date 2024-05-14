@@ -198,7 +198,7 @@ Also, when declaring `WebSocketServer` type, you have to specify three generic a
 For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
 
   - Above example case:
-    - `Header`: Nothing
+    - `Header`: `ICalcConfig` type
     - `Provider`: Server is providing one of below to the client
       - `SimpleCalculator`
       - `StatisticsCalculator`
@@ -430,7 +430,8 @@ export const webSocketClientMain = async () => {
   await remote.scientific.sqrt(2); // returns 1.41
   await remote.statistics.mean(1, 3, 9); // returns 4.33
 
-  console.log(stack);
+  await connector.close();
+  console.log(...stack);
 };
 ```
   </Tab>
@@ -474,13 +475,11 @@ export interface IStatisticsCalculator {
 > Execution result:
 >
 > ```bash
-> [
->   { type: 'plus', input: [ 10, 20 ], output: 30 },
->   { type: 'multiplies', input: [ 3, 4 ], output: 12 },
->   { type: 'divides', input: [ 5, 3 ], output: 1.67 },
->   { type: 'sqrt', input: [ 2 ], output: 1.41 },
->   { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
-> ]
+> { type: 'plus', input: [ 10, 20 ], output: 30 }
+> { type: 'multiplies', input: [ 3, 4 ], output: 12 }
+> { type: 'divides', input: [ 5, 3 ], output: 1.67 }
+> { type: 'sqrt', input: [ 2 ], output: 1.41 }
+> { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
 > ```
 
 <Callout type="info">
@@ -500,7 +499,7 @@ Also, when declaring this `WebSocketConnector` type, you've to define three gene
 For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
 
   - Above example case:
-    - `Header`: Nothing
+    - `Header`: `ICalcConfig` type
     - `Provider`: Client is providing `ICalcEventListener` to the server
     - `Remote`: Server is providing `ISimpleCalculator` to the client
 

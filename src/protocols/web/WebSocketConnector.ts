@@ -26,7 +26,7 @@ import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
  * closing must be performed by the remote websocket server, you can wait the
  * remote server's closing signal through the {@link join} method.
  *
- * Also, when declaring this {@link WebSocketConnector} type, you've to define three
+ * Also, when declaring this `WebSocketConnector` type, you've to define three
  * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
  * be same with the ones defined in the target {@link WebSocketServer} and
  * {@link WebSocketAcceptor} classes (`Provider` and `Remote` must be reversed).
@@ -34,7 +34,7 @@ import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
  * For reference, the first `Header` type repersents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
- * provider from client to server, and other `Remote` means a provider from the
+ * provider from client to server, and the other `Remote` means a provider from the
  * remote server to client.
  *
  * @template Header Type of the header containing initial data.

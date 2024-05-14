@@ -14,14 +14,14 @@ import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
  *  - available only in the NodeJS.
  *
  * The `WebSocketAcceptor` is a communicator class interacting with the remote
- * {@link WebSocketConnector websocket client} through RPC (Remote Procedure Call)
- * concept, created by the {@link WebSocketServer} class whenever a remote client
+ * {@link WebSocketConnector websocket client} through RPC (Remote Procedure Call),
+ * created by the {@link WebSocketServer} class whenever a remote client
  * connects to the websocket server.
  *
  * When a remote client connects to the {@link WebSocketServer websocket server},
  * so that a new `WebSocketAcceptor` instance being created, you can determine
  * whether to {@link accept} the client's connection or {@link reject not},
- * reading the {@lin header} and {@link path} properties. If you've decided to
+ * reading the {@link header} and {@link path} properties. If you've decided to
  * accept the connection, call the {@link accept} method with `Provider` instance.
  * Otherwise, reject it thorugh the {@link reject} method.
  *
@@ -37,7 +37,7 @@ import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
  * For reference, the first `Header` type repersents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
- * provider from server to client, and other `Remote` means a provider from the
+ * provider from server to client, and the other `Remote` means a provider from the
  * remote client to server.
  *
  * @template Header Type of the header containing initial data.

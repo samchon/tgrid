@@ -10,27 +10,36 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
  *
  *  - available only in the Web Browser.
  *
- * The `SharedWorkerAcceptor` is a communicator class communicating with the remote client
- * ({@link SharedWorkerConnector}) using RFC (Remote Function Call). The `SharedAcceptor`
- * objects are always created by the {@link SharedWorkerServer} class whenever a remote client
- * connects to its server.
+ * The `SharedWorkerAcceptor` is a communicator class interacting with the
+ * {@link SharedWorkerConnector} through RFC (Remote Function Call), created by
+ * the {@link SharedWorkerServer} class whenever a client connects to the
+ * `SharedWorker` instance.
  *
- * To accept connection and start interaction with the remote client, call the {@link accept}
- * method with special `Provider`. After the {@link accept acceptance}, don't forget to closing
- * the connection after your business has been completed. Otherwise, you don't want to accept but
- * reject the connection, call the {@link reject} method.
+ * When a remote client connects to the {@link SharedWorkerServer},
+ * so that a new `SharedworkerAcceptor` instance being created, you can determine
+ * whether to {@link accept} the client's connection or {@link reject not},
+ * reading the {@link header} property. If you've decided to accept the connection,
+ * call the {@link accept} method with `Provider` instance. Otherwise, reject it
+ * thorugh the {@link reject} method.
  *
- * Also, when declaring this {@link SharedWorkerAcceptor} type, you've to define two template
- * arguments, *Header* and *Provider*. The *Header* type repersents an initial data gotten from
- * the remote client after the connection.
+ * After {@link accept accepting} the connection, don't forget to
+ * {@link close closing} the connection after your business has been completed
+ * to clean up the resources. Otherwise the closing must be performed by the remote
+ * client, you can wait the remote client's closing signal by the {@link join} method.
  *
- * The second template argument *Provider* represents the features provided for the remote client.
- * If you don't have any plan to provide any feature to the remote client, just declare it as
- * `null`.
+ * Also, when declaring this {@link SharedworkerAcceptor} type, you have to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
+ * be same with the ones defined in the {@link SharedWorkerServer} class.
+ *
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from server to client, and the other `Remote` means a provider from the
+ * remote client to server.
  *
  * @template Header Type of the header containing initial data.
- * @template Provider Type of features provided for the remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Provider Type of features provided for the remote client.
+ * @template Remote Type of features provided by remote client.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerAcceptor<

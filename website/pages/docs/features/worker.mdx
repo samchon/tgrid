@@ -1,19 +1,782 @@
 import { Callout, Tabs, Tab } from 'nextra-theme-docs'
 
 ## Outline
-## Dedicated Worker
+`TGrid` supports `Worker`/`SharedWorker` protocols.
+
+With `TGrid`, you can easily develop `Worker` programs under the RPC (Remote Procedure Call) concept.
+
+`TGrid` considers `Worker` as a 1: 1 dedicated server, and `SharedWorker` as a 1: N multi-client acceptable server running on the local. Therefore, the interfaces of `Worker` and `SharedWorker` in the `TGrid` are similar with [WebSocket components](./websocket). In such reason, if you're developing a complicate WebSocket system, you can simulate it in the local environment by using `Worker`/`SharedWorker` components.
+
+
+
+
+## Worker
 <Callout type="info">
   Available in both Browser/NodeJS.
 </Callout>
 
+You can utilize RPC (Remote Procedure Call) even in the `Worker`.
+
 ### `WorkerConnector`
+<Tabs items={["Main Program", "Interfaces"]}>
+  <Tab>
+```typescript filename="examples/src/worker/client.ts" showLineNumbers
+import { Driver, WorkerConnector } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEvent } from "../interfaces/ICalcEvent";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+
+const EXTENSION = __filename.endsWith(".ts") ? "ts" : "js";
+
+export const workerClientMain = async () => {
+  const stack: ICalcEvent[] = [];
+  const listener: ICalcEventListener = {
+    on: (evt: ICalcEvent) => stack.push(evt),
+  };
+  const connector: WorkerConnector<
+    ICalcConfig,
+    ICalcEventListener,
+    ICompositeCalculator
+  > = new WorkerConnector(
+    { precision: 2 }, // header
+    listener, // provider for remote server
+    "process",
+  );
+  await connector.connect(`${__dirname}/server.${EXTENSION}`);
+
+  const remote: Driver<ICompositeCalculator> = connector.getDriver();
+  await remote.plus(10, 20); // returns 30
+  await remote.multiplies(3, 4); // returns 12
+  await remote.divides(5, 3); // returns 1.67
+  await remote.scientific.sqrt(2); // returns 1.41
+  await remote.statistics.mean(1, 3, 9); // returns 4.33
+
+  await connector.close();
+  console.log(...stack);
+};
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+> Execution result:
+>
+> ```bash
+> { type: 'plus', input: [ 10, 20 ], output: 30 }
+> { type: 'multiplies', input: [ 3, 4 ], output: 12 }
+> { type: 'divides', input: [ 5, 3 ], output: 1.67 }
+> { type: 'sqrt', input: [ 2 ], output: 1.41 }
+> { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
+> ```
+
+Worker Connector.
+
+The `WorkerConnetor` is a [communicator](./components/#communicator) class, which creates an `Worker` instance, and interacts with it through RPC (Remote Procedure Call). In other words, `WorkerConnector` considers the `Worker` instance as a remote server accepting only one client; [`WorkerServer`](#workerserver).
+
+You can create the `Worker` instance and communicate with it by [`WorkerConnector.connect()`](/api/classes/WorkerConnector-1.html#connect) or [`WorkerConnector.compile()`](/api/classes/WorkerConnector-1.html#compile) method. The [`WorkerConnector.connect()`](/api/classes/WorkerConnector-1.html#connect) method just opens an existing JS (or TS) file, and the [`WorkerConnector.compile()`](/api/classes/WorkerConnector-1.html#compile) method writes a temporary JS (TS) file and connects to it. Anyway, the `Worker` instanced program must open the [`WorkerServer`](#workerserver).
+
+By the way, don't forget [closing](/api/classes/WorkerConnector-1.html#close) the worker to clean up the resources. If the closing be performed by [`WorkerServer`](#workerserver), you can wait the worker server closing through the [`WorkerConnector.wait()`](/api/classes/WorkerConnector-1.html#wait) method.
+
+Also, when declaring this `WorkerConnector` type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`WorkerServer`](#workerserver) class (`Provider` and `Remote` must be reversed).
+
+For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
+
+  - Above example case:
+    - `Header`: `ICalcConfig` type
+    - `Provider`: Client is providing `ICalcEventListener` to the server
+    - `Remote`: Server is providing `ISimpleCalculator` to the client
+
 ### `WorkerServer`
+<Tabs items={["Main Program", "Providers", "Interfaces"]}>
+  <Tab>
+```typescript filename="examples/src/worker/server.ts" showLineNumbers
+import { Driver, WorkerServer } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { CompositeCalculator } from "../providers/CompositeCalculator";
+
+const main = async () => {
+  const server: WorkerServer<
+    ICalcConfig,
+    CompositeCalculator,
+    ICalcEventListener
+  > = new WorkerServer();
+
+  const header: ICalcConfig = await server.getHeader();
+  const listener: Driver<ICalcEventListener> = server.getDriver();
+  const provider: CompositeCalculator = new CompositeCalculator(
+    header,
+    listener,
+  );
+  await server.open(provider);
+};
+main().catch((exp) => {
+  console.error(exp);
+  process.exit(-1);
+});
+```
+</Tab>
+  <Tab>
+```typescript filename="examples/src/providers/*.ts" showLineNumbers
+import { Driver } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { IScientificCalculator } from "../interfaces/IScientificCalculator";
+import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
+import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
+
+export abstract class CalculatorBase {
+  public constructor(
+    private readonly config: ICalcConfig,
+    private readonly listener: Driver<ICalcEventListener>,
+  ) {}
+
+  protected compute(type: string, input: number[], output: number): number {
+    const pow: number = Math.pow(10, this.config.precision);
+    output = Math.round(output * pow) / pow;
+    this.listener.on({ type, input, output }).catch(() => {});
+    return output;
+  }
+}
+
+export class SimpleCalculator
+  extends CalculatorBase
+  implements ISimpleCalculator
+{
+  public plus(x: number, y: number): number {
+    return this.compute("plus", [x, y], x + y);
+  }
+  public minus(x: number, y: number): number {
+    return this.compute("minus", [x, y], x - y);
+  }
+  public multiplies(x: number, y: number): number {
+    return this.compute("multiplies", [x, y], x * y);
+  }
+  public divides(x: number, y: number): number {
+    return this.compute("divides", [x, y], x / y);
+  }
+}
+
+export class ScientificCalculator
+  extends CalculatorBase
+  implements IScientificCalculator
+{
+  public pow(x: number, y: number): number {
+    return this.compute("pow", [x, y], Math.pow(x, y));
+  }
+  public sqrt(x: number): number {
+    return this.compute("sqrt", [x], Math.sqrt(x));
+  }
+  public log(x: number, base: number): number {
+    return this.compute("log", [x, base], Math.log(x) / Math.log(base));
+  }
+}
+
+export class StatisticsCalculator
+  extends CalculatorBase
+  implements IStatisticsCalculator
+{
+  public mean(...values: number[]): number {
+    const sum: number = values.reduce((x, y) => x + y);
+    return this.compute("mean", values, sum / values.length);
+  }
+  public stdev(...values: number[]): number {
+    const mean: number = values.reduce((x, y) => x + y) / values.length;
+    const sum: number = values.reduce((x, y) => x + Math.pow(y - mean, 2));
+    return this.compute("stdev", values, Math.sqrt(sum / values.length));
+  }
+}
+
+export class CompositeCalculator
+  extends SimpleCalculator
+  implements ICompositeCalculator
+{
+  public readonly scientific: ScientificCalculator;
+  public readonly statistics: StatisticsCalculator;
+
+  public constructor(
+    config: ICalcConfig,
+    listener: Driver<ICalcEventListener>,
+  ) {
+    super(config, listener);
+    this.scientific = new ScientificCalculator(config, listener);
+    this.statistics = new StatisticsCalculator(config, listener);
+  }
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+Worker Server.
+
+The `WorkerServer` is a class representing a Worker server which communicate with client ([`WorkerConnector`](#workerconnector)), through the RPC (Remote Procedure Call).
+
+Unlike other servers, `WorkerServer` can accept only one client ([`WorkerConnector`](#workerconnector)), because the `Worker` is dependent on its parent instance (web page, node or parent worker). Thus, `WorkerServer` does not have any acceptor and communicates with client (its parent) directly.
+
+To start communication with the client, call the [`WorkerServer.open()`](http://127.0.0.1:3000/api/classes/WorkerServer-1.html#open) method with `Provider` instance. After your business, don't forget closing this Worker instance. If the termination is performed by the [`WorkerConnector`](#workerconnector), you can wait the closing signal through the [`WorkerServer.join()`](http://127.0.0.1:3000/api/classes/WorkerServer-1.html#join) method.
+
+Also, when declaring this WorkerServer type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`WorkerConnector`](#workerconnector) class (`Provider` and `Remote` must be reversed).
+
+For reference, the first `Header` type repersents an initial data from the client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the client to server.
+
+  - Above example case:
+    - `Header`: `ICalcConfig` type
+    - `Provider`: Server is providing `CompositeCalculator` to the client
+    - `Remote`: Client is providing `ICalcEventListener` to the server
+
+
+
 
 ## Shared Worker
 <Callout type="warning">
   Available only in the Web Browser.
 </Callout>
 
+In the Web Browser, you also can perform RPC (Remote Procedure Call) in the `SharedWorker`.
+
+Also, as `SharedWorker` can accept multiple clients, `TGrid` considers it as a local server running on the web browser, and its interfaces are similar with [WebSocket components](./websocket).
+
 ### `SharedWorkerServer`
+<Tabs items={["Main Program", "Providers", "Interfaces"]}>
+  <Tab>
+```typescript filename="examples/src/shared-worker/server.ts" showLineNumbers
+import { Driver, SharedWorkerServer } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { CompositeCalculator } from "../providers/CompositeCalculator";
+
+const main = async () => {
+  let pool: number = 0;
+  const server: SharedWorkerServer<
+    ICalcConfig,
+    CompositeCalculator,
+    ICalcEventListener
+  > = new SharedWorkerServer();
+  await server.open(async (acceptor) => {
+    // LIST UP PROPERTIES
+    const config: ICalcConfig = acceptor.header;
+    const listener: Driver<ICalcEventListener> = acceptor.getDriver();
+
+    // ACCEPT OR REJECT THE CONNECTION
+    if (pool >= 8) {
+      await acceptor.reject("Too much connections.");
+    } else {
+      await acceptor.accept(new CompositeCalculator(config, listener));
+      ++pool;
+      await acceptor.join();
+      --pool;
+    }
+  });
+};
+main().catch((exp) => {
+  console.error(exp);
+  process.exit(-1);
+});
+```
+</Tab>
+  <Tab>
+```typescript filename="examples/src/providers/*.ts" showLineNumbers
+import { Driver } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { IScientificCalculator } from "../interfaces/IScientificCalculator";
+import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
+import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
+
+export abstract class CalculatorBase {
+  public constructor(
+    private readonly config: ICalcConfig,
+    private readonly listener: Driver<ICalcEventListener>,
+  ) {}
+
+  protected compute(type: string, input: number[], output: number): number {
+    const pow: number = Math.pow(10, this.config.precision);
+    output = Math.round(output * pow) / pow;
+    this.listener.on({ type, input, output }).catch(() => {});
+    return output;
+  }
+}
+
+export class SimpleCalculator
+  extends CalculatorBase
+  implements ISimpleCalculator
+{
+  public plus(x: number, y: number): number {
+    return this.compute("plus", [x, y], x + y);
+  }
+  public minus(x: number, y: number): number {
+    return this.compute("minus", [x, y], x - y);
+  }
+  public multiplies(x: number, y: number): number {
+    return this.compute("multiplies", [x, y], x * y);
+  }
+  public divides(x: number, y: number): number {
+    return this.compute("divides", [x, y], x / y);
+  }
+}
+
+export class ScientificCalculator
+  extends CalculatorBase
+  implements IScientificCalculator
+{
+  public pow(x: number, y: number): number {
+    return this.compute("pow", [x, y], Math.pow(x, y));
+  }
+  public sqrt(x: number): number {
+    return this.compute("sqrt", [x], Math.sqrt(x));
+  }
+  public log(x: number, base: number): number {
+    return this.compute("log", [x, base], Math.log(x) / Math.log(base));
+  }
+}
+
+export class StatisticsCalculator
+  extends CalculatorBase
+  implements IStatisticsCalculator
+{
+  public mean(...values: number[]): number {
+    const sum: number = values.reduce((x, y) => x + y);
+    return this.compute("mean", values, sum / values.length);
+  }
+  public stdev(...values: number[]): number {
+    const mean: number = values.reduce((x, y) => x + y) / values.length;
+    const sum: number = values.reduce((x, y) => x + Math.pow(y - mean, 2));
+    return this.compute("stdev", values, Math.sqrt(sum / values.length));
+  }
+}
+
+export class CompositeCalculator
+  extends SimpleCalculator
+  implements ICompositeCalculator
+{
+  public readonly scientific: ScientificCalculator;
+  public readonly statistics: StatisticsCalculator;
+
+  public constructor(
+    config: ICalcConfig,
+    listener: Driver<ICalcEventListener>,
+  ) {
+    super(config, listener);
+    this.scientific = new ScientificCalculator(config, listener);
+    this.statistics = new StatisticsCalculator(config, listener);
+  }
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+Shared Worker Server.
+
+The `SharedWorkerServer` is a class representing a server in `SharedWorker` environment. Clients connecting to the `SharedWorkerServer` would communicate with this server through [`SharedWorkerAcceptor`](#sharedworkeracceptor) instaces using RPC (Remote Procedure Call) concept.
+
+To open the server, call the [`SharedWorkerServer.open()`](/api/classes/SharedWorkerServer-1.html#open) method with your callback function which would be called whenever a [`SharedWorkerAcceptor`](#sharedworkeracceptor) has been newly created by a new client's connection.
+
+Also, when declaring this `SharedWorkerServer` type, you have to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments would be propagated to the [`SharedWorkerAcceptor`](#sharedworkeracceptor), so that [`SharedWorkerAcceptor`](#sharedworkeracceptor) would have the same generic arguments, too.
+
+For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
+
+  - Above example case:
+    - `Header`: `ICalcConfig` type
+    - `Provider`: Server is providing `CompositeCalculator` to the client
+    - `Remote`: Client is providing `ICalcEventListener` to the server
+
 ### `SharedWorkerAcceptor`
+<Tabs items={["Main Program", "Providers", "Interfaces"]}>
+  <Tab>
+```typescript filename="examples/src/shared-worker/server.ts" showLineNumbers {15-35}
+import { Driver, SharedWorkerAcceptor, SharedWorkerServer } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { CompositeCalculator } from "../providers/CompositeCalculator";
+
+const main = async () => {
+  let pool: number = 0;
+  const server: SharedWorkerServer<
+    ICalcConfig,
+    CompositeCalculator,
+    ICalcEventListener
+  > = new SharedWorkerServer();
+  await server.open(
+    async (
+      acceptor: SharedWorkerAcceptor<
+        ICalcConfig,
+        CompositeCalculator,
+        ICalcEventListener
+      >,
+    ) => {
+      // LIST UP PROPERTIES
+      const config: ICalcConfig = acceptor.header;
+      const listener: Driver<ICalcEventListener> = acceptor.getDriver();
+
+      // ACCEPT OR REJECT THE CONNECTION
+      if (pool >= 8) {
+        await acceptor.reject("Too much connections.");
+      } else {
+        await acceptor.accept(new CompositeCalculator(config, listener));
+        ++pool;
+        await acceptor.join();
+        --pool;
+      }
+    },
+  );
+};
+main().catch((exp) => {
+  console.error(exp);
+  process.exit(-1);
+});
+```
+</Tab>
+  <Tab>
+```typescript filename="examples/src/providers/*.ts" showLineNumbers
+import { Driver } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { IScientificCalculator } from "../interfaces/IScientificCalculator";
+import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
+import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
+
+export abstract class CalculatorBase {
+  public constructor(
+    private readonly config: ICalcConfig,
+    private readonly listener: Driver<ICalcEventListener>,
+  ) {}
+
+  protected compute(type: string, input: number[], output: number): number {
+    const pow: number = Math.pow(10, this.config.precision);
+    output = Math.round(output * pow) / pow;
+    this.listener.on({ type, input, output }).catch(() => {});
+    return output;
+  }
+}
+
+export class SimpleCalculator
+  extends CalculatorBase
+  implements ISimpleCalculator
+{
+  public plus(x: number, y: number): number {
+    return this.compute("plus", [x, y], x + y);
+  }
+  public minus(x: number, y: number): number {
+    return this.compute("minus", [x, y], x - y);
+  }
+  public multiplies(x: number, y: number): number {
+    return this.compute("multiplies", [x, y], x * y);
+  }
+  public divides(x: number, y: number): number {
+    return this.compute("divides", [x, y], x / y);
+  }
+}
+
+export class ScientificCalculator
+  extends CalculatorBase
+  implements IScientificCalculator
+{
+  public pow(x: number, y: number): number {
+    return this.compute("pow", [x, y], Math.pow(x, y));
+  }
+  public sqrt(x: number): number {
+    return this.compute("sqrt", [x], Math.sqrt(x));
+  }
+  public log(x: number, base: number): number {
+    return this.compute("log", [x, base], Math.log(x) / Math.log(base));
+  }
+}
+
+export class StatisticsCalculator
+  extends CalculatorBase
+  implements IStatisticsCalculator
+{
+  public mean(...values: number[]): number {
+    const sum: number = values.reduce((x, y) => x + y);
+    return this.compute("mean", values, sum / values.length);
+  }
+  public stdev(...values: number[]): number {
+    const mean: number = values.reduce((x, y) => x + y) / values.length;
+    const sum: number = values.reduce((x, y) => x + Math.pow(y - mean, 2));
+    return this.compute("stdev", values, Math.sqrt(sum / values.length));
+  }
+}
+
+export class CompositeCalculator
+  extends SimpleCalculator
+  implements ICompositeCalculator
+{
+  public readonly scientific: ScientificCalculator;
+  public readonly statistics: StatisticsCalculator;
+
+  public constructor(
+    config: ICalcConfig,
+    listener: Driver<ICalcEventListener>,
+  ) {
+    super(config, listener);
+    this.scientific = new ScientificCalculator(config, listener);
+    this.statistics = new StatisticsCalculator(config, listener);
+  }
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+Shared Worker Acceptor.
+
+The `SharedWorkerAcceptor` is a [communicator](./components/#communicator) class interacting with the [`SharedWorkerConnector`](#sharedworkerconnector) through RFC (Remote Function Call), created by the [`SharedWorkerServer`](#sharedworkerserver) class whenever a client connects to the `SharedWorker` instance.
+
+When a remote client connects to the [`SharedWorkerServer`](#sharedworkerserver), so that a new `SharedworkerAcceptor` instance being created, you can determine whether to accept the client's connection or not, reading the [`SharedWorkerAcceptor.header`](/api/classes/SharedWorkerAcceptor-1.html#header-1) property. If you've decided to accept the connection, call the [`SharedWorkerAcceptor.accept()`](/api/classes/SharedWorkerAcceptor-1.html#accept) method with Provider instance. Otherwise, reject it thorugh the [`SharedWorkerAcceptor.reject()`](/api/classes/SharedWorkerAcceptor-1.html#reject) method.
+
+After [accepting](/api/classes/SharedWorkerAcceptor-1.html#accept) the connection, don't forget to [closing](/api/classes/SharedWorkerAcceptor-1.html#close) the connection after your business has been completed to clean up the resources. Otherwise the closing must be performed by the remote client, you can wait the remote client's closing signal by the [`SharedWorkerAcceptor.join()`](/api/classes/SharedWorkerAcceptor-1.html#accept) method.
+
+Also, when declaring this `SharedworkerAcceptor` type, you have to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the [`SharedWorkerServer`](#sharedworkerserver) class.
+
+For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
+
 ### `SharedWorkerConnector`
+<Tabs items={["Main Program", "Interfaces"]}>
+  <Tab>
+```typescript filename="examples/src/shared-worker/client.ts" showLineNumbers
+import { Driver, SharedWorkerConnector } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEvent } from "../interfaces/ICalcEvent";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+
+export const sharedWorkerClientMain = async () => {
+  const stack: ICalcEvent[] = [];
+  const listener: ICalcEventListener = {
+    on: (evt: ICalcEvent) => stack.push(evt),
+  };
+  const connector: SharedWorkerConnector<
+    ICalcConfig,
+    ICalcEventListener,
+    ICompositeCalculator
+  > = new SharedWorkerConnector(
+    { precision: 2 }, // header
+    listener, // provider for remote server
+  );
+  await connector.connect("./server.js");
+
+  const remote: Driver<ICompositeCalculator> = connector.getDriver();
+  await remote.plus(10, 20); // returns 30
+  await remote.multiplies(3, 4); // returns 12
+  await remote.divides(5, 3); // returns 1.67
+  await remote.scientific.sqrt(2); // returns 1.41
+  await remote.statistics.mean(1, 3, 9); // returns 4.33
+
+  await connector.close();
+  console.log(...stack);
+};
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+> Execution result:
+>
+> ```bash
+> { type: 'plus', input: [ 10, 20 ], output: 30 }
+> { type: 'multiplies', input: [ 3, 4 ], output: 12 }
+> { type: 'divides', input: [ 5, 3 ], output: 1.67 }
+> { type: 'sqrt', input: [ 2 ], output: 1.41 }
+> { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
+> ```
+
+Shared Worker Connector.
+
+The `SharedWorkerConnector` is a [communicator](./components/#communicator) class which connects to an `SharedWorker` instance, and interacts with it through RFC (Remote Function Call) concept.
+
+You can connect to the [`SharedWorkerServer`](#sharedworkerserver) using [`SharedWorkerConnector.connect()`](/api/classes/SharedWorkerConnector-1.html#connect) method. The interaction would be started if the server accepts your connection by calling the [`SharedWorkerAcceptor.accept()`](/api/classes/SharedWorkerAcceptor-1.html#accept) method. If the remote server rejects your connection through [`SharedWorkerAcceptor.reject()`](/api/classes/SharedWorkerAcceptor-1.html#reject) method, the exception would be thrown.
+
+After the connection, don't forget to [closing](/api/classes/SharedWorkerConnector-1.html#close) the connection, if your business logics have been completed, to clean up the resources. Otherwise, the closing must be performed by the remote shared worker server, you can wait the remote server's closing signal through the [`SharedWorkerConnector.join()`](/api/classes/SharedWorkerConnector-1.html#join) method.
+
+Also, when declaring this `SharedWorkerConnector` type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`SharedWorkerServer`](#sharedworkerserver) and [`SharedWorkerAcceptor`](#sharedworkeracceptor) classes (Provider and `Remote` must be reversed).
+
+For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
+
+  - Above example case:
+    - `Header`: `ICalcConfig` type
+    - `Provider`: Client is providing `ICalcEventListener` to the server
+    - `Remote`: Server is providing `ISimpleCalculator` to the client
