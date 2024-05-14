@@ -15,19 +15,26 @@ Also, extremely easy even when composing complicated network system like grid co
 
 ```typescript
 import { Driver, WebSocketConnector } from "tgrid";
+
 import { ICalculator } from "./interfaces/ICalculator";
+import { CalcEventListener } from "./providers/CalcEventListener";
 
 export const main = async (): Promise<void> => {
-  const connector: WebSocketConnector<null, null, ICalculator> =
-    new WebSocketConnector(null, null);
+  // CONNECT TO WEBSOCKET SERVER
+  const connector: WebSocketConnector<
+    null, // header
+    CalcEventListener, // provider for remote server
+    ICalculator, // provider from remote server
+  > = new WebSocketConnector(null, new CalcEventListener());
   await connector.connect("ws://127.0.0.1:443/calculator");
   
-  const remote: Driver<ICalculator> = connector.getDriver();
+  // RPC (YOU CAN CALL REMOTE PROCEDURES)
+  const calc: Driver<ICalculator> = connector.getDriver();
   console.log(
-    await remote.plus(2, 3),
-    await remote.minus(7, 1),
-    await remote.multiplies(3, 4),
-    await remote.divides(9, 3),
+    await calc.plus(2, 3),
+    await calc.minus(7, 1),
+    await calc.multiplies(3, 4),
+    await calc.divides(9, 3),
   );
   await connector.close();
 };
@@ -43,7 +50,7 @@ npm install tgrid
 
 Just install with `npm` command. That's all.
 
-If you're using `tgrid` with `nestia`, reference `nestia` guide documents.
+If you wanna `tgrid` in `NestJS`, read `nestia` guide documents.
 
   - [Nestia > Guide Documents > Setup](https://nestia.io/docs/setup/)
   - [Nestia > Guide Documents > WebSocketRoute](https://nestia.io/docs/core/WebSocketRoute/)
@@ -68,7 +75,7 @@ Check out the document in the [website](https://tgrid.com/docs):
     - [Remote Function Call](https://tgrid.com/docs/examples/remote-function-call)
     - [Remote Object Call](https://tgrid.com/docs/examples/remote-object-call)
     - [Object Oriented Network](https://tgrid.com/docs/examples/object-oriented-network)
-    - [NestJS WebSocket](https://tgrid.com/docs/examples/nestjs)
+    - [NestJS WebSocket SDK](https://tgrid.com/docs/examples/nestjs-websocket-sdk)
   - Learn from Projects
     - [Chat Application](https://tgrid.com/docs/projects/chat)
     - [Grid Market](https://tgrid.com/docs/examples/market)

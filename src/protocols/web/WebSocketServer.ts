@@ -13,25 +13,29 @@ import { WebSocketAcceptor } from "./WebSocketAcceptor";
  *
  *  - available only in the NodeJS.
  *
- * The `WebSocketServer` is a class who can open an websocket server. Clients connecting to the
- * `WebSocketServer` would communicate with this server through {@link WebSocketAcceptor} objects using
- * RFC (Remote Function Call).
+ * The `WebSocketServer` is a class who can open an websocket server. Clients
+ * connecting to the `WebSocketServer` would communicate with this websocket server
+ * through {@link WebSocketAcceptor} instances with RPC (Remote Procedure Call)
+ * concept.
  *
- * To open the websocket server, call the {@link open}() method with your callback function which
- * would be called whenever a {@link WebSocketAcceptor} has been newly created ay a client's connection.
+ * To open the websocket server, call the {@link open} method with your callback
+ * function which would be called whenever a {@link WebSocketAcceptor} has been
+ * newly created ay a new client's connection.
  *
- * Also, when declaring this {@link WebSocketServer} type, you've to define two template arguments,
- * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
- * client after the connection. I hope you and client not to omit it and utilize it as an
- * activation tool to enhance security.
+ * Also, when declaring this {@link WebSocketServer} type, you have to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments
+ * would be propagated to the {@link WebSocketAcceptor}, so that
+ * {@link WebSocketAcceptor} would have the same generic arguments, too.
  *
- * The second template argument *Provider* represents the features provided for the remote client.
- * If you don't have any plan to provide any feature to the remote client, just declare it as
- * `null`.
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from server to client, and other `Remote` means a provider from the
+ * remote client to server.
  *
  * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for the remote systems.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Provider Type of features provided for the remote client.
+ * @template Remote Type of features provided by remote client.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebSocketServer<

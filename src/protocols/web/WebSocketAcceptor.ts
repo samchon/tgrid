@@ -13,28 +13,36 @@ import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
  *
  *  - available only in the NodeJS.
  *
- * The `WebSocketAcceptor` is a communicator class interacting with the remote (web socket) client using
- * [RFC](https://github.com/samchon/tgrid#13-remote-function-call) (Remote Function Call). The
- * `WebSocketAcceptor` objects are always created by the {@link WebSocketServer} class whenever a remote client
- * connects to its server.
+ * The `WebSocketAcceptor` is a communicator class interacting with the remote
+ * {@link WebSocketConnector websocket client} through RPC (Remote Procedure Call)
+ * concept, created by the {@link WebSocketServer} class whenever a remote client
+ * connects to the websocket server.
  *
- * To accept connection and start interaction with the remote client, call the {@link accept}
- * method with special `Provider`. After the {@link accept acceptance}, don't forget to closing the
- * connection after your busines has been completed. Otherwise, you don't want to accept but reject
- * the connection, call the {@link reject} method.
+ * When a remote client connects to the {@link WebSocketServer websocket server},
+ * so that a new `WebSocketAcceptor` instance being created, you can determine
+ * whether to {@link accept} the client's connection or {@link reject not},
+ * reading the {@lin header} and {@link path} properties. If you've decided to
+ * accept the connection, call the {@link accept} method with `Provider` instance.
+ * Otherwise, reject it thorugh the {@link reject} method.
  *
- * Also, when declaring this {@link WebSocketAcceptor} type, you've to define two template arguments,
- * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
- * client after the connection. I hope you and client not to omit it and utilize it as an
- * activation tool to enhance security.
+ * After {@link accept accepting} the connection, don't forget to
+ * {@link close closing} the connection after your business has been completed
+ * to clean up the resources. Otherwise the closing must be performed by the remote
+ * client, you can wait the remote client's closing signal by the {@link join} method.
  *
- * The second template argument *Provider* represents the features provided for the remote client.
- * If you don't have any plan to provide any feature to the remote client, just declare it as
- * `null`.
+ * Also, when declaring this {@link WebSocketAcceptor} type, you have to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
+ * be same with the ones defined in the {@link WebSocketServer} class.
+ *
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from server to client, and other `Remote` means a provider from the
+ * remote client to server.
  *
  * @template Header Type of the header containing initial data.
- * @template Provider Type of features provided for the remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Provider Type of features provided for the remote client.
+ * @template Remote Type of features provided by remote client.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebSocketAcceptor<
@@ -58,6 +66,23 @@ export class WebSocketAcceptor<
   /* ----------------------------------------------------------------
     CONSTRUCTORS
   ---------------------------------------------------------------- */
+  /**
+   * Upgrade to WebSocket protocol.
+   *
+   * If you've not opened websocket server from {@link WebSocketServer}, you can
+   * still compose the `WebSocketAcceptor` instance by yourself, by upgrading
+   * the HTTP connection to the websocket protocol.
+   *
+   * For reference, this `upgrade()` method is useful when you're planning to
+   * make a server supporting both HTTP and WebSocket protocols, and
+   * distinguishing the protocol by the path of URL.
+   *
+   * - ex) [NestJS `@WebSocketRoute()` case](https://nestia.io/docs/core/WebSocketRoute/)
+   *
+   * @param request HTTP incoming message.
+   * @param socket WebSocket instance
+   * @param handler A callback function after the connection has been established.
+   */
   public static upgrade<
     Header,
     Provider extends object | null,

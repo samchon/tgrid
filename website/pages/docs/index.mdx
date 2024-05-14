@@ -40,21 +40,28 @@ TypeScript RPC (Remote Procedure Call) framework for WebSocket and Worker protoc
 
 Also, extremely easy even when composing complicated network system like grid computing.
 
-```typescript
+```typescript filename="examples/web-socket-client.ts" showLineNumbers
 import { Driver, WebSocketConnector } from "tgrid";
+
 import { ICalculator } from "./interfaces/ICalculator";
+import { CalcEventListener } from "./providers/CalcEventListener";
 
 export const main = async (): Promise<void> => {
-  const connector: WebSocketConnector<null, null, ICalculator> =
-    new WebSocketConnector(null, null);
+  // CONNECT TO WEBSOCKET SERVER
+  const connector: WebSocketConnector<
+    null, // header
+    CalcEventListener, // provider for remote server
+    ICalculator, // provider from remote server
+  > = new WebSocketConnector(null, new CalcEventListener());
   await connector.connect("ws://127.0.0.1:443/calculator");
   
-  const remote: Driver<ICalculator> = connector.getDriver();
+  // RPC (YOU CAN CALL REMOTE PROCEDURES)
+  const calc: Driver<ICalculator> = connector.getDriver();
   console.log(
-    await remote.plus(2, 3),
-    await remote.minus(7, 1),
-    await remote.multiplies(3, 4),
-    await remote.divides(9, 3),
+    await calc.plus(2, 3),
+    await calc.minus(7, 1),
+    await calc.multiplies(3, 4),
+    await calc.divides(9, 3),
   );
   await connector.close();
 };

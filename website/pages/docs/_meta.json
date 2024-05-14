@@ -1,6 +1,7 @@
 {
   "index": "🙋🏻‍♂️ Introduction",
   "setup": "📦 Setup",
+  "remote-procedure-call": "📡 Remote Procedure Call",
   "-- tutorial": {
     "type": "separator",
     "title": "📖 Tutorial"

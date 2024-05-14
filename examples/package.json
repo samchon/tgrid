@@ -1,0 +1,20 @@
+{
+  "name": "@samchon/tgrid-example-websocket",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "websocket": "npx ts-node src/websocket/index.ts",
+    "websocket:server": "npx ts-node src/websocket/server.ts",
+    "websocket:client": "npx ts-node src/websocket/client.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "tgrid": "1.0.0-dev.20240507"
+  }
+}
