@@ -11,6 +11,11 @@ TypeScript Grid Computing Framework.
 
 TypeScript RPC (Remote Procedure Call) framework for WebSocket and Worker protocols. 
 
+  - `WebSocket`
+  - `Worker`
+  - `SharedWorker`
+  - `NestJS`
+
 Also, extremely easy even when composing complicated network system like grid computing.
 
 ```typescript
@@ -68,7 +73,7 @@ npm install tgrid
 
 Just install with `npm` command. That's all.
 
-If you wanna use `tgrid` in `NestJS`, read `nestia` guide documents.
+If you wanna use `TGrid` in `NestJS`, read `Nestia` guide documents.
 
   - [Nestia > Guide Documents > Setup](https://nestia.io/docs/setup/)
   - [Nestia > Guide Documents > WebSocketRoute](https://nestia.io/docs/core/WebSocketRoute/)
@@ -86,9 +91,8 @@ Check out the document in the [website](https://tgrid.com/docs):
 ### 📖 Tutorial
   - Features
     - [Components](https://tgrid.com/docs/features/components)
-    - [Worker Protocol](https://tgrid.com/docs/features/worker)
     - [WebSocket Protocol](https://tgrid.com/docs/features/websocket)
-    - [NestJS WebSocket](https://tgrid.com/docs/features/nestjs)
+    - [Worker Protocol](https://tgrid.com/docs/features/worker)
   - Learn from Examples
     - [Remote Function Call](https://tgrid.com/docs/examples/remote-function-call)
     - [Remote Object Call](https://tgrid.com/docs/examples/remote-object-call)

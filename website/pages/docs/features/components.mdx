@@ -128,4 +128,6 @@ Driver of Listener for RPC (Remote Procedure Call).
 
 `Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument [Listener](#listener) which means the type of remote system's [Provider](#provider), and you can remotely call the functions of the [Listener](#listener) asynchronously through the `Drive<Listener>` instance.
 
-When you call some function of [Listener](#listener) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments to the remote system through the [Communicator](#communicator). When the remote system replies the result of the function call, [Communicator](#communicator) `Driver<Listener>` resolves the promise of the function call expression with the result.
+When you call some function of [Listener](#listener) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments to the remote system through the [Communicator](#communicator). If the remote system suceeded to reply the result of the function call, [Communicator](#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Listener>` working.
+
+Otherwise exception is thrown in the [Provider](#provider) function, [Communicator](#communicator) deliveries the exception instance instead to the remote system, so that actual exception being thrown from the `Driver<Listener>` instance.
