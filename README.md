@@ -90,8 +90,8 @@ Check out the document in the [website](https://tgrid.com/docs):
 
 ### 🏠 Home
   - [Introduction](https://tgrid.com/docs)
-  - [Setup](https://tgrid.com/docs/setup)
   - [Remote Procedure Call](https://tgrid.com/docs/remote-procedure-call)
+  - [Setup](https://tgrid.com/docs/setup)
 
 ### 📖 Tutorial
   - Features
