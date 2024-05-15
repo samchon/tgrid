@@ -474,7 +474,7 @@ export interface IStatisticsCalculator {
   </Tab>
 </Tabs>
 
-> ```bash filename="console"
+> ```bash filename="Terminal"
 > $ npx ts-node examples/src/websocket
 > 30 12 1.67 1.41 4.33
 > [
@@ -518,12 +518,6 @@ In the server side, you can take advantages of `NestJS` controller patterns, so 
 In the client side, you also can take advantages of automatically generated SDK (Software Development Kit) library for the client developers. With the SDK, client developers no more need to write the WebSocket connection and RPC (Remote Procedure Call) codes manually, so that development becomes much safer. 
 
 ### Bootstrap
-```bash
-npx nestia setup
-```
-
-At first, install `Nestia` packages through `npx nestia setup` command.
-
 ```typescript filename="examples/src/nestjs/bootstrap.ts" showLineNumbers
 import { WebSocketAdaptor } from "@nestia/core";
 import { INestApplication } from "@nestjs/common";
@@ -539,7 +533,7 @@ export const bootstrap = async (): Promise<INestApplication> => {
 };
 ```
 
-After that, you've to upgrade the NestJS application to support the WebSocket server.
+To utilize `TGrid` in the `NestJS`, upgrade the `NestJS` application like above.
 
 Just call the [`WebSocketAdaptor.upgrade()`](https://nestia.io/api/classes/WebSocketAdaptor.html#upgrade) method, then you can utilize `TGrid` in the `NestJS` server.
 
@@ -978,7 +972,7 @@ export namespace statistics {
 }
 ```
 
-```bash filename="console"
+```bash filename="Terminal"
 npx nestia sdk
 ```
 
@@ -1105,7 +1099,7 @@ export interface IStatisticsCalculator {
   </Tab>
 </Tabs>
 
-> ```bash filename="console"
+> ```bash filename="Terminal"
 > $ npx ts-node examples/src/nestjs
 >
 > [Nest] 4328  - 05/15/2024, 3:19:50 AM     LOG [NestFactory] Starting Nest application...

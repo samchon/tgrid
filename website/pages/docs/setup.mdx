@@ -1,0 +1,54 @@
+import { Callout, Tabs, Tab } from 'nextra-theme-docs'
+
+## Standalone
+<Tabs items={["npm", "pnpm", "yarn"]}>
+  <Tab>
+```bash filename="Terminal"
+npm install tgrid
+```
+  </Tab>
+  <Tab>
+```bash filename="Terminal"
+pnpm install tgrid
+```
+  </Tab>
+  <Tab>
+```bash filename="Terminal"
+yarn add tgrid
+```
+  </Tab>
+</Tabs>
+
+If you're planning to use `TGrid` standalone, without [NestJS integration](./features/websocket/#nestjs-integration), just setup it.
+
+
+
+
+## NestJS
+[Nestia > Guide Documents > Setup](https://nestia.io/docs/setup/)
+
+Otherwise, you wanna use `TGrid` with [NestJS integration](./features/websocket/#nestjs-integration), please refer to the guide documents of `nestia`.
+
+By the way, if you want to setup it right now without reading detailed documents, just run the below commands.
+
+<Tabs items={["npm", "pnpm", "yarn"]}>
+  <Tab>
+```bash filename="Terminal"
+npx nestia setup
+npm install tgrid
+```
+  </Tab>
+  <Tab>
+```bash filename="Terminal"
+npx nestia setup --manager pnpm
+pnpm install tgrid
+```
+  </Tab>
+  <Tab>
+<Callout type="warning">Yarn beery is not supported.</Callout>
+```bash filename="Terminal"
+npx nestia setup --manager yarn
+yarn add tgrid
+```
+  </Tab>
+</Tabs>
