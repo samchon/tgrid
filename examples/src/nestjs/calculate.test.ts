@@ -17,12 +17,14 @@ export const testCalculateSdk = async () => {
     listener,
   );
 
-  await driver.plus(10, 20); // returns 30
-  await driver.multiplies(3, 4); // returns 12
-  await driver.divides(5, 3); // returns 1.67
-  await driver.scientific.sqrt(2); // returns 1.41
-  await driver.statistics.mean(1, 3, 9); // returns 4.33
+  console.log(
+    await driver.plus(10, 20), // returns 30
+    await driver.multiplies(3, 4), // returns 12
+    await driver.divides(5, 3), // returns 1.67
+    await driver.scientific.sqrt(2), // returns 1.41
+    await driver.statistics.mean(1, 3, 9), // returns 4.33
+  );
 
   await connector.close();
-  console.log(...stack);
+  console.log(stack);
 };

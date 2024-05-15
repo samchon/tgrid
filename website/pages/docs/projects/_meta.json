@@ -1,4 +1,5 @@
 {
   "chat": "Chat Application",
-  "market": "Grid Market"
+  "market": "Grid Market",
+  "mutex": "Remote Mutex"
 }

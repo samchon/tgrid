@@ -1,5 +1,6 @@
 {
-  "name": "@samchon/tgrid-example-websocket",
+  "private": true,
+  "name": "@tgrid/examples",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

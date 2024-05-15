@@ -1,5 +1,5 @@
 # TGrid
-![TGrid logo](https://private-user-images.githubusercontent.com/13158709/329786980-42e584e9-bede-4879-b416-627060a21ef6.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTU0MzY0NzIsIm5iZiI6MTcxNTQzNjE3MiwicGF0aCI6Ii8xMzE1ODcwOS8zMjk3ODY5ODAtNDJlNTg0ZTktYmVkZS00ODc5LWI0MTYtNjI3MDYwYTIxZWY2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA1MTElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNTExVDE0MDI1MlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTU4OTEwNzEzMjc3NGExOWE2ZTM4OTdlYmViYjE1MTI2Y2VkN2FmMGM4ZDgxZWNkY2Q4MDE0Mjg0OGQ3ZGJhNmEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.TNb9oEvZpawGXAJ9heHAcp9jZMleFUK1SIK_PYZHYig)
+![TGrid logo](https://tgrid.com/og.jpg)
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/samchon/tgrid/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/tgrid.svg)](https://www.npmjs.com/package/tgrid)
@@ -9,7 +9,7 @@
 
 TypeScript Grid Computing Framework.
 
-TypeScript RPC (Remote Procedure Call) framework for WebSocket and Worker protocols. 
+TypeScript RPC (Remote Procedure Call) framework for `WebSocket` and `Worker` protocols. 
 
   - `WebSocket`
   - `Worker`
@@ -42,25 +42,30 @@ export const webSocketClientMain = async () => {
   await connector.connect("ws://127.0.0.1:37000/composite");
 
   const remote: Driver<ICompositeCalculator> = connector.getDriver();
-  await remote.plus(10, 20); // returns 30
-  await remote.multiplies(3, 4); // returns 12
-  await remote.divides(5, 3); // returns 1.67
-  await remote.scientific.sqrt(2); // returns 1.41
-  await remote.statistics.mean(1, 3, 9); // returns 4.33
+  console.log(
+    await remote.plus(10, 20), // returns 30
+    await remote.multiplies(3, 4), // returns 12
+    await remote.divides(5, 3), // returns 1.67
+    await remote.scientific.sqrt(2), // returns 1.41
+    await remote.statistics.mean(1, 3, 9), // returns 4.33
+  );
 
   await connector.close();
-  console.log(...stack);
+  console.log(stack);
 };
 ```
 
-> Execution result:
->
+> [!TIP]
 > ```bash
-> { type: 'plus', input: [ 10, 20 ], output: 30 }
-> { type: 'multiplies', input: [ 3, 4 ], output: 12 }
-> { type: 'divides', input: [ 5, 3 ], output: 1.67 }
-> { type: 'sqrt', input: [ 2 ], output: 1.41 }
-> { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
+> $ npx ts-node examples/src/websocket
+> 30 12 1.67 1.41 4.33
+> [
+>   { type: 'plus', input: [ 10, 20 ], output: 30 },
+>   { type: 'multiplies', input: [ 3, 4 ], output: 12 },
+>   { type: 'divides', input: [ 5, 3 ], output: 1.67 },
+>   { type: 'sqrt', input: [ 2 ], output: 1.41 },
+>   { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
+> ]
 > ```
 
 
@@ -100,7 +105,8 @@ Check out the document in the [website](https://tgrid.com/docs):
     - [NestJS WebSocket SDK](https://tgrid.com/docs/examples/nestjs-websocket-sdk)
   - Learn from Projects
     - [Chat Application](https://tgrid.com/docs/projects/chat)
-    - [Grid Market](https://tgrid.com/docs/examples/market)
+    - [Grid Market](https://tgrid.com/docs/projects/market)
+    - [Mutex Server](https://tgrid.com/docs/projects/mutex)
 
 ### 🔗 Appendix
   - [API Documents](https://tgrid.com/api)
