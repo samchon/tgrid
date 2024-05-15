@@ -11,7 +11,6 @@ Otherwise, let's study about the key components of the `TGrid`.
 
   - [`Communicator`](#communicator): network communication with remote system
   - [`Provider`](#provider): object provided for remote system
-  - [`Listener`](#listener): interface of the remote system's `Provider`
   - [`Driver`](#driver): proxy instance for calling functions of the remote system's `Provider`
 
 
@@ -22,7 +21,7 @@ Otherwise, let's study about the key components of the `TGrid`.
 
 Communicates with a remote system.
 
-`Communicator` is a class taking full responsibility to network communication with remote system. You can register a Provider, an object would be provided to the remote system, to the `Communicator`. Also, [Driver](#driver)\<[Listener](#listener)\>, which can access to the remote system's [Provider](#provider), is created by this `Communicator`.
+`Communicator` is a class taking full responsibility to network communication with remote system. You can register a Provider, an object would be provided to the remote system, to the `Communicator`. Also, [`Driver<Remote>`](#driver), which can access to the remote system's [Provider](#provider), is created by this `Communicator`.
 
 For reference, actual `Communicator` is the top-level abstract class, and all the classes responsible for network communication in `TGrid` are inheriting from this `Communicator` class. Here is the list of every communicator classes in `TGrid`.
 
@@ -40,9 +39,9 @@ Object provided for remote system.
 
 `Provider` is an object provided for the remote system.
 
-The remote system can call the `Provider`'s functions through [Driver](#driver)\<[Listener](#listener)\>.
+The remote system can call the `Provider`'s functions through [`Driver<Remote>`](#driver).
 
-```typescript filename="examples/websocket/server.ts" showLineNumbers
+```typescript filename="examples/websocket/server.ts" showLineNumbers {22-23, 26-33}
 import { Driver, WebSocketServer } from "tgrid";
 
 import { ICalcConfig } from "../interfaces/ICalcConfig";
@@ -64,18 +63,18 @@ export const webSocketServerMain = async () => {
   > = new WebSocketServer();
   await server.open(37_000, async (acceptor) => {
     // LIST UP PROPERTIES
-    const config: ICalcConfig = acceptor.header;
+    const header: ICalcConfig = acceptor.header;
     const listener: Driver<ICalcEventListener> = acceptor.getDriver();
 
     // ACCEPT OR REJECT
     if (acceptor.path === "/composite")
-      await acceptor.accept(new CompositeCalculator(config, listener));
+      await acceptor.accept(new CompositeCalculator(header, listener));
     else if (acceptor.path === "/simple")
-      await acceptor.accept(new SimpleCalculator(config, listener));
+      await acceptor.accept(new SimpleCalculator(header, listener));
     else if (acceptor.path === "/statistics")
-      await acceptor.accept(new StatisticsCalculator(config, listener));
+      await acceptor.accept(new StatisticsCalculator(header, listener));
     else if (acceptor.path === "/scientific")
-      await acceptor.accept(new ScientificCalculator(config, listener));
+      await acceptor.accept(new ScientificCalculator(header, listener));
     else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
   });
   return server;
@@ -84,18 +83,9 @@ export const webSocketServerMain = async () => {
 
 
 
-## Listener
-Interface of the remote system's [Provider](#provider).
-
-`Listener` is a type definition (interface is recommended) of the remote system's [Provider](#provider). If you wrap the `Listener` type into the [Driver](#driver)\<`Listener`\> through `Communicator.getDriver<Listener>()` method, you can call the functions of the remote system's [Provider](#provider) asynchronously.
-
-For reference, it is possible to using the original [Provider](#provider) type of the remote system, so that composing [Driver](#driver)\<[Provider](#provider)\> type. However, such way is not recommended due to the dependency problem. Instead, consider to defining the [Provider](#provider) class to implement the `Listener` interface type.
-
-
-
 
 ## Driver
-```typescript filename="examples/websocket/client.ts" showLineNumbers
+```typescript filename="examples/websocket/client.ts" showLineNumbers {23-30}
 import { Driver, WebSocketConnector } from "tgrid";
 
 import { ICalcConfig } from "../interfaces/ICalcConfig";
@@ -144,10 +134,10 @@ export const webSocketClientMain = async () => {
 > ]
 > ```
 
-Driver of Listener for RPC (Remote Procedure Call).
+Driver of RPC (Remote Procedure Call).
 
-`Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument [Listener](#listener) which means the type of remote system's [Provider](#provider), and you can remotely call the functions of the [Listener](#listener) asynchronously through the `Drive<Listener>` instance.
+`Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument `Remote` which means the type of remote system's [Provider](#provider), and you can remotely call the functions of the [Provider](#provider) asynchronously through the `Drive<Remote>` instance.
 
-When you call some function of [Listener](#listener) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments to the remote system through the [Communicator](#communicator). If the remote system suceeded to reply the result of the function call, [Communicator](#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Listener>` working.
+When you call some function of remote [Provider](#provider) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments (parameter values) to the remote system through the [Communicator](#communicator). If the remote system suceeded to reply the result of the function call, [Communicator](#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Remote>` working.
 
-Otherwise exception is thrown in the [Provider](#provider) function, [Communicator](#communicator) deliveries the exception instance instead to the remote system, so that actual exception being thrown from the `Driver<Listener>` instance.
+Otherwise exception is thrown in the remote [Provider](#provider) function, [Communicator](#communicator) deliveries the exception instance instead to the remote system, so that actual exception being thrown from the `Driver<Remote>` instance.

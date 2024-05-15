@@ -1,0 +1,545 @@
+import { Callout, Tabs, Tab } from 'nextra-theme-docs'
+
+## Outline
+With `TGrid`, you can call remote procedures of provided by remote system.
+
+If remote system provides a function, `TGrid` lets you call it as if it were your own. If remote system provides some functions that are capsuled in hierarchical structured objects, you still can call them as if they were your own. This is the concept of RPC (Remote Procedure Call) what `TGrid` is saying.
+
+By the way, there are many other RPC (Remote Procedure Call) frameworks or libraries in the world. However, `TGrid` is different from them. RPC of `TGrid` does not mean only calling and getting returned value from the remote system's procedure, but also ensuring type safety. With the type safety, you can actually feel like that the remote procedure is your own.
+
+
+
+
+## Demonstration
+<Tabs items={["Client Program", "Server Program", "Interfaces", "Providers"]}>
+  <Tab>
+```typescript filename="examples/src/websocket/client.ts" showLineNumbers {23-30}
+import { Driver, WebSocketConnector } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEvent } from "../interfaces/ICalcEvent";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+
+export const webSocketClientMain = async () => {
+  const stack: ICalcEvent[] = [];
+  const listener: ICalcEventListener = {
+    on: (evt: ICalcEvent) => stack.push(evt),
+  };
+  const connector: WebSocketConnector<
+    ICalcConfig,
+    ICalcEventListener,
+    ICompositeCalculator
+  > = new WebSocketConnector(
+    { precision: 2 }, // header
+    listener, // provider for remote server
+  );
+  await connector.connect("ws://127.0.0.1:37000/composite");
+
+  const remote: Driver<ICompositeCalculator> = connector.getDriver();
+  console.log(
+    await driver.plus(10, 20), // returns 30
+    await driver.multiplies(3, 4), // returns 12
+    await driver.divides(5, 3), // returns 1.67
+    await driver.scientific.sqrt(2), // returns 1.41
+    await driver.statistics.mean(1, 3, 9), // returns 4.33
+  );
+
+  await connector.close();
+  console.log(stack);
+};
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/websocket/server.ts" showLineNumbers {25-32}
+import { Driver, WebSocketServer } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { CompositeCalculator } from "../providers/CompositeCalculator";
+import { ScientificCalculator } from "../providers/ScientificCalculator";
+import { SimpleCalculator } from "../providers/SimpleCalculator";
+import { StatisticsCalculator } from "../providers/StatisticsCalculator";
+
+export const webSocketServerMain = async () => {
+  const server: WebSocketServer<
+    ICalcConfig,
+    | CompositeCalculator
+    | SimpleCalculator
+    | StatisticsCalculator
+    | ScientificCalculator,
+    ICalcEventListener
+  > = new WebSocketServer();
+  await server.open(37_000, async (acceptor) => {
+    // LIST UP PROPERTIES
+    const config: ICalcConfig = acceptor.header;
+    const listener: Driver<ICalcEventListener> = acceptor.getDriver();
+
+    // ACCEPT OR REJECT
+    if (acceptor.path === "/composite")
+      await acceptor.accept(new CompositeCalculator(config, listener));
+    else if (acceptor.path === "/simple")
+      await acceptor.accept(new SimpleCalculator(config, listener));
+    else if (acceptor.path === "/statistics")
+      await acceptor.accept(new StatisticsCalculator(config, listener));
+    else if (acceptor.path === "/scientific")
+      await acceptor.accept(new ScientificCalculator(config, listener));
+    else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+  });
+  return server;
+};
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/providers/*.ts" showLineNumbers
+import { Driver } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { IScientificCalculator } from "../interfaces/IScientificCalculator";
+import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
+import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
+
+export abstract class CalculatorBase {
+  public constructor(
+    private readonly config: ICalcConfig,
+    private readonly listener: Driver<ICalcEventListener>,
+  ) {}
+
+  protected compute(type: string, input: number[], output: number): number {
+    const pow: number = Math.pow(10, this.config.precision);
+    output = Math.round(output * pow) / pow;
+    this.listener.on({ type, input, output }).catch(() => {});
+    return output;
+  }
+}
+
+export class SimpleCalculator
+  extends CalculatorBase
+  implements ISimpleCalculator
+{
+  public plus(x: number, y: number): number {
+    return this.compute("plus", [x, y], x + y);
+  }
+  public minus(x: number, y: number): number {
+    return this.compute("minus", [x, y], x - y);
+  }
+  public multiplies(x: number, y: number): number {
+    return this.compute("multiplies", [x, y], x * y);
+  }
+  public divides(x: number, y: number): number {
+    return this.compute("divides", [x, y], x / y);
+  }
+}
+
+export class ScientificCalculator
+  extends CalculatorBase
+  implements IScientificCalculator
+{
+  public pow(x: number, y: number): number {
+    return this.compute("pow", [x, y], Math.pow(x, y));
+  }
+  public sqrt(x: number): number {
+    return this.compute("sqrt", [x], Math.sqrt(x));
+  }
+  public log(x: number, base: number): number {
+    return this.compute("log", [x, base], Math.log(x) / Math.log(base));
+  }
+}
+
+export class StatisticsCalculator
+  extends CalculatorBase
+  implements IStatisticsCalculator
+{
+  public mean(...values: number[]): number {
+    const sum: number = values.reduce((x, y) => x + y);
+    return this.compute("mean", values, sum / values.length);
+  }
+  public stdev(...values: number[]): number {
+    const mean: number = values.reduce((x, y) => x + y) / values.length;
+    const sum: number = values.reduce((x, y) => x + Math.pow(y - mean, 2));
+    return this.compute("stdev", values, Math.sqrt(sum / values.length));
+  }
+}
+
+export class CompositeCalculator
+  extends SimpleCalculator
+  implements ICompositeCalculator
+{
+  public readonly scientific: ScientificCalculator;
+  public readonly statistics: StatisticsCalculator;
+
+  public constructor(
+    config: ICalcConfig,
+    listener: Driver<ICalcEventListener>,
+  ) {
+    super(config, listener);
+    this.scientific = new ScientificCalculator(config, listener);
+    this.statistics = new StatisticsCalculator(config, listener);
+  }
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+> ```bash filename="Terminal"
+> $ npx ts-node examples/src/websocket
+> 30 12 1.67 1.41 4.33
+> [
+>   { type: 'plus', input: [ 10, 20 ], output: 30 },
+>   { type: 'multiplies', input: [ 3, 4 ], output: 12 },
+>   { type: 'divides', input: [ 5, 3 ], output: 1.67 },
+>   { type: 'sqrt', input: [ 2 ], output: 1.41 },
+>   { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
+> ]
+> ```
+
+Here is the one of example programs that demonstrating the RPC (Remote Procedure Call) of `TGrid`. 
+
+At first, looking at the "Client Program" tab, you can find out that the "Client Program" is calling the "Server Program"'s functions as if they were its own, through the `Driver<ICompositeCalculator>` typed instance with `await` symbols.
+
+At next, change the tab to "Server Program", then you can find out that the "Server Program" is serving `CompositeCalculator` class to the "Client Program". Calling the functions of `CompositeCalculator` in the "Server Program" from the "Client Program" through the `Driver<ICompositeCalculator>` typed instance, this is the RPC (Remote Procedure Call) of `TGrid`.
+
+
+
+
+## RPC Driver
+<Tabs 
+  items={["Client Program", "Server Program", "Interfaces", "Providers"]} 
+  selectedIndex={2}>
+  <Tab>
+```typescript filename="examples/src/websocket/client.ts" showLineNumbers
+import { Driver, WebSocketConnector } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEvent } from "../interfaces/ICalcEvent";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+
+export const webSocketClientMain = async () => {
+  const stack: ICalcEvent[] = [];
+  const listener: ICalcEventListener = {
+    on: (evt: ICalcEvent) => stack.push(evt),
+  };
+  const connector: WebSocketConnector<
+    ICalcConfig,
+    ICalcEventListener,
+    ICompositeCalculator
+  > = new WebSocketConnector(
+    { precision: 2 }, // header
+    listener, // provider for remote server
+  );
+  await connector.connect("ws://127.0.0.1:37000/composite");
+
+  const remote: Driver<ICompositeCalculator> = connector.getDriver();
+  console.log(
+    await driver.plus(10, 20), // returns 30
+    await driver.multiplies(3, 4), // returns 12
+    await driver.divides(5, 3), // returns 1.67
+    await driver.scientific.sqrt(2), // returns 1.41
+    await driver.statistics.mean(1, 3, 9), // returns 4.33
+  );
+
+  await connector.close();
+  console.log(stack);
+};
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/websocket/server.ts" showLineNumbers
+import { Driver, WebSocketServer } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { CompositeCalculator } from "../providers/CompositeCalculator";
+import { ScientificCalculator } from "../providers/ScientificCalculator";
+import { SimpleCalculator } from "../providers/SimpleCalculator";
+import { StatisticsCalculator } from "../providers/StatisticsCalculator";
+
+export const webSocketServerMain = async () => {
+  const server: WebSocketServer<
+    ICalcConfig,
+    | CompositeCalculator
+    | SimpleCalculator
+    | StatisticsCalculator
+    | ScientificCalculator,
+    ICalcEventListener
+  > = new WebSocketServer();
+  await server.open(37_000, async (acceptor) => {
+    // LIST UP PROPERTIES
+    const config: ICalcConfig = acceptor.header;
+    const listener: Driver<ICalcEventListener> = acceptor.getDriver();
+
+    // ACCEPT OR REJECT
+    if (acceptor.path === "/composite")
+      await acceptor.accept(new CompositeCalculator(config, listener));
+    else if (acceptor.path === "/simple")
+      await acceptor.accept(new SimpleCalculator(config, listener));
+    else if (acceptor.path === "/statistics")
+      await acceptor.accept(new StatisticsCalculator(config, listener));
+    else if (acceptor.path === "/scientific")
+      await acceptor.accept(new ScientificCalculator(config, listener));
+    else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+  });
+  return server;
+};
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/providers/*.ts" showLineNumbers
+import { Driver } from "tgrid";
+
+import { ICalcConfig } from "../interfaces/ICalcConfig";
+import { ICalcEventListener } from "../interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { IScientificCalculator } from "../interfaces/IScientificCalculator";
+import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
+import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
+
+export abstract class CalculatorBase {
+  public constructor(
+    private readonly config: ICalcConfig,
+    private readonly listener: Driver<ICalcEventListener>,
+  ) {}
+
+  protected compute(type: string, input: number[], output: number): number {
+    const pow: number = Math.pow(10, this.config.precision);
+    output = Math.round(output * pow) / pow;
+    this.listener.on({ type, input, output }).catch(() => {});
+    return output;
+  }
+}
+
+export class SimpleCalculator
+  extends CalculatorBase
+  implements ISimpleCalculator
+{
+  public plus(x: number, y: number): number {
+    return this.compute("plus", [x, y], x + y);
+  }
+  public minus(x: number, y: number): number {
+    return this.compute("minus", [x, y], x - y);
+  }
+  public multiplies(x: number, y: number): number {
+    return this.compute("multiplies", [x, y], x * y);
+  }
+  public divides(x: number, y: number): number {
+    return this.compute("divides", [x, y], x / y);
+  }
+}
+
+export class ScientificCalculator
+  extends CalculatorBase
+  implements IScientificCalculator
+{
+  public pow(x: number, y: number): number {
+    return this.compute("pow", [x, y], Math.pow(x, y));
+  }
+  public sqrt(x: number): number {
+    return this.compute("sqrt", [x], Math.sqrt(x));
+  }
+  public log(x: number, base: number): number {
+    return this.compute("log", [x, base], Math.log(x) / Math.log(base));
+  }
+}
+
+export class StatisticsCalculator
+  extends CalculatorBase
+  implements IStatisticsCalculator
+{
+  public mean(...values: number[]): number {
+    const sum: number = values.reduce((x, y) => x + y);
+    return this.compute("mean", values, sum / values.length);
+  }
+  public stdev(...values: number[]): number {
+    const mean: number = values.reduce((x, y) => x + y) / values.length;
+    const sum: number = values.reduce((x, y) => x + Math.pow(y - mean, 2));
+    return this.compute("stdev", values, Math.sqrt(sum / values.length));
+  }
+}
+
+export class CompositeCalculator
+  extends SimpleCalculator
+  implements ICompositeCalculator
+{
+  public readonly scientific: ScientificCalculator;
+  public readonly statistics: StatisticsCalculator;
+
+  public constructor(
+    config: ICalcConfig,
+    listener: Driver<ICalcEventListener>,
+  ) {
+    super(config, listener);
+    this.scientific = new ScientificCalculator(config, listener);
+    this.statistics = new StatisticsCalculator(config, listener);
+  }
+}
+```
+  </Tab>
+  <Tab>
+```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+export interface ICalcConfig {
+  precision: number;
+}
+export interface ICalcEvent {
+  type: string;
+  input: number[];
+  output: number;
+}
+export interface ICalcEventListener {
+  on(event: ICalcEvent): void;
+}
+
+export interface ICompositeCalculator extends ISimpleCalculator {
+  scientific: IScientificCalculator;
+  statistics: IStatisticsCalculator;
+}
+export interface ISimpleCalculator {
+  plus(x: number, y: number): number;
+  minus(x: number, y: number): number;
+  multiplies(x: number, y: number): number;
+  divides(x: number, y: number): number;
+}
+export interface IScientificCalculator {
+  pow(x: number, y: number): number;
+  sqrt(x: number): number;
+  log(x: number, base: number): number;
+}
+export interface IStatisticsCalculator {
+  mean(...values: number[]): number;
+  stdev(...values: number[]): number;
+}
+```
+  </Tab>
+</Tabs>
+
+Looking at the above `ICompositeCalculator` type from the "Interfaces" tab, none of the functions are actually asynchrounous. However, the "Client Program" is attaching `await` symbols. It's because every return types of `ICompositeCalculator` have changed to `Promise<R>` types through the `Driver<T>` type.
+
+As the `Driver<ICompositeCalculator>` typed instance is not a "Client Program"'s own, but the "Server Program"'s own (`CompositeCalculator`), the function call must be passed through the asynchronous network communication. In such reason, the remote function calling cannot be synchronous, but asynchronous, and `Driver<T>` type is casting them.
+
+<Callout type="info">
+
+Description of `Driver` type in the [Features > Components](./features/components) chatper.
+
+`Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument `Remote` which means the type of remote system's [Provider](./features/components/#provider), and you can remotely call the functions of the [Provider](#provider) asynchronously through the `Drive<Remote>` instance.
+
+When you call some function of remote [Provider](./features/components/#provider) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments (parameter values) to the remote system through the [Communicator](./features/components/#communicator). If the remote system suceeded to reply the result of the function call, [Communicator](./features/components/#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Remote>` working.
+
+Otherwise exception is thrown in the remote [Provider](./features/components/#provider) function, [Communicator](./features/components/#communicator) deliveries the exception instance instead to the remote system, so that actual exception being thrown from the `Driver<Remote>` instance.
+
+</Callout>
+
+
+
+## Restrictions
+`TGrid` has implemented the RPC (Remote Procedure Call) by communicating JSON message. Therefore, if parameters or return values of the remote provided functions are not compatible JSON, you can't use them.
+
+For example, JSON does not support `bigint` type of JavaScript. Therefore, if some of the remote provided functions are using `bigint` type on their parameters or return value, it would throw an exception.
+
+Also, as JSON does not contain class transformation spec, every parameters and return values must be primitive types. If you try to deliver the class instance as a parameter or return value, it would be downgraded to primitive instance in the remote system.

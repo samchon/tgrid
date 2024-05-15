@@ -123,7 +123,7 @@ const sections: HomeStrengthSectionMovie.Props[] = [
       <React.Fragment>
         <p>WebSocket RPC in NestJS</p>
         <br />
-        <p>Compatible with both HTTP/WebSocket protocols</p>
+        <p>Compatible with both HTTP and WebSocket protocols</p>
         <br/>
         <p>Supports SDK (Software Development Kit) generation</p>
       </React.Fragment>
