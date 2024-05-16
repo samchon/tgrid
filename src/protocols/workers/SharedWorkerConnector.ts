@@ -13,36 +13,35 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  *
  *  - available only in the Web Browser.
  *
- * The `SharedWorkerConnector` is a communicator class, who can connect to an `SharedWorker`
- * instance and communicate with it using RFC (Remote Function Call), considering the
- * `SharedWorker` as a remote system ({@link WorkerServer}).
+ * The `SharedWorkerConnector` is a communicator class which connects to an
+ * `SharedWorker` instance, and interacts with it through RFC (Remote Function Call)
+ * concept.
  *
- * You can connect to an `SharedWorker` instance with {@link connect}() method. If the
- * `SharedWorker` instance does not exist yet, a new `SharedWorker` instance would be newly
- * created. After the creation, you have to let the `SharedWorker` program to open a sever
- * using the {@link SharedWorkerServer.open}() method. Your connection would be linked with
- * a {@link SharedWorkerAcceptor} object in the server.
+ * You can connect to the {@link SharedWorkerServer} using {@link connect} method.
+ * The interaction would be started if the server accepts your connection by calling
+ * the {@link SharedWorkerAcceptor.accept} method. If the remote server rejects your
+ * connection through {@link SharedWorkerAcceptor.reject} method, the exception
+ * would be thrown.
  *
- * After your business has been completed, you've to close the `SharedWorker` using one of
- * them below. If you don't close that, vulnerable memory usage and communication channel
- * would not be destroyed and it may cause the memory leak:
+ * After the connection, don't forget to {@link closing} the connection, if your
+ * business logics have been completed, to clean up the resources. Otherwise, the
+ * closing must be performed by the remote shared worker server, you can wait the
+ * remote server's closing signal through the {@link join} method.
  *
- *  - {@link close}()
- *  - {@link SharedWorkerAcceptor.close}()
- *  - {@link SharedWorkerServer.close}()
+ * Also, when declaring this `SharedWorkerConnector` type, you've to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
+ * be same with the ones defined in the target {@link WebSocketServer} and
+ * {@link SharedWorkerAcceptor} classes (`Provider` and `Remote` must be reversed).
  *
- * Also, when declaring this {@link SharedWorkerConnector} type, you've to define two template
- * arguments, *Header* and *Provider*. The *Header* type repersents an initial data gotten from the
- * remote client after the connection.
- *
- * The second template argument *Provider* represents the features provided for the remote system.
- * If you don't have any plan to provide any feature to the remote system, just declare it as
- * `null`.
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from client to server, and the other `Remote` means a provider from the
+ * remote server to client.
  *
  * @template Header Type of the header containing initial data.
- * @template Provider Type of features provided for the remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
- * @author Jeongho Nam - https://github.com/samchon
+ * @template Provider Type of features provided for the remote server.
+ * @template Remote Type of features supported by remote server.
  */
 export class SharedWorkerConnector<
     Header,

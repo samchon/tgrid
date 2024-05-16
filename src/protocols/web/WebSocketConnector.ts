@@ -11,29 +11,35 @@ import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
 /**
  * Web Socket Connector.
  *
- * The `WebSocketConnector` is a communicator class who can connect to websocket server and
- * interact with it using RFC (Remote Function Call).
+ * The `WebSocketConnector` is a communicator class which connects to a
+ * {@link WebSocketServer websocket server}, and interacts with it through RPC
+ * (Remote Procedure Call) concept.
  *
- * You can connect to the websocket server using {@link connect}() method. The interaction
- * would be started if the server is opened by {@link WebSocketServer.open}() and the server
- * accepts your connection by {@link WebSocketAcceptor.accept}().
+ * You can connect to the websocket server using {@link connect} method. The
+ * interaction would be started if the server accepts your connection by calling
+ * the {@link WebSocketAcceptor.accept} method. If the remote server rejects your
+ * connection through {@link WebSocketAcceptor.reject} method, the exception
+ * would be thrown.
  *
- * Note that, after you business has been completed, please close the connection using
- * {@link close}() or let the server to {@link WebSocketAcceptor.close close itself}. If you don't
- * close the connection in time, it may waste vulnerable resources of the server.
+ * After the connection, don't forget to {@link closing} the connection, if your
+ * business logics have been completed, to clean up the resources. Otherwise, the
+ * closing must be performed by the remote websocket server, you can wait the
+ * remote server's closing signal through the {@link join} method.
  *
- * Also, when declaring this {@link WebSocketConnector} type, you've to define two template arguments,
- * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
- * client after the connection. I hope you and client not to omit it and utilize it as an
- * activation tool to enhance security.
+ * Also, when declaring this `WebSocketConnector` type, you've to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
+ * be same with the ones defined in the target {@link WebSocketServer} and
+ * {@link WebSocketAcceptor} classes (`Provider` and `Remote` must be reversed).
  *
- * The second template argument *Provider* represents the features provided for the remote system.
- * If you don't have any plan to provide any feature to the remote system, just declare it as
- * `null`.
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from client to server, and the other `Remote` means a provider from the
+ * remote server to client.
  *
  * @template Header Type of the header containing initial data.
- * @template Provider Type of features provided for the remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Provider Type of features provided for the remote server.
+ * @template Remote Type of features supported by remote server.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebSocketConnector<

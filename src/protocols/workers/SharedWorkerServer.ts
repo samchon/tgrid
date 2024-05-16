@@ -10,30 +10,29 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
  *
  *  - available only in the Web Browser.
  *
- * The `SharedWorkerServer` is a class representing a server server in a `SharedWorker`
- * environment. Clients connecting to the `SharedWorkerServer` would communicate with this
- * server through {@link SharedWorkerAcceptor} objects using RFC (Remote Function Call).
+ * The `SharedWorkerServer` is a class representing a server in `SharedWorker`
+ * environment. Clients connecting to the `SharedWorkerServer` would communicate
+ * with this server through {@link SharedWorkerAcceptor} instaces using RPC
+ * (Remote Procedure Call) concept.
  *
- * To open the server, use the {@link open}() method with a callback function which would be
- * called whenever a client has been connected. After your business, don't forget to closing
- * the connection using one of them below. If you don't close that, vulnerable memory usage
- * and communication channel would not be destroyed and it may cause the memory leak.
+ * To open the server, call the {@link open} method with your callback function
+ * which would be called whenever a {@link SharedWorkerAcceptor} has been newly
+ * created by a new client's connection.
  *
- *  - {@link close}()
- *  - {@link SharedWorkerAcceptor.close}()
- *  - {@link SharedWorkerConnector.close}()
+ * Also, when declaring this `SharedWorkerServer` type, you have to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments
+ * would be propagated to the {@link SharedWorkerAcceptor}, so that
+ * {@link SharedWorkerAcceptor} would have the same generic arguments, too.
  *
- * Also, when declaring this {@link SharedWorkerServer} type, you've to define two template
- * arguments, *Header* and *Provider*. The *Header* type repersents an initial data gotten from the
- * remote client after the connection.
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from server to client, and the other `Remote` means a provider from the
+ * remote client to server.
  *
- * The second template argument *Provider* represents the features provided for the remote client.
- * If you don't have any plan to provide any feature to the remote client, just declare it as
- * `null`.
- *
- * @template Header Type of the header containing initial data.
- * @template Provider Type of features provided for the remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Header Type of header containing initialization data like activation.
+ * @template Provider Type of features provided for the remote client.
+ * @template Remote Type of features provided by remote client.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class SharedWorkerServer<
@@ -66,14 +65,16 @@ export class SharedWorkerServer<
   /**
    * Open shared worker server.
    *
-   * Open a server through the shared worker protocol, with *handler* function determining
-   * whether to accept the client's connection or not. After the server has been opened, clients
-   * can connect to that websocket server by using the {@link SharedWorkerServer} class.
+   * Open a server through the shared worker protocol, with *handler* function
+   * determining whether to accept the client's connection or not. After the server
+   * has been opened, clients can connect to that server by using the
+   * {@link SharedWorkerServer} class.
    *
-   * When implementing the *handler* function with the {@link SharedWorkerServer} instance, calls
-   * the {@link SharedWorkerAcceptor.accept} method if you want to accept the new client's
-   * connection. Otherwise you dont't want to accept the client and reject its connection, just
-   * calls the {@link SharedWorkerAcceptor.reject} instead.
+   * When implementing the *handler* function with the {@link SharedWorkerServer}
+   * instance, calls the {@link SharedWorkerAcceptor.accept} method if you want to
+   * accept the new client's connection. Otherwise you dont't want to accept the
+   * client and reject its connection, just calls the
+   * {@link SharedWorkerAcceptor.reject} instead.
    *
    * @param handler Callback function called whenever client connects.
    */
