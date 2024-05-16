@@ -104,7 +104,7 @@ Check out the document in the [website](https://tgrid.com/docs):
     - [Remote Function Call](https://tgrid.com/docs/examples/remote-function-call)
     - [Remote Object Call](https://tgrid.com/docs/examples/remote-object-call)
     - [Object Oriented Network](https://tgrid.com/docs/examples/object-oriented-network)
-    - [NestJS WebSocket SDK](https://tgrid.com/docs/examples/nestjs-websocket-sdk)
+    - [NestJS WebSocket](https://tgrid.com/docs/examples/nestjs-websocket)
   - Learn from Projects
     - [Chat Application](https://tgrid.com/docs/projects/chat)
     - [Grid Market](https://tgrid.com/docs/projects/market)
