@@ -1,9 +1,10 @@
-import { WebServer } from "tgrid";
+import { WebSocketServer } from "tgrid";
 
 import { Calculator } from "../providers/Calculator";
 
 async function main(): Promise<void> {
-  const server: WebServer<object, Calculator, null> = new WebServer();
+  const server: WebSocketServer<object, Calculator, null> =
+    new WebSocketServer();
   let index: number = 0;
 
   await server.open(10489, async (acceptor) => {

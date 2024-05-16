@@ -1,0 +1,5 @@
+{
+  "components": "Components",
+  "websocket": "WebSocket Protocol",
+  "worker": "Worker Protocol"
+}

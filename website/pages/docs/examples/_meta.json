@@ -1,0 +1,6 @@
+{
+  "remote-function-call": "Remote Function Call",
+  "remote-object-call": "Remote Object Call",
+  "object-oriented-network": "Object Oriented Network",
+  "nestjs-websocket": "NestJS WebSocket"
+}

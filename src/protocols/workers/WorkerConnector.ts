@@ -12,30 +12,34 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 /**
  * Worker Connector.
  *
- * The `WorkerConnector` is a communicator class, who can create an `Worker` instance and
- * communicate with it using RFC (Remote Function Call), considering the `Worker` as a
- * remote system ({@link WorkerServer}).
+ * The `WorkerConnector` is a communicator class, which creates an `Worker` instance
+ * and interacts with it through RPC (Remote Procedure Call). In other words,
+ * `WorkerConnector` considers the `Worker` instance as a remote server accepting
+ * only one client; {@link WorkerServer}.
  *
- * You can create an `Worker` instance with {@link compile}() or {@link connect}() method.
- * Anyway, after creation of the `Worker` instance, the `Worker` program must open a server
- * using the {@link WorkerServer.open}() method.
+ * You can create an `Worker` instance with {@link connect} or {@link compile} method.
+ * The {@link connect} method just opens an existing JS (or TS) file, and
+ * {@link compile} method writes a temporary JS (TS) file, and connects to it.
+ * Anyway, the `Worker` instanced program must open the {@link WorkerServer}.
  *
- * Note that, after your business, don't forget terminating the worker using {@link close}()
- * or {@link WorkerServer.close}(). If you don't terminate it, then vulnerable memory and
- * communication channel would not be destroyed and it may cause the memory leak.
+ * By the way, don't forget {@link close closing} the worker to clean up the resources.
+ * If the closing be performed by {@link WorkerServer}, you can wait
+ * the worker server closing through the {@link join} method.
  *
- * Also, when declaring this {@link WorkerConnector} type, you've to define two template arguments,
- * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
- * system after the connection. I hope you and server not to omit it and utilize it as an
- * activation tool to enhance security.
+ * Also, when declaring this `WorkerConnector` type, you've to define three
+ * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
+ * be same with the ones defined in the target {@link WorkerServer} class
+ * (`Provider` and `Remote` must be reversed).
  *
- * The second template argument *Provider* represents the features provided for the remote system.
- * If you don't have any plan to provide any feature to the remote system, just declare it as
- * `null`.
+ * For reference, the first `Header` type repersents an initial data from the
+ * remote client after the connection. I recommend utilize it as an activation tool
+ * for security enhancement. The second generic argument `Provider` represents a
+ * provider from client to server, and the other `Remote` means a provider from the
+ * remote server to client.
  *
- * @template Header Type of header containing initialization data like activation.
- * @template Provider Type of features provided for remote system.
- * @template Remote Type of features supported by remote system, used for {@link getDriver} function.
+ * @template Header Type of the header containing initial data.
+ * @template Provider Type of features provided for the remote server.
+ * @template Remote Type of features supported by remote server.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WorkerConnector<

@@ -1,3 +1,6 @@
+/**
+ * @internal
+ */
 export const serializeError = (error: any) => {
   if (
     typeof error === "object" &&

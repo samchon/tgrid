@@ -1,4 +1,4 @@
-import { Driver, WebConnector, WebServer } from "tgrid";
+import { Driver, WebSocketConnector, WebSocketServer } from "tgrid";
 
 import { Calculator, Scientific } from "../../providers/Calculator";
 
@@ -24,13 +24,14 @@ async function must_be_error(
 }
 
 export async function test_security(): Promise<void> {
-  const server: WebServer<object, CustomCalculator, null> = new WebServer();
+  const server: WebSocketServer<object, CustomCalculator, null> =
+    new WebSocketServer();
   await server.open(10101, async (acceptor) => {
     await acceptor.accept(new CustomCalculator());
   });
 
-  const connector: WebConnector<null, null, CustomCalculator> =
-    new WebConnector(null, null);
+  const connector: WebSocketConnector<null, null, CustomCalculator> =
+    new WebSocketConnector(null, null);
   await connector.connect("ws://127.0.0.1:10101");
 
   const calc: Driver<CustomCalculator> = connector.getDriver();
