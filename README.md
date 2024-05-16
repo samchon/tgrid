@@ -78,10 +78,12 @@ npm install tgrid
 
 Just install with `npm` command. That's all.
 
-If you wanna use `TGrid` in `NestJS`, read `Nestia` guide documents.
+If you wanna use `TGrid` in `NestJS`, read `Nestia` guide documents, too.
 
+  - [TGrid > Guide Documents > Setup](https://tgrid.com/docs/setup/)
   - [Nestia > Guide Documents > Setup](https://nestia.io/docs/setup/)
   - [Nestia > Guide Documents > WebSocketRoute](https://nestia.io/docs/core/WebSocketRoute/)
+
 
 
 

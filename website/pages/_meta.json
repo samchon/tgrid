@@ -11,5 +11,9 @@
   "docs": {
     "title": "📖 Guide Documents",
     "type": "page"
+  },
+  "playground": {
+    "title": "💻 Playground",
+    "type": "page"
   }
 }

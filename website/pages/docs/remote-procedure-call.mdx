@@ -3,7 +3,7 @@ import { Callout, Tabs, Tab } from 'nextra-theme-docs'
 ## Outline
 With `TGrid`, you can call remote procedures of provided by remote system.
 
-If remote system provides a function, `TGrid` lets you call it as if it were your own. If remote system provides some functions that are capsuled in hierarchical structured objects, you still can call them as if they were your own. This is the concept of RPC (Remote Procedure Call) what `TGrid` is saying.
+If remote system provides a function, `TGrid` lets you call it as if it was a local function own. If remote system provides some functions that are capsuled in hierarchical structured objects, you still can call them as if they were your own. This is the concept of RPC (Remote Procedure Call) what `TGrid` is saying.
 
 By the way, there are many other RPC (Remote Procedure Call) frameworks or libraries in the world. However, `TGrid` is different from them. RPC of `TGrid` does not mean only calling and getting returned value from the remote system's procedure, but also ensuring type safety. With the type safety, you can actually feel like that the remote procedure is your own.
 
@@ -13,13 +13,13 @@ By the way, there are many other RPC (Remote Procedure Call) frameworks or libra
 ## Demonstration
 <Tabs items={["Client Program", "Server Program", "Interfaces", "Providers"]}>
   <Tab>
-```typescript filename="examples/src/websocket/client.ts" showLineNumbers {23-30}
+```typescript filename="examples/websocket/src/client.ts" showLineNumbers {23-30}
 import { Driver, WebSocketConnector } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEvent } from "../interfaces/ICalcEvent";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEvent } from "./interfaces/ICalcEvent";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "./interfaces/ICompositeCalculator";
 
 export const webSocketClientMain = async () => {
   const stack: ICalcEvent[] = [];
@@ -51,15 +51,15 @@ export const webSocketClientMain = async () => {
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/websocket/server.ts" showLineNumbers {25-32}
+```typescript filename="examples/websocket/src/server.ts" showLineNumbers {25-32}
 import { Driver, WebSocketServer } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { CompositeCalculator } from "../providers/CompositeCalculator";
-import { ScientificCalculator } from "../providers/ScientificCalculator";
-import { SimpleCalculator } from "../providers/SimpleCalculator";
-import { StatisticsCalculator } from "../providers/StatisticsCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { CompositeCalculator } from "./providers/CompositeCalculator";
+import { ScientificCalculator } from "./providers/ScientificCalculator";
+import { SimpleCalculator } from "./providers/SimpleCalculator";
+import { StatisticsCalculator } from "./providers/StatisticsCalculator";
 
 export const webSocketServerMain = async () => {
   const server: WebSocketServer<
@@ -91,7 +91,7 @@ export const webSocketServerMain = async () => {
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/websocket/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -126,15 +126,15 @@ export interface IStatisticsCalculator {
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/providers/*.ts" showLineNumbers
+```typescript filename="examples/websocket/src/providers/*.ts" showLineNumbers
 import { Driver } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
-import { IScientificCalculator } from "../interfaces/IScientificCalculator";
-import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
-import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "./interfaces/ICompositeCalculator";
+import { IScientificCalculator } from "./interfaces/IScientificCalculator";
+import { ISimpleCalculator } from "./interfaces/ISimpleCalculator";
+import { IStatisticsCalculator } from "./interfaces/IStatisticsCalculator";
 
 export abstract class CalculatorBase {
   public constructor(
@@ -217,7 +217,7 @@ export class CompositeCalculator
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/websocket/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -254,7 +254,7 @@ export interface IStatisticsCalculator {
 </Tabs>
 
 > ```bash filename="Terminal"
-> $ npx ts-node examples/src/websocket
+> $ npm start
 > 30 12 1.67 1.41 4.33
 > [
 >   { type: 'plus', input: [ 10, 20 ], output: 30 },
@@ -271,6 +271,17 @@ At first, looking at the "Client Program" tab, you can find out that the "Client
 
 At next, change the tab to "Server Program", then you can find out that the "Server Program" is serving `CompositeCalculator` class to the "Client Program". Calling the functions of `CompositeCalculator` in the "Server Program" from the "Client Program" through the `Driver<ICompositeCalculator>` typed instance, this is the RPC (Remote Procedure Call) of `TGrid`.
 
+<Callout type="info" emoji="💻"> 
+**Demonstration**
+
+You can run it on [Playground Website](https://stackblitz.com/~/github.com/samchon/tgrid.example.websocket?file=src/client.ts&view=editor), or local machine.
+
+```bash filename="Terminal" copy
+git clone https://github.com/samchon/tgrid.example.websocket
+npm install
+npm start
+```
+</Callout>
 
 
 
@@ -279,13 +290,13 @@ At next, change the tab to "Server Program", then you can find out that the "Ser
   items={["Client Program", "Server Program", "Interfaces", "Providers"]} 
   selectedIndex={2}>
   <Tab>
-```typescript filename="examples/src/websocket/client.ts" showLineNumbers
+```typescript filename="examples/websocket/src/client.ts" showLineNumbers
 import { Driver, WebSocketConnector } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEvent } from "../interfaces/ICalcEvent";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEvent } from "./interfaces/ICalcEvent";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "./interfaces/ICompositeCalculator";
 
 export const webSocketClientMain = async () => {
   const stack: ICalcEvent[] = [];
@@ -317,15 +328,15 @@ export const webSocketClientMain = async () => {
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/websocket/server.ts" showLineNumbers
+```typescript filename="examples/websocket/src/server.ts" showLineNumbers
 import { Driver, WebSocketServer } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { CompositeCalculator } from "../providers/CompositeCalculator";
-import { ScientificCalculator } from "../providers/ScientificCalculator";
-import { SimpleCalculator } from "../providers/SimpleCalculator";
-import { StatisticsCalculator } from "../providers/StatisticsCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { CompositeCalculator } from "./providers/CompositeCalculator";
+import { ScientificCalculator } from "./providers/ScientificCalculator";
+import { SimpleCalculator } from "./providers/SimpleCalculator";
+import { StatisticsCalculator } from "./providers/StatisticsCalculator";
 
 export const webSocketServerMain = async () => {
   const server: WebSocketServer<
@@ -523,7 +534,8 @@ Looking at the above `ICompositeCalculator` type from the "Interfaces" tab, none
 
 As the `Driver<ICompositeCalculator>` typed instance is not a "Client Program"'s own, but the "Server Program"'s own (`CompositeCalculator`), the function call must be passed through the asynchronous network communication. In such reason, the remote function calling cannot be synchronous, but asynchronous, and `Driver<T>` type is casting them.
 
-<Callout type="info">
+<Callout type="warning" emoji="💡">
+**Tip**
 
 Description of `Driver` type in the [Features > Components](./features/components) chatper.
 

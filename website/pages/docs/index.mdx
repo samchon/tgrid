@@ -45,7 +45,7 @@ TypeScript RPC (Remote Procedure Call) framework for `WebSocket` and `Worker` pr
 
 Also, extremely easy even when composing complicated network system like grid computing.
 
-```typescript filename="examples/websocket/client.ts" showLineNumbers
+```typescript filename="examples/websocket/src/client.ts" showLineNumbers
 import { Driver, WebSocketConnector } from "tgrid";
 
 import { ICalcConfig } from "../interfaces/ICalcConfig";
@@ -83,7 +83,7 @@ export const webSocketClientMain = async () => {
 ```
 
 > ```bash filename="Terminal"
-> $ npx ts-node examples/src/websocket
+> $ npm start
 > 30 12 1.67 1.41 4.33
 > [
 >   { type: 'plus', input: [ 10, 20 ], output: 30 },

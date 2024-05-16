@@ -17,9 +17,9 @@ const config: DocsThemeConfig = {
       </span>
     </>
   ),
-  // nextThemes: {
-  //   defaultTheme: "dark",
-  // },
+  nextThemes: {
+    defaultTheme: "dark",
+  },
   project: {
     link: "https://github.com/samchon/tgrid",
   },
@@ -78,7 +78,7 @@ const config: DocsThemeConfig = {
         },
         {
           property: "og:description",
-          content: "TypeScript Grid Computing Framework.\n\nSupport RPC (Remote Procure Call) for WebSocket and Worker protocols",
+          content: "TypeScript Grid Computing Framework.\n\nSupport RPC (Remote Procure Call) for WebSocket and Worker protocols.\n\nAlso, possible to integrate with NestJS.",
         },
         {
           property: "og:site_name",
@@ -102,7 +102,7 @@ const config: DocsThemeConfig = {
         },
         {
           name: "twitter:description",
-          content: "TypeScript Grid Computing Framework.\n\nSupport RPC (Remote Procure Call) for WebSocket and Worker protocols",
+          content: "TypeScript Grid Computing Framework.\n\nSupport RPC (Remote Procure Call) for WebSocket and Worker protocols.\n\nAlso, possible to integrate with NestJS.",
         },
         {
           name: "twitter:site",

@@ -20,13 +20,13 @@ You can utilize RPC (Remote Procedure Call) even in the `Worker`.
 ### `WorkerConnector`
 <Tabs items={["Main Program", "Interfaces"]}>
   <Tab>
-```typescript filename="examples/src/worker/client.ts" showLineNumbers
+```typescript filename="examples/worker/src/client.ts" showLineNumbers
 import { Driver, WorkerConnector } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEvent } from "../interfaces/ICalcEvent";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEvent } from "./interfaces/ICalcEvent";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "./interfaces/ICompositeCalculator";
 
 const EXTENSION = __filename.endsWith(".ts") ? "ts" : "js";
 
@@ -61,7 +61,7 @@ export const workerClientMain = async () => {
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/worker/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -98,7 +98,7 @@ export interface IStatisticsCalculator {
 </Tabs>
 
 > ```bash filename="Terminal"
-> $ npx ts-node examples/src/worker
+> $ npm start
 > 30 12 1.67 1.41 4.33
 > [
 >   { type: 'plus', input: [ 10, 20 ], output: 30 },
@@ -126,15 +126,27 @@ For reference, the first `Header` type repersents an initial data from the remot
     - `Provider`: Client is providing `ICalcEventListener` to the server
     - `Remote`: Server is providing `ISimpleCalculator` to the client
 
+<Callout type="info" emoji="💻"> 
+**Demonstration**
+
+You can run it on [Playground Website](https://stackblitz.com/~/github.com/samchon/tgrid.example.worker?file=src/client.ts&view=editor), or local machine.
+
+```bash filename="Terminal" copy
+git clone https://github.com/samchon/tgrid.example.worker
+npm install
+npm start
+```
+</Callout>
+
 ### `WorkerServer`
 <Tabs items={["Main Program", "Providers", "Interfaces"]}>
   <Tab>
-```typescript filename="examples/src/worker/server.ts" showLineNumbers
+```typescript filename="examples/worker/src/server.ts" showLineNumbers
 import { Driver, WorkerServer } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { CompositeCalculator } from "../providers/CompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { CompositeCalculator } from "./providers/CompositeCalculator";
 
 const main = async () => {
   const server: WorkerServer<
@@ -158,7 +170,7 @@ main().catch((exp) => {
 ```
 </Tab>
   <Tab>
-```typescript filename="examples/src/providers/*.ts" showLineNumbers
+```typescript filename="examples/worker/src/providers/*.ts" showLineNumbers
 import { Driver } from "tgrid";
 
 import { ICalcConfig } from "../interfaces/ICalcConfig";
@@ -249,7 +261,7 @@ export class CompositeCalculator
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/worker/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -317,12 +329,12 @@ Also, as `SharedWorker` can accept multiple clients, `TGrid` considers it as a l
 ### `SharedWorkerServer`
 <Tabs items={["Main Program", "Providers", "Interfaces"]}>
   <Tab>
-```typescript filename="examples/src/shared-worker/server.ts" showLineNumbers
+```typescript filename="examples/shared-worker/src/server.ts" showLineNumbers
 import { Driver, SharedWorkerServer } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { CompositeCalculator } from "../providers/CompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { CompositeCalculator } from "./providers/CompositeCalculator";
 
 const main = async () => {
   let pool: number = 0;
@@ -347,14 +359,11 @@ const main = async () => {
     }
   });
 };
-main().catch((exp) => {
-  console.error(exp);
-  process.exit(-1);
-});
+main().catch(console.error);
 ```
 </Tab>
   <Tab>
-```typescript filename="examples/src/providers/*.ts" showLineNumbers
+```typescript filename="examples/shared-worker/src/providers/*.ts" showLineNumbers
 import { Driver } from "tgrid";
 
 import { ICalcConfig } from "../interfaces/ICalcConfig";
@@ -445,7 +454,7 @@ export class CompositeCalculator
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/shared-worker/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -499,12 +508,12 @@ For reference, the first `Header` type repersents an initial data from the remot
 ### `SharedWorkerAcceptor`
 <Tabs items={["Main Program", "Providers", "Interfaces"]}>
   <Tab>
-```typescript filename="examples/src/shared-worker/server.ts" showLineNumbers {15-35}
+```typescript filename="examples/shared-worker/src/server.ts" showLineNumbers {15-35}
 import { Driver, SharedWorkerAcceptor, SharedWorkerServer } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { CompositeCalculator } from "../providers/CompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { CompositeCalculator } from "./providers/CompositeCalculator";
 
 const main = async () => {
   let pool: number = 0;
@@ -537,105 +546,11 @@ const main = async () => {
     },
   );
 };
-main().catch((exp) => {
-  console.error(exp);
-  process.exit(-1);
-});
-```
-</Tab>
-  <Tab>
-```typescript filename="examples/src/providers/*.ts" showLineNumbers
-import { Driver } from "tgrid";
-
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
-import { IScientificCalculator } from "../interfaces/IScientificCalculator";
-import { ISimpleCalculator } from "../interfaces/ISimpleCalculator";
-import { IStatisticsCalculator } from "../interfaces/IStatisticsCalculator";
-
-export abstract class CalculatorBase {
-  public constructor(
-    private readonly config: ICalcConfig,
-    private readonly listener: Driver<ICalcEventListener>,
-  ) {}
-
-  protected compute(type: string, input: number[], output: number): number {
-    const pow: number = Math.pow(10, this.config.precision);
-    output = Math.round(output * pow) / pow;
-    this.listener.on({ type, input, output }).catch(() => {});
-    return output;
-  }
-}
-
-export class SimpleCalculator
-  extends CalculatorBase
-  implements ISimpleCalculator
-{
-  public plus(x: number, y: number): number {
-    return this.compute("plus", [x, y], x + y);
-  }
-  public minus(x: number, y: number): number {
-    return this.compute("minus", [x, y], x - y);
-  }
-  public multiplies(x: number, y: number): number {
-    return this.compute("multiplies", [x, y], x * y);
-  }
-  public divides(x: number, y: number): number {
-    return this.compute("divides", [x, y], x / y);
-  }
-}
-
-export class ScientificCalculator
-  extends CalculatorBase
-  implements IScientificCalculator
-{
-  public pow(x: number, y: number): number {
-    return this.compute("pow", [x, y], Math.pow(x, y));
-  }
-  public sqrt(x: number): number {
-    return this.compute("sqrt", [x], Math.sqrt(x));
-  }
-  public log(x: number, base: number): number {
-    return this.compute("log", [x, base], Math.log(x) / Math.log(base));
-  }
-}
-
-export class StatisticsCalculator
-  extends CalculatorBase
-  implements IStatisticsCalculator
-{
-  public mean(...values: number[]): number {
-    const sum: number = values.reduce((x, y) => x + y);
-    return this.compute("mean", values, sum / values.length);
-  }
-  public stdev(...values: number[]): number {
-    const mean: number = values.reduce((x, y) => x + y) / values.length;
-    const sum: number = values.reduce((x, y) => x + Math.pow(y - mean, 2));
-    return this.compute("stdev", values, Math.sqrt(sum / values.length));
-  }
-}
-
-export class CompositeCalculator
-  extends SimpleCalculator
-  implements ICompositeCalculator
-{
-  public readonly scientific: ScientificCalculator;
-  public readonly statistics: StatisticsCalculator;
-
-  public constructor(
-    config: ICalcConfig,
-    listener: Driver<ICalcEventListener>,
-  ) {
-    super(config, listener);
-    this.scientific = new ScientificCalculator(config, listener);
-    this.statistics = new StatisticsCalculator(config, listener);
-  }
-}
+main().catch(console.error);
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/shared-worker/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -686,15 +601,15 @@ For reference, the first `Header` type repersents an initial data from the remot
 ### `SharedWorkerConnector`
 <Tabs items={["Main Program", "Interfaces"]}>
   <Tab>
-```typescript filename="examples/src/shared-worker/client.ts" showLineNumbers
+```typescript filename="examples/shared-worker/src/client.ts" showLineNumbers
 import { Driver, SharedWorkerConnector } from "tgrid";
 
-import { ICalcConfig } from "../interfaces/ICalcConfig";
-import { ICalcEvent } from "../interfaces/ICalcEvent";
-import { ICalcEventListener } from "../interfaces/ICalcEventListener";
-import { ICompositeCalculator } from "../interfaces/ICompositeCalculator";
+import { ICalcConfig } from "./interfaces/ICalcConfig";
+import { ICalcEvent } from "./interfaces/ICalcEvent";
+import { ICalcEventListener } from "./interfaces/ICalcEventListener";
+import { ICompositeCalculator } from "./interfaces/ICompositeCalculator";
 
-export const sharedWorkerClientMain = async () => {
+const main = async () => {
   const stack: ICalcEvent[] = [];
   const listener: ICalcEventListener = {
     on: (evt: ICalcEvent) => stack.push(evt),
@@ -707,7 +622,7 @@ export const sharedWorkerClientMain = async () => {
     { precision: 2 }, // header
     listener, // provider for remote server
   );
-  await connector.connect("./server.js");
+  await connector.connect(`./server.js`);
 
   const remote: Driver<ICompositeCalculator> = connector.getDriver();
   console.log(
@@ -719,12 +634,13 @@ export const sharedWorkerClientMain = async () => {
   );
 
   await connector.close();
-  console.log(stack);
+  for (const evt of stack) console.log(JSON.stringify(evt));
 };
+main().catch(console.error);
 ```
   </Tab>
   <Tab>
-```typescript filename="examples/src/interfaces/*.ts" showLineNumbers
+```typescript filename="examples/shared-worker/src/interfaces/*.ts" showLineNumbers
 export interface ICalcConfig {
   precision: number;
 }
@@ -762,13 +678,11 @@ export interface IStatisticsCalculator {
 
 > ```bash filename="console"
 > 30 12 1.67 1.41 4.33
-> [
->   { type: 'plus', input: [ 10, 20 ], output: 30 },
->   { type: 'multiplies', input: [ 3, 4 ], output: 12 },
->   { type: 'divides', input: [ 5, 3 ], output: 1.67 },
->   { type: 'sqrt', input: [ 2 ], output: 1.41 },
->   { type: 'mean', input: [ 1, 3, 9 ], output: 4.33 }
-> ]
+> {"type":"plus","input":[10,20],"output":30}
+> {"type":"multiplies","input":[3,4],"output":12}
+> {"type":"divides","input":[5,3],"output":1.67}
+> {"type":"sqrt","input":[2],"output":1.41}
+> {"type":"mean","input":[1,3,9],"output":4.33}
 > ```
 
 Shared Worker Connector.
@@ -787,3 +701,16 @@ For reference, the first `Header` type repersents an initial data from the remot
     - `Header`: `ICalcConfig` type
     - `Provider`: Client is providing `ICalcEventListener` to the server
     - `Remote`: Server is providing `ISimpleCalculator` to the client
+
+<Callout type="info" emoji="💻"> 
+**Demonstration**
+
+You can run it on your local machine.
+
+```bash filename="Terminal" copy
+git clone https://github.com/samchon/tgrid.example.shared-worker
+npm install
+npm run build
+npm start
+```
+</Callout>
