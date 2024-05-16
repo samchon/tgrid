@@ -1,5 +1,5 @@
 # TGrid
-![TGrid logo](https://tgrid.com/og.jpg)
+![TGrid logo](https://tgrid.com/logo.png)
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/samchon/tgrid/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/tgrid.svg)](https://www.npmjs.com/package/tgrid)
