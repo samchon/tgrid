@@ -70,9 +70,9 @@ const HomeHeroMovie = () => (
     >
       <React.Fragment>
         <span style={{ color: PURPLE }}>{"await "}</span>
-        <span style={{ color: CYAN }}>driver</span>
+        <span style={{ color: CYAN }}>remote</span>
         <span style={{ color: "gray" }}>{"."}</span>
-        <span style={{ color: YELLOW }}>{"method("}</span>
+        <span style={{ color: YELLOW }}>{"function("}</span>
         <span style={{ color: "gray" }}>{"...params"}</span>
         <span style={{ color: YELLOW }}>{")"}</span>
       </React.Fragment>
