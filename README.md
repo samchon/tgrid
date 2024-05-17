@@ -53,7 +53,7 @@ interface ICalculator {
 
 > ```bash
 > $ npm start
-> 30 12 1.67 1.41 4.33
+> 30 4 12 2.5
 > ```
 
 
