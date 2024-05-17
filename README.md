@@ -21,8 +21,6 @@ Also, easy to develop complicated network system like grid computing.
 ```typescript
 import { Driver, WebSocketConnector } from "tgrid";
 
-import { ICalculator } from "./ICalculator";
-
 export const webSocketClientMain = async () => {
   // CONNECT TO WEBSOCKET SERVER
   const connector: WebSocketConnector<null, null, ICalculator> =

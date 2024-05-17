@@ -26,8 +26,6 @@ npm start
 ```typescript filename="examples/remote-function-call/src/client.ts" showLineNumbers {13-19}
 import { Driver, WebSocketConnector } from "tgrid";
 
-import { ICalculator } from "./ICalculator";
-
 export const webSocketClientMain = async () => {
   const connector: WebSocketConnector<null, null, ICalculator> =
     new WebSocketConnector(
@@ -74,8 +72,6 @@ This is the secret of how `TGrid` has implemented the [RPC (Remote Procedure Cal
   <Tab>
 ```typescript filename="examples/remote-function-call/src/server.ts" showLineNumbers {12-13}
 import { WebSocketServer } from "tgrid";
-
-import { Calculator } from "./Calculator";
 
 export const webSocketServerMain = async () => {
   const server: WebSocketServer<
