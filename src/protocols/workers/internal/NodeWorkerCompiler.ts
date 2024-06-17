@@ -10,10 +10,10 @@ import { ThreadWorker } from "./threads/ThreadWorker";
 export const NodeWorkerCompiler = async (
   type: "process" | "thread",
 ): Promise<IWorkerCompiler> => ({
-  execute: async (jsFile, execArg) => {
+  execute: async (jsFile, options) => {
     const factory =
       type === "process" ? await ProcessWorker() : await ThreadWorker();
-    return (<any>new factory(jsFile, execArg)) as Worker;
+    return (<any>new factory(jsFile, options)) as Worker;
   },
   compile: async (content) => {
     const os = await NodeModule.os.get();
