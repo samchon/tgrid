@@ -1,6 +1,7 @@
 import type thread from "worker_threads";
 
 import { NodeModule } from "../../../../utils/internal/NodeModule";
+import { WorkerConnector } from "../../WorkerConnector";
 import { IWorkerCompiler } from "../IWorkerCompiler";
 
 /**
@@ -11,8 +12,13 @@ export async function ThreadWorker(): Promise<IWorkerCompiler.Creator> {
   class ThreadWorker {
     private readonly worker_: thread.Worker;
 
-    public constructor(jsFile: string, execArgv: string[] | undefined) {
-      this.worker_ = new Worker(jsFile, { execArgv });
+    public constructor(
+      jsFile: string,
+      arg?: Partial<WorkerConnector.IConnectOptions>,
+    ) {
+      this.worker_ = new Worker(jsFile, {
+        execArgv: arg?.execArgv,
+      });
     }
 
     public terminate(): void {

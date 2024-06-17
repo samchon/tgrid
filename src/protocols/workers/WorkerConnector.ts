@@ -200,7 +200,7 @@ export class WorkerConnector<
       const compiler: IWorkerCompiler = await this.compiler_.get();
       this.worker_ = await compiler.execute(
         jsFile,
-        is_node() === true ? options.execArgv : undefined,
+        is_node() === true ? options : undefined,
       );
 
       // WAIT THE WORKER TO BE READY
@@ -348,5 +348,12 @@ export namespace WorkerConnector {
      * Arguments only for the NodeJS environments.
      */
     execArgv: string[];
+
+    /**
+     * Whether to redirect the standard input to the worker server.
+     *
+     * Available only in the NodeJS + Process environments.
+     */
+    stdio: "overlapped" | "pipe" | "ignore" | "inherit";
   }
 }

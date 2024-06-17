@@ -1,6 +1,7 @@
 import type cp from "child_process";
 
 import { NodeModule } from "../../../../utils/internal/NodeModule";
+import { WorkerConnector } from "../../WorkerConnector";
 import { IWorkerCompiler } from "../IWorkerCompiler";
 
 /**
@@ -12,8 +13,14 @@ export async function ProcessWorker(): Promise<IWorkerCompiler.Creator> {
   class ProcessWorker {
     private process_: cp.ChildProcess;
 
-    public constructor(jsFile: string, execArgv: string[] | undefined) {
-      this.process_ = fork(jsFile, { execArgv });
+    public constructor(
+      jsFile: string,
+      options?: Partial<WorkerConnector.IConnectOptions>,
+    ) {
+      this.process_ = fork(jsFile, {
+        execArgv: options?.execArgv,
+        stdio: options?.stdio,
+      });
     }
 
     public terminate(): void {
