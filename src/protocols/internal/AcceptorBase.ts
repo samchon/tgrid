@@ -1,5 +1,3 @@
-import { DomainError, RuntimeError } from "tstl";
-
 import { Communicator } from "../../components/Communicator";
 
 /**
@@ -97,27 +95,27 @@ export abstract class AcceptorBase<
     if (this.state_ === AcceptorBase.State.OPEN) return null;
     // ERROR, ONE OF THEM
     else if (this.state_ === AcceptorBase.State.NONE)
-      return new DomainError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): not accepted yet.`,
       );
     else if (this.state_ === AcceptorBase.State.ACCEPTING)
-      return new DomainError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): it's on accepting, wait for a second.`,
       );
     else if (
       this.state_ === AcceptorBase.State.REJECTING ||
-      AcceptorBase.State.CLOSING
+      this.state_ === AcceptorBase.State.CLOSING
     )
-      return new RuntimeError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): the connection is on closing.`,
       );
     else if (this.state_ === AcceptorBase.State.CLOSED)
-      return new RuntimeError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): the connection has been closed.`,
       );
     // UNKNOWN ERROR, IT MAY NOT OCCURED
     else
-      return new RuntimeError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): unknown error, but not connected.`,
       );
   }

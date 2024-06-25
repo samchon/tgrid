@@ -1,4 +1,4 @@
-import { DomainError, RuntimeError, sleep_until } from "tstl";
+import { sleep_until } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
@@ -85,10 +85,15 @@ export class SharedWorkerConnector<
     // TEST CONDITION
     if (this.port_ && this.state_ !== SharedWorkerConnector.State.CLOSED) {
       if (this.state_ === SharedWorkerConnector.State.CONNECTING)
-        throw new DomainError("On connecting.");
+        throw new Error(
+          "Error on SharedWorkerConnector.connect(): on connecting.",
+        );
       else if (this.state_ === SharedWorkerConnector.State.OPEN)
-        throw new DomainError("Already connected.");
-      else throw new DomainError("Closing.");
+        throw new Error(
+          "Error on SharedWorkerConnector.connect(): already connected.",
+        );
+      else
+        throw new Error("Error on SharedWorkerConnector.connect(): closing.");
     }
 
     //----
@@ -113,7 +118,7 @@ export class SharedWorkerConnector<
         (await this._Handshake(options.timeout, at)) !==
         SharedWorkerConnector.State.CONNECTING
       )
-        throw new DomainError(
+        throw new Error(
           `Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`,
         );
 
@@ -142,9 +147,9 @@ export class SharedWorkerConnector<
           reject.name === "reject" &&
           typeof reject.message === "string"
         )
-          throw new RuntimeError(reject.message);
+          throw new Error(reject.message);
         else
-          throw new DomainError(
+          throw new Error(
             `Error on SharedWorkerConnector.connect(): target shared-worker may not be opened by TGrid. It's not following the TGrid's own handshake rule.`,
           );
       }
@@ -170,7 +175,7 @@ export class SharedWorkerConnector<
         sleep_until(at).then(() => {
           if (completed === false) {
             reject(
-              new DomainError(
+              new Error(
                 `Error on SharedWorkerConnector.connect(): target shared-worker is not sending handshake data over ${timeout} milliseconds.`,
               ),
             );

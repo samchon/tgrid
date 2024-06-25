@@ -1,5 +1,4 @@
 import type http from "http";
-import { DomainError } from "tstl";
 import type WebSocket from "ws";
 
 import { Invoke } from "../../components/Invoke";
@@ -198,7 +197,7 @@ export class WebSocketAcceptor<
   public async accept(provider: Provider): Promise<void> {
     // VALIDATION
     if (this.state_ !== WebSocketAcceptor.State.NONE)
-      throw new DomainError(
+      throw new Error(
         "Error on WebSocketAcceptor.accept(): you've already accepted (or rejected) the connection.",
       );
 
@@ -226,8 +225,8 @@ export class WebSocketAcceptor<
   public async reject(status?: number, reason?: string): Promise<void> {
     // VALIDATION
     if (this.state_ !== WebSocketAcceptor.State.NONE)
-      throw new DomainError(
-        "You've already accepted (or rejected) the connection.",
+      throw new Error(
+        "Error on WebSocketAcceptor.reject(): you've already accepted (or rejected) the connection.",
       );
 
     // SEND CLOSING FRAME

@@ -1,5 +1,3 @@
-import { DomainError, RuntimeError } from "tstl";
-
 import { Communicator } from "../../components/Communicator";
 
 /**
@@ -91,24 +89,24 @@ export abstract class ConnectorBase<
     if (this.state_ === ConnectorBase.State.OPEN) return null;
     // ERROR, ONE OF THEM
     else if (this.state_ === ConnectorBase.State.NONE)
-      return new DomainError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): connect first.`,
       );
     else if (this.state_ === ConnectorBase.State.CONNECTING)
-      return new DomainError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): it's on connecting, wait for a second.`,
       );
     else if (this.state_ === ConnectorBase.State.CLOSING)
-      return new RuntimeError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): the connection is on closing.`,
       );
     else if (this.state_ === ConnectorBase.State.CLOSED)
-      return new RuntimeError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): the connection has been closed.`,
       );
     // UNKNOWN ERROR, IT MAY NOT OCCURED
     else
-      return new RuntimeError(
+      return new Error(
         `Error on ${this.constructor.name}.${method}(): unknown error, but not connected.`,
       );
   }

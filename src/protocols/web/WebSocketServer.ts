@@ -1,7 +1,7 @@
 import type http from "http";
 import type https from "https";
 import type net from "net";
-import { DomainError, RuntimeError, is_node } from "tstl";
+import { is_node } from "tstl";
 import type WebSocket from "ws";
 
 import { NodeModule } from "../../utils/internal/NodeModule";
@@ -86,7 +86,7 @@ export class WebSocketServer<
 
   public constructor(key?: string, cert?: string) {
     if (is_node() === false)
-      throw new DomainError(
+      throw new Error(
         "Error on WebSocketServer.constructor(): only available in NodeJS.",
       );
 
@@ -126,17 +126,15 @@ export class WebSocketServer<
     //----
     // POSSIBLE TO OPEN?
     if (this.state_ === WebSocketServer.State.OPEN)
-      throw new DomainError(
+      throw new Error(
         "Error on WebSocketServer.open(): it has already been opened.",
       );
     else if (this.state_ === WebSocketServer.State.OPENING)
-      throw new DomainError(
+      throw new Error(
         "Error on WebSocketServer.open(): it's on opening, wait for a second.",
       );
     else if (this.state_ === WebSocketServer.State.CLOSING)
-      throw new RuntimeError(
-        "Error on WebSocketServer.open(): it's on closing.",
-      );
+      throw new Error("Error on WebSocketServer.open(): it's on closing.");
     // DO OPEN
     else if (
       this.server_ === null ||
@@ -190,7 +188,7 @@ export class WebSocketServer<
   public async close(): Promise<void> {
     // VALIDATION
     if (this.state_ !== WebSocketServer.State.OPEN)
-      throw new DomainError(
+      throw new Error(
         "Error on WebSocketServer.close(): server is not opened.",
       );
 
