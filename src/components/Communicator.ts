@@ -1,10 +1,4 @@
-import {
-  ConditionVariable,
-  DomainError,
-  HashMap,
-  Pair,
-  RuntimeError,
-} from "tstl";
+import { ConditionVariable, HashMap, Pair } from "tstl";
 
 import { Driver } from "../typings/Driver";
 import { serializeError } from "../utils/internal/serializeError";
@@ -96,7 +90,7 @@ export abstract class Communicator<
     // REJECT UNRETURNED FUNCTIONS
     const rejectError: Error = error
       ? error
-      : new RuntimeError("Connection has been closed.");
+      : new Error("Connection has been closed.");
 
     for (const entry of this.promises_) {
       const reject: FunctionLike = entry.second.second;
@@ -292,11 +286,11 @@ export abstract class Communicator<
       //----
       if (this.provider_ === undefined)
         // PROVIDER MUST BE
-        throw new RuntimeError(
+        throw new Error(
           `Error on Communicator._Handle_function(): the provider is not specified yet.`,
         );
       else if (this.provider_ === null)
-        throw new DomainError(
+        throw new Error(
           "Error on Communicator._Handle_function(): the provider would not be.",
         );
 
@@ -311,19 +305,19 @@ export abstract class Communicator<
 
         // SECURITY-ERRORS
         if (name[0] === "_")
-          throw new RuntimeError(
+          throw new Error(
             `Error on Communicator._Handle_function(): RFC does not allow access to a member starting with the underscore: Provider.${invoke.listener}()`,
           );
         else if (name[name.length - 1] === "_")
-          throw new RuntimeError(
+          throw new Error(
             `Error on Communicator._Handle_function(): RFC does not allow access to a member ending with the underscore: Provider.${invoke.listener}().`,
           );
         else if (name === "toString" && func === Function.toString)
-          throw new RuntimeError(
+          throw new Error(
             `Error on Communicator._Handle_function(): RFC on Function.toString() is not allowed: Provider.${invoke.listener}().`,
           );
         else if (name === "constructor" || name === "prototype")
-          throw new RuntimeError(
+          throw new Error(
             `Error on Communicator._Handle_function(): RFC does not allow access to ${name}: Provider.${invoke.listener}().`,
           );
       }

@@ -1,4 +1,4 @@
-import { DomainError, is_node, sleep_for } from "tstl";
+import { is_node, sleep_for } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
@@ -78,15 +78,15 @@ export class WebSocketConnector<
     // TEST CONDITION
     if (this.socket_ && this.state !== WebSocketConnector.State.CLOSED)
       if (this.socket_.readyState === WebSocketConnector.State.CONNECTING)
-        throw new DomainError(
+        throw new Error(
           "Error on WebSocketConnector.connect(): already connecting.",
         );
       else if (this.socket_.readyState === WebSocketConnector.State.OPEN)
-        throw new DomainError(
+        throw new Error(
           "Error on WebSocketConnector.connect(): already connected.",
         );
       else
-        throw new DomainError(
+        throw new Error(
           "Error on WebSocketConnector.connect(): already closing.",
         );
 
@@ -147,7 +147,12 @@ export class WebSocketConnector<
         reject(new WebSocketError(evt.code, evt.reason));
       });
       this.socket_!.onerror = once(() => {
-        reject(new WebSocketError(1006, "Connection refused."));
+        reject(
+          new WebSocketError(
+            1006,
+            "Error on WebSocketConnector.connect(): connection refused.",
+          ),
+        );
       });
     });
   }
@@ -215,7 +220,12 @@ export class WebSocketConnector<
       this.socket_!.onerror = once(() => {
         if (expired === false) {
           completed = true;
-          reject(new WebSocketError(1006, "Connection refused."));
+          reject(
+            new WebSocketError(
+              1006,
+              "Error on WebSocketConnector.connect(): connection refused.",
+            ),
+          );
         }
       });
     });

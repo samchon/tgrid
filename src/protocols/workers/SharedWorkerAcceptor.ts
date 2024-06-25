@@ -1,5 +1,3 @@
-import { DomainError } from "tstl";
-
 import { Invoke } from "../../components/Invoke";
 import { AcceptorBase } from "../internal/AcceptorBase";
 import { IReject } from "./internal/IReject";
@@ -133,7 +131,7 @@ export class SharedWorkerAcceptor<
   public async accept(provider: Provider): Promise<void> {
     // TEST CONDITION
     if (this.state_ !== SharedWorkerAcceptor.State.NONE)
-      throw new DomainError(
+      throw new Error(
         "Error on SharedWorkerAcceptor.accept(): you've already accepted (or rejected) the connection.",
       );
 
@@ -165,7 +163,7 @@ export class SharedWorkerAcceptor<
   public async reject(reason: string = "Rejected by server"): Promise<void> {
     // TEST CONDITION
     if (this.state_ !== SharedWorkerAcceptor.State.NONE)
-      throw new DomainError(
+      throw new Error(
         "Error on SharedWorkerAcceptor.reject(): you've already accepted (or rejected) the connection.",
       );
 

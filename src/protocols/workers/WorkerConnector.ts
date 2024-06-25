@@ -1,4 +1,4 @@
-import { DomainError, Singleton, is_node, sleep_until } from "tstl";
+import { Singleton, is_node, sleep_until } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
@@ -166,15 +166,12 @@ export class WorkerConnector<
   private _Test_connection(method: string): void {
     if (this.worker_ && this.state !== WorkerConnector.State.CLOSED) {
       if (this.state_ === WorkerConnector.State.CONNECTING)
-        throw new DomainError(
-          `Error on WorkerConnector.${method}(): on connecting.`,
-        );
+        throw new Error(`Error on WorkerConnector.${method}(): on connecting.`);
       else if (this.state_ === WorkerConnector.State.OPEN)
-        throw new DomainError(
+        throw new Error(
           `Error on WorkerConnector.${method}(): already connected.`,
         );
-      else
-        throw new DomainError(`Error on WorkerConnector.${method}(): closing.`);
+      else throw new Error(`Error on WorkerConnector.${method}(): closing.`);
     }
   }
 
@@ -208,7 +205,7 @@ export class WorkerConnector<
         (await this._Handshake(method, options.timeout, at)) !==
         WorkerConnector.State.CONNECTING
       )
-        throw new DomainError(
+        throw new Error(
           `Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connecting.`,
         );
 
@@ -222,7 +219,7 @@ export class WorkerConnector<
         (await this._Handshake(method, options.timeout, at)) !==
         WorkerConnector.State.OPEN
       )
-        throw new DomainError(
+        throw new Error(
           `Error on WorkerConnector.${method}(): target worker may not be opened by TGrid. It's not following the TGrid's own handshake rule when connected.`,
         );
 
@@ -258,7 +255,7 @@ export class WorkerConnector<
         sleep_until(until).then(() => {
           if (completed === false) {
             reject(
-              new DomainError(
+              new Error(
                 `Error on WorkerConnector.${method}(): target worker is not sending handshake data over ${timeout} milliseconds.`,
               ),
             );

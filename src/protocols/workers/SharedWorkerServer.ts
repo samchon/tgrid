@@ -1,4 +1,4 @@
-import { DomainError, HashSet, is_node } from "tstl";
+import { HashSet, is_node } from "tstl";
 
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IServer } from "../internal/IServer";
@@ -85,15 +85,15 @@ export class SharedWorkerServer<
   ): Promise<void> {
     // TEST CONDITION
     if (is_node() === true)
-      throw new DomainError(
+      throw new Error(
         "Error on SharedWorkerServer.open(): SharedWorker is not supported in the NodeJS.",
       );
     else if (self.document !== undefined)
-      throw new DomainError(
+      throw new Error(
         "Error on SharedWorkerServer.open(): this is not the SharedWorker.",
       );
     else if (this.state_ !== SharedWorkerServer.State.NONE)
-      throw new DomainError(
+      throw new Error(
         "Error on SharedWorkerServer.open(): the server has been opened yet.",
       );
 
@@ -122,7 +122,7 @@ export class SharedWorkerServer<
   public async close(): Promise<void> {
     // TEST VALIDATION
     if (this.state_ !== SharedWorkerServer.State.OPEN)
-      throw new DomainError(
+      throw new Error(
         "Error on SharedWorkerServer.close(): the server is not opened.",
       );
 

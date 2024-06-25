@@ -1,10 +1,4 @@
-import {
-  DomainError,
-  RuntimeError,
-  Singleton,
-  is_node,
-  sleep_until,
-} from "tstl";
+import { Singleton, is_node, sleep_until } from "tstl";
 
 import { Communicator } from "../../components/Communicator";
 import { Invoke } from "../../components/Invoke";
@@ -115,15 +109,11 @@ export class WorkerServer<
     // TEST CONDITION
     if (is_node() === false) {
       if (self.document !== undefined)
-        throw new DomainError(
-          "Error on WorkerServer.open(): this is not Worker.",
-        );
+        throw new Error("Error on WorkerServer.open(): this is not Worker.");
     } else if ((await this.channel_.get()).is_worker_server() === false)
-      throw new DomainError(
-        "Error on WorkerServer.open(): this is not Worker.",
-      );
+      throw new Error("Error on WorkerServer.open(): this is not Worker.");
     else if (this.state_ !== WorkerServer.State.NONE)
-      throw new DomainError(
+      throw new Error(
         "Error on WorkerServer.open(): the server has been opened yet.",
       );
 
@@ -205,7 +195,7 @@ export class WorkerServer<
           .then(() => {
             if (completed === false) {
               reject(
-                new DomainError(
+                new Error(
                   `Error on WorkerConnector.${method}(): target worker is not sending handshake data over ${timeout} milliseconds.`,
                 ),
               );
@@ -241,15 +231,26 @@ export class WorkerServer<
     if (this.state_ === WorkerServer.State.OPEN) return null;
     // ERROR, ONE OF THEM
     else if (this.state_ === WorkerServer.State.NONE)
-      return new DomainError("Server is not opened yet.");
+      return new Error(
+        "Error on WorkerServer.inspectReady(): server is not opened yet.",
+      );
     else if (this.state_ === WorkerServer.State.OPENING)
-      return new DomainError("Server is on opening; wait for a sec.");
+      return new Error(
+        "Error on WorkerServer.inspectReady(): server is on opening, wait for a sec.",
+      );
     else if (this.state_ === WorkerServer.State.CLOSING)
-      return new RuntimeError("Server is on closing.");
+      return new Error(
+        "Error on WorkerServer.inspectReady(): server is on closing.",
+      );
     // MAY NOT BE OCCURED
     else if (this.state_ === WorkerServer.State.CLOSED)
-      return new RuntimeError("The server has been closed.");
-    else return new RuntimeError("Unknown error, but not connected.");
+      return new Error(
+        "Error on WorkerServer.inspectReady(): the server has been closed.",
+      );
+    else
+      return new Error(
+        "Error on WorkerServer.inspectReady(): unknown error, but not connected.",
+      );
   }
 
   /**
