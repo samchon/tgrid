@@ -1,4 +1,5 @@
 import type http from "http";
+import { sleep_for } from "tstl";
 import type WebSocket from "ws";
 
 import { Invoke } from "../../components/Invoke";
@@ -240,6 +241,33 @@ export class WebSocketAcceptor<
   /* ----------------------------------------------------------------
     COMMUNICATOR
   ---------------------------------------------------------------- */
+  /**
+   * Ping to the remote client.
+   *
+   * Send a ping message to the remote client repeatedly.
+   *
+   * The ping message would be sent every internal milliseconds, until the
+   * connection be disconnectedd. The remote client will reply with a pong
+   * message, so that the connection would be alive until be explicitly
+   * disconnected.
+   *
+   * @param ms Interval milliseconds
+   * @throws Error when the connection is not accepted.
+   */
+  public ping(ms: number): void {
+    // TEST CONDITION
+    const error: Error | null = this.inspectReady("close");
+    if (error) throw error;
+    (async (): Promise<void> => {
+      while (this.state_ === WebSocketAcceptor.State.OPEN) {
+        await sleep_for(ms);
+        try {
+          this.socket_.ping();
+        } catch {}
+      }
+    })().catch(() => {});
+  }
+
   /**
    * @hidden
    */
