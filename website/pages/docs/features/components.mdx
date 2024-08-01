@@ -109,7 +109,13 @@ export const webSocketServerMain = async () => {
       await acceptor.accept(new StatisticsCalculator(config, listener));
     else if (acceptor.path === "/scientific")
       await acceptor.accept(new ScientificCalculator(config, listener));
-    else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+    else {
+      await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+      return;
+    }
+
+    // PING REPEATEDLY TO KEEP CONNECTION
+    acceptor.ping(15_000);
   });
   return server;
 };
@@ -193,7 +199,13 @@ export const webSocketServerMain = async () => {
       await acceptor.accept(new StatisticsCalculator(config, listener));
     else if (acceptor.path === "/scientific")
       await acceptor.accept(new ScientificCalculator(config, listener));
-    else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+    else {
+      await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+      return;
+    }
+
+    // PING REPEATEDLY TO KEEP CONNECTION
+    acceptor.ping(15_000);
   });
   return server;
 };

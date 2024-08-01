@@ -95,7 +95,9 @@ export class CalculateController {
       header,
       listener
     );
-    await acceptor.accept(provider);
+
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 
   /**
@@ -113,7 +115,9 @@ export class CalculateController {
     const header: ICalcConfig = acceptor.header;
     const listener: Driver<ICalcEventListener> = acceptor.getDriver();
     const provider: SimpleCalculator = new SimpleCalculator(header, listener);
-    await acceptor.accept(provider);
+
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 
   /**
@@ -134,7 +138,9 @@ export class CalculateController {
       header,
       listener
     );
-    await acceptor.accept(provider);
+
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 
   /**
@@ -155,7 +161,9 @@ export class CalculateController {
       header,
       listener
     );
-    await acceptor.accept(provider);
+
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 }
 ```
@@ -305,6 +313,14 @@ As you can see from the above code, `CalculateController` has many API operation
 When defining WebSocket operation, attach `@WebSocketRoute()` decorator to the target controller method with `path` specification. Also, the controller method must have the `@WebSocketRoute.Acceptor()` decorated parameter with [`WebSocketAcceptor`](../features/websocket/#websocketacceptor) type, because you have to determine whether to [`WebSocketAcceptor.accept()`](/api/classes/WebSocketAcceptor-1.html#accept) the client's connection or [`WebSocketAcceptor.reject()`](/api/classes/WebSocketAcceptor-1.html#reject) it.
 
 With such controller patterned WebSocket operation, you can manage WebSocket API endpoints much effectively and easily. Also, you can generate SDK (Software Development Kit) library for your client application through `Nestia`. Let's see how to generate SDK library, and how it would be looked like in the next section.
+
+<Callout type="info">
+**Ping**
+
+If client comes from web browser, the connection would be closed automatically after a certain period of time if there's no signal. In the Google Chrome case, it automatically closes the connection after 60 seconds.
+
+To make the connection alive forcibly, you can ping a signal to the remote client repeatedly in the specified interval by calling the [`WebSocketAcceptor.ping()`](/api/classes/WebSocketAcceptor-1.html#ping) method. Therefore, when developing WebSocket server application, consider to calling the [`WebSocketAcceptor.ping()`](/api/classes/WebSocketAcceptor-1.html#ping) method after [accepting](/api/classes/WebSocketAcceptor-1.html#accept) the connection.
+</Callout>
 
 ### Software Development Kit
 <Tabs items={["SDK Function", "Interfaces"]}>
