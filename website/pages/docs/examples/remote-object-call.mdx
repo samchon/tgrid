@@ -140,7 +140,10 @@ export const webSocketServerMain = async () => {
   await server.open(37_000, async (acceptor) => {
     const config: ICalcConfig = acceptor.header;
     const listener: Driver<ICalcEventListener> = acceptor.getDriver();
-    await acceptor.accept(new CompositeCalculator(config, listener));
+    const provider: CompositeCalculator = new CompositeCalculator(config, listener);
+
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   });
   return server;
 };

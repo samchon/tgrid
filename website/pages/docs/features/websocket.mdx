@@ -51,7 +51,13 @@ export const webSocketServerMain = async () => {
       await acceptor.accept(new StatisticsCalculator(config, listener));
     else if (acceptor.path === "/scientific")
       await acceptor.accept(new ScientificCalculator(config, listener));
-    else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+    else {
+      await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+      return;
+    }
+
+    // PING REPEATEDLY TO KEEP CONNECTION
+    acceptor.ping(15_000);
   });
   return server;
 };
@@ -252,7 +258,13 @@ export const webSocketServerMain = async () => {
         await acceptor.accept(new StatisticsCalculator(config, listener));
       else if (acceptor.path === "/scientific")
         await acceptor.accept(new ScientificCalculator(config, listener));
-      else await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+      else {
+        await acceptor.reject(1002, `WebSocket API endpoint not found.`);
+        return;
+      }
+
+      // PING REPEATEDLY TO KEEP CONNECTION
+      acceptor.ping(15_000);
     },
   );
   return server;
@@ -395,7 +407,15 @@ The `WebSocketAcceptor` is a [communicator](./components/#communicator) class in
 
 When the closure function being called by the connection of a remote client, you can determine whether to accept the client's connection or not, reading the [`WebSocketAcceptor.header`](/api/classes/WebSocketAcceptor-1.html#header-1) or [`WebSocketAcceptor.path`](/api/classes/WebSocketAcceptor-1.html#path-1) properties. If you've decided to accept the connection, call the [`WebSocketAcceptor.accept()`](/api/classes/WebSocketAcceptor-1.html#accept) method with `Provider` instance. Otherwise, reject it through the [`WebSocketAcceptor.reject()`](/api/classes/WebSocketAcceptor-1.html#reject) method.
 
-After [accepting](/api/classes/WebSocketAcceptor-1.html#accept) the connection, don't forget to [`closing`](/api/classes/WebSocketAcceptor-1.html#close) the connection after your business logic has been completed to clean up the resources. Otherwise the closing must be performed by the remote client, you can wait the remote client's closing signal by the [`WebSocketAcceptor.join()`](/api/classes/WebSocketAcceptor-1.html#join) method.
+Also, don't forget to [`closing`](/api/classes/WebSocketAcceptor-1.html#close) the connection after your business logic has been completed to clean up the resources. Otherwise the closing must be performed by the remote client, you can wait the remote client's closing signal by the [`WebSocketAcceptor.join()`](/api/classes/WebSocketAcceptor-1.html#join) method.
+
+<Callout type="info">
+**Ping**
+
+If client comes from web browser, the connection would be closed automatically after a certain period of time if there's no signal. In the Google Chrome case, it automatically closes the connection after 60 seconds.
+
+To make the connection alive forcibly, you can ping a signal to the remote client repeatedly in the specified interval by calling the [`WebSocketAcceptor.ping()`](/api/classes/WebSocketAcceptor-1.html#ping) method. Therefore, when developing WebSocket server application, consider to calling the [`WebSocketAcceptor.ping()`](/api/classes/WebSocketAcceptor-1.html#ping) method after [accepting](/api/classes/WebSocketAcceptor-1.html#accept) the connection.
+</Callout>
 
 ### `WebSocketConnector`
 <Tabs items={["Main Program", "Interfaces"]}>
@@ -604,7 +624,8 @@ export class CalculateController {
       header,
       listener
     );
-    await acceptor.accept(provider);
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 
   /**
@@ -622,7 +643,9 @@ export class CalculateController {
     const header: ICalcConfig = acceptor.header;
     const listener: Driver<ICalcEventListener> = acceptor.getDriver();
     const provider: SimpleCalculator = new SimpleCalculator(header, listener);
-    await acceptor.accept(provider);
+
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 
   /**
@@ -643,7 +666,8 @@ export class CalculateController {
       header,
       listener
     );
-    await acceptor.accept(provider);
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 
   /**
@@ -664,7 +688,8 @@ export class CalculateController {
       header,
       listener
     );
-    await acceptor.accept(provider);
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   }
 }
 ```

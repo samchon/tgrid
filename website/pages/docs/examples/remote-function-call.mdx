@@ -23,7 +23,7 @@ npm start
 
 
 ## Client Program
-```typescript filename="examples/remote-function-call/src/client.ts" showLineNumbers {13-19}
+```typescript filename="examples/remote-function-call/src/client.ts" showLineNumbers {11-17}
 import { Driver, WebSocketConnector } from "tgrid";
 
 export const webSocketClientMain = async () => {
@@ -81,7 +81,8 @@ export const webSocketServerMain = async () => {
   > = new WebSocketServer();
   await server.open(37_000, async (acceptor) => {
     const provider: Calculator = new Calculator();
-    await acceptor.accept(provider);
+    await acceptor.accept(provider); // ACCEPT CONNECTION
+    acceptor.ping(15_000); // PING REPEATEDLY TO KEEP CONNECTION
   });
   return server;
 };
