@@ -43,8 +43,9 @@ Provider->>Acceptor: 5. returns a value
 Acceptor-->>Connector: 6. sends a protocolized<br/>network message<br/>meaning a return value
 Deactivate Acceptor
 Activate Connector
-Connector->>User: 7. delivers the return value
+Connector->>Driver: 7. delivers the return value
 Deactivate Connector
+Driver->>User: 8. returns the value
 Deactivate User
 ```
 
