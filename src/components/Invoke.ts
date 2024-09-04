@@ -1,5 +1,5 @@
 /**
- * Message structure for RFC (Remote Function Call).
+ * Message structure for RPC (Remote Procedure Call).
  *
  * @author Jeongho Nam - https://github.com/samchon
  */
@@ -7,9 +7,14 @@ export type Invoke = Invoke.IFunction | Invoke.IReturn;
 
 export namespace Invoke {
   /**
-   * Message for Requesting RFC.
+   * Message for Requesting RPC.
    */
-  export interface IFunction extends IBase {
+  export interface IFunction {
+    /**
+     * Unique identifier.
+     */
+    uid: number;
+
     /**
      * Target function (sometimes calsuled in objects) to call.
      */
@@ -20,16 +25,32 @@ export namespace Invoke {
      */
     parameters: IParameter[];
   }
-
+  /**
+   * Parameter for the function call.
+   */
   export interface IParameter {
+    /**
+     * Type of the {@link value}.
+     *
+     * Actually, it stores result of the `typeof` statement.
+     */
     type: string;
+
+    /**
+     * Value of the parameter.
+     */
     value: any;
   }
 
   /**
-   * Message for Returning RFC.
+   * Message for Returning RPC.
    */
-  export interface IReturn extends IBase {
+  export interface IReturn {
+    /**
+     * Unique identifier.
+     */
+    uid: number;
+
     /**
      * `true` -> return, `false` -> exception.
      */
@@ -39,15 +60,5 @@ export namespace Invoke {
      * Returned value or thrown exception.
      */
     value: any;
-  }
-
-  /**
-   * @hiden
-   */
-  interface IBase {
-    /**
-     * Unique identifier.
-     */
-    uid: number;
   }
 }
