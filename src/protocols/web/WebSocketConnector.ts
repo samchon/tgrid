@@ -146,11 +146,11 @@ export class WebSocketConnector<
       this.socket_!.onclose = once((evt) => {
         reject(new WebSocketError(evt.code, evt.reason));
       });
-      this.socket_!.onerror = once(() => {
+      this.socket_!.onerror = once((evt) => {
         reject(
           new WebSocketError(
             1006,
-            "Error on WebSocketConnector.connect(): connection refused.",
+            `Error on WebSocketConnector.connect(): ${(evt as any as ErrorEvent)?.message ?? "connection refused."}`,
           ),
         );
       });
