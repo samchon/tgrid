@@ -22,9 +22,9 @@ export interface IWorkerSystem {
    *
    * Close connection between the remote worker system.
    *
-   * It destroies all RFCs (remote function calls) between this and the remote system
+   * It destroys all RFCs (remote function calls) between this and the remote system
    * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
-   * causes all incompleted RFCs to throw exceptions.
+   * causes all incomplete RFCs to throw exceptions.
    */
   close(): Promise<void>;
 }

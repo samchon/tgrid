@@ -31,7 +31,7 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  * be same with the ones defined in the target {@link WorkerServer} class
  * (`Provider` and `Remote` must be reversed).
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from client to server, and the other `Remote` means a provider from the
@@ -106,7 +106,7 @@ export class WorkerConnector<
     options: Partial<WorkerConnector.IConnectOptions> = {},
   ): Promise<void> {
     //----
-    // PRELIMINIARIES
+    // PRELIMINARIES
     //----
     // TEST CONDITION
     this._Test_connection("compile");
