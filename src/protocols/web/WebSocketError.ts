@@ -11,7 +11,7 @@ export class WebSocketError extends Error {
    * Initializer Constructor.
    *
    * @param status Status code.
-   * @param message Detailed message, the reaason why.
+   * @param message Detailed message, the reason why.
    */
   public constructor(status: number, message: string) {
     super(message);

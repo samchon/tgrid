@@ -14,7 +14,7 @@ import { Promisive } from "./Promisive";
  *   - `Driver`: Remote Function Call
  *
  * @template Controller An interface defining features (functions & objects) provided from the remote system.
- * @template UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+ * @template UseParametric Whether to convert type of function parameters to be compatible with their primitive.
  * @author Jeongho Nam - https://github.com/samchon
  */
 export type Driver<

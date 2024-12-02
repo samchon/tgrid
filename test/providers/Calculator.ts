@@ -38,7 +38,7 @@ export class Scientific implements IScientific {
   }
 
   public sqrt(x: number): number {
-    if (x < 0) throw new Error("Negative value on sqaure.");
+    if (x < 0) throw new Error("Negative value on square.");
     return Math.sqrt(x);
   }
 }

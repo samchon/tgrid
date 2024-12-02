@@ -23,7 +23,7 @@ import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
  * whether to {@link accept} the client's connection or {@link reject not},
  * reading the {@link header} and {@link path} properties. If you've decided to
  * accept the connection, call the {@link accept} method with `Provider` instance.
- * Otherwise, reject it thorugh the {@link reject} method.
+ * Otherwise, reject it through the {@link reject} method.
  *
  * After {@link accept accepting} the connection, don't forget to
  * {@link close closing} the connection after your business has been completed
@@ -34,7 +34,7 @@ import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
  * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
  * be same with the ones defined in the {@link WebSocketServer} class.
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from server to client, and the other `Remote` means a provider from the
@@ -247,7 +247,7 @@ export class WebSocketAcceptor<
    * Send a ping message to the remote client repeatedly.
    *
    * The ping message would be sent every internal milliseconds, until the
-   * connection be disconnectedd. The remote client will reply with a pong
+   * connection be disconnected. The remote client will reply with a pong
    * message, so that the connection would be alive until be explicitly
    * disconnected.
    *

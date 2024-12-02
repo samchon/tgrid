@@ -201,7 +201,7 @@ To open the websocket server, call the [`WebSocketServer.open()`](/api/classes/W
 
 Also, when declaring `WebSocketServer` type, you have to specify three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments would be propagated to the [`WebSocketAcceptor`](#websocketacceptor), so that [`WebSocketAcceptor`](#websocketacceptor) would have the same generic arguments, too.
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
 
   - Above example case:
     - `Header`: `ICalcConfig` type
@@ -520,7 +520,7 @@ After the connection, don't forget to [closing](/api/classes/WebSocketConnector-
 
 Also, when declaring this `WebSocketConnector` type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`WebSocketServer`](#websocketserver) and [`WebSocketAcceptor`](#websocketacceptor) classes (`Provider` and `Remote` must be reversed).
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
 
   - Above example case:
     - `Header`: `ICalcConfig` type
@@ -570,7 +570,7 @@ To utilize `TGrid` in the `NestJS`, upgrade the NestJS application like above.
 Just call the [`WebSocketAdaptor.upgrade()`](https://nestia.io/api/classes/WebSocketAdaptor.html#upgrade) method, then you can utilize `TGrid` in the `NestJS` server.
 
 <Callout type="info">
-About detailed setup or more detailed informations, please refer below docs:
+About detailed setup or more detailed information, please refer below docs:
 
   - [Nestia > Guide Documents > Setup](https://nestia.io/docs/setup/)
   - [Nestia > Guide Documents > WebSocketRoute](https://nestia.io/docs/core/WebSocketRoute/)
@@ -842,10 +842,10 @@ Note that, don't forget to define `@WebSocketRoute.Acceptor()` decorated paramet
 
 Also, when declaring the [`WebSocketAcceptor`](#websocketacceptor) type, ou have to specify three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments would be propagated to the automatically generated [Software Development Kit](#software-development-kit) for the client, so that the client developers will utilize the same generic types what you've defined (`Provider` and `Remote` must be reversed).
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
 
 <Callout type="info">
-You can find more detailed informations about `@WebSocketRoute()`:
+You can find more detailed information about `@WebSocketRoute()`:
 
   - [Nestia > Guide Documents > WebSocketRoute](https://nestia.io/docs/core/WebSocketRoute/)]
 </Callout>
@@ -1099,7 +1099,7 @@ Above file is one of the SDK library corresponding to the [`CalculateController`
 Let's see how client developer utilizes the SDK library in the next section.
 
 <Callout type="info">
-You can find more detailed informations about SDK generator:
+You can find more detailed information about SDK generator:
 
   - [Nestia > Guide Documents > S/W Development Kit](https://nestia.io/docs/sdk/sdk/)
 </Callout>

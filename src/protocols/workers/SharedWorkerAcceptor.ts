@@ -29,7 +29,7 @@ import { IWorkerSystem } from "./internal/IWorkerSystem";
  * generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must
  * be same with the ones defined in the {@link SharedWorkerServer} class.
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from server to client, and the other `Remote` means a provider from the
