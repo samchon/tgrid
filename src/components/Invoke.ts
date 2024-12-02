@@ -13,12 +13,12 @@ export namespace Invoke {
     /**
      * Unique identifier.
      */
-    uid: number;
+    readonly uid: number;
 
     /**
      * Target function (sometimes calsuled in objects) to call.
      */
-    listener: string;
+    readonly listener: string;
 
     /**
      * Parameters for the function call.
@@ -49,12 +49,12 @@ export namespace Invoke {
     /**
      * Unique identifier.
      */
-    uid: number;
+    readonly uid: number;
 
     /**
      * `true` -> return, `false` -> exception.
      */
-    success: boolean;
+    readonly success: boolean;
 
     /**
      * Returned value or thrown exception.
