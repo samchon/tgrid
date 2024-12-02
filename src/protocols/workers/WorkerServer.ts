@@ -21,7 +21,7 @@ import { ThreadPort } from "./internal/threads/ThreadPort";
  * and communicates with client (its parent) directly.
  *
  * To start communication with the client, call the {@link open} method
- * with `Provider` instance. After your business, don't forget {@link close cosing}
+ * with `Provider` instance. After your business, don't forget {@link close closing}
  * this `Worker` instance. If the termination is performed by the
  * {@link WorkerConnector}, you can wait the closing signal through the
  * {@link join} method.
@@ -31,7 +31,7 @@ import { ThreadPort } from "./internal/threads/ThreadPort";
  * be same with the ones defined in the target {@link WorkerConnector} class
  * (`Provider` and `Remote` must be reversed).
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from server to client, and the other `Remote` means a provider from the
@@ -103,7 +103,7 @@ export class WorkerServer<
    * waste of memory leak. Close this worker by yourself ({@link close}) or let
    * client to close this worker ({@link WorkerConnector.close}).
    *
-   * @param provider An object providing featrues for the client.
+   * @param provider An object providing features for the client.
    */
   public async open(provider: Provider): Promise<void> {
     // TEST CONDITION
@@ -242,7 +242,7 @@ export class WorkerServer<
       return new Error(
         "Error on WorkerServer.inspectReady(): server is on closing.",
       );
-    // MAY NOT BE OCCURED
+    // MAY NOT BE OCCURRED
     else if (this.state_ === WorkerServer.State.CLOSED)
       return new Error(
         "Error on WorkerServer.inspectReady(): the server has been closed.",

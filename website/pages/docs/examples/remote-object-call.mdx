@@ -115,7 +115,7 @@ Here is an example websocket client program, calling remote calculator of the we
 
 As you can see, the client has constructed a `WebSocketConnector` instance with the `Header` and `listener` objects. The `header` object represents a [`Header`](../features/components/#header) component which be directly delivered to the remote system when connecting. The `listener` object is a [`Provider`](../features/components/#provider) component provided for the remote websocket server. It means that, the "Client Program" configures the `header` value to `precision: 2`, and provides `ICalcEventListener` for the remote "Server Program".
 
-After that, you can find out the "Client Program" is calling the remote calculator's function of "Server Program" through [`Driver<ICompositeCalculator>`](../features/components/#driver) typed instance. In the remote function call statements, there is one thing important. It is [`Driver<ICompositeCalculator>`](../features/components/#driver) type supports nested object's funtion calls. 
+After that, you can find out the "Client Program" is calling the remote calculator's function of "Server Program" through [`Driver<ICompositeCalculator>`](../features/components/#driver) typed instance. In the remote function call statements, there is one thing important. It is [`Driver<ICompositeCalculator>`](../features/components/#driver) type supports nested object's function calls.
 
 This is the "Remote Object Call".
 
@@ -272,7 +272,7 @@ export interface IStatisticsCalculator {
 
 The "Server Program" is [providing]([`Provider`](../features/components/#provider)) `CompositeCalculator` class to the websocket client.
 
-By the way, when composing the `CompositeCalculator` class instance as a [`Provider`](../features/components/#provider), you can find out that it is delivering the [`Header`](../features/components/#header) and [`Driver<ICalcEventListener>`](../features/components/#driver) typed instances to the construction parameter. By getting the [`Header`](../features/components/#header) value from the "Client Program", "Server Program" configures precision level of the calculator. 
+By the way, when composing the `CompositeCalculator` class instance as a [`Provider`](../features/components/#provider), you can find out that it is delivering the [`Header`](../features/components/#header) and [`Driver<ICalcEventListener>`](../features/components/#driver) typed instances to the construction parameter. By getting the [`Header`](../features/components/#header) value from the "Client Program", "Server Program" configures precision level of the calculator.
 
 Also, if you click the second `Providers` tab, you can find out that calculators are reporting their calculator operations to the "Client Program" through the [`Driver<ICalcEventListener>`](../features/components/#driver) object. Therefore, whenever the calculator function be called, "Server Program" calls remote function of the "Client Program" for event reporting.
 
@@ -282,9 +282,9 @@ Such two-way remote functions providing and header for initialization, this is t
 
 
 ## Next Chapter
-Until this chapter, we've learned only about simple structructured network systems. Complexity has only come to the [`Provider`](../features/components/#provider) level, and the network systems were always monotonous. Only single type of server and client were existed.
+Until this chapter, we've learned only about simple structured network systems. Complexity has only come to the [`Provider`](../features/components/#provider) level, and the network systems were always monotonous. Only single type of server and client were existed.
 
-By the way, `TGrid` has said that it is useful for developing complicated network system like grid computing in the [README](https://github.com/samchon/tgrid) and index page of guide documents. At the next chapter, we will learn about the complicated network system. 
+By the way, `TGrid` has said that it is useful for developing complicated network system like grid computing in the [README](https://github.com/samchon/tgrid) and index page of guide documents. At the next chapter, we will learn about the complicated network system.
 
   - [Learn from Examples > Object Oriented Network](./object-oriented-network).
 

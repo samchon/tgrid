@@ -1,7 +1,7 @@
 {
   "name": "tgrid.com",
   "version": "0.1.0",
-  "description": "Typia Guide Documents",
+  "description": "TGrid Guide Documents",
   "private": true,
   "scripts": {
     "build": "rimraf .next && rimraf out && typedoc && next build && node build/sitemap",
@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/samchon/typia"
+    "url": "https://github.com/samchon/tgrid"
   },
   "author": "Jeongho Nam",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/samchon/typia/issues"
+    "url": "https://github.com/samchon/tgrid/issues"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",

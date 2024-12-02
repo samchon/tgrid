@@ -111,7 +111,7 @@ export interface IStatisticsCalculator {
 
 Worker Connector.
 
-The `WorkerConnetor` is a [communicator](./components/#communicator) class, which creates an `Worker` instance, and interacts with it through RPC (Remote Procedure Call). In other words, `WorkerConnector` considers the `Worker` instance as a remote server accepting only one client; [`WorkerServer`](#workerserver).
+The `WorkerConnector` is a [communicator](./components/#communicator) class, which creates an `Worker` instance, and interacts with it through RPC (Remote Procedure Call). In other words, `WorkerConnector` considers the `Worker` instance as a remote server accepting only one client; [`WorkerServer`](#workerserver).
 
 You can create the `Worker` instance and communicate with it by [`WorkerConnector.connect()`](/api/classes/WorkerConnector-1.html#connect) or [`WorkerConnector.compile()`](/api/classes/WorkerConnector-1.html#compile) method. The [`WorkerConnector.connect()`](/api/classes/WorkerConnector-1.html#connect) method just opens an existing JS (or TS) file, and the [`WorkerConnector.compile()`](/api/classes/WorkerConnector-1.html#compile) method writes a temporary JS (TS) file and connects to it. Anyway, the `Worker` instanced program must open the [`WorkerServer`](#workerserver).
 
@@ -119,7 +119,7 @@ By the way, don't forget [closing](/api/classes/WorkerConnector-1.html#close) th
 
 Also, when declaring this `WorkerConnector` type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`WorkerServer`](#workerserver) class (`Provider` and `Remote` must be reversed).
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
 
   - Above example case:
     - `Header`: `ICalcConfig` type
@@ -307,7 +307,7 @@ To start communication with the client, call the [`WorkerServer.open()`](http://
 
 Also, when declaring this WorkerServer type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`WorkerConnector`](#workerconnector) class (`Provider` and `Remote` must be reversed).
 
-For reference, the first `Header` type repersents an initial data from the client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the client to server.
+For reference, the first `Header` type represents an initial data from the client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the client to server.
 
   - Above example case:
     - `Header`: `ICalcConfig` type
@@ -492,13 +492,13 @@ export interface IStatisticsCalculator {
 
 Shared Worker Server.
 
-The `SharedWorkerServer` is a class representing a server in `SharedWorker` environment. Clients connecting to the `SharedWorkerServer` would communicate with this server through [`SharedWorkerAcceptor`](#sharedworkeracceptor) instaces using RPC (Remote Procedure Call) concept.
+The `SharedWorkerServer` is a class representing a server in `SharedWorker` environment. Clients connecting to the `SharedWorkerServer` would communicate with this server through [`SharedWorkerAcceptor`](#sharedworkeracceptor) instances using RPC (Remote Procedure Call) concept.
 
 To open the server, call the [`SharedWorkerServer.open()`](/api/classes/SharedWorkerServer-1.html#open) method with your callback function which would be called whenever a [`SharedWorkerAcceptor`](#sharedworkeracceptor) has been newly created by a new client's connection.
 
 Also, when declaring this `SharedWorkerServer` type, you have to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments would be propagated to the [`SharedWorkerAcceptor`](#sharedworkeracceptor), so that [`SharedWorkerAcceptor`](#sharedworkeracceptor) would have the same generic arguments, too.
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
 
   - Above example case:
     - `Header`: `ICalcConfig` type
@@ -590,13 +590,13 @@ Shared Worker Acceptor.
 
 The `SharedWorkerAcceptor` is a [communicator](./components/#communicator) class interacting with the [`SharedWorkerConnector`](#sharedworkerconnector) through RFC (Remote Function Call), created by the [`SharedWorkerServer`](#sharedworkerserver) class whenever a client connects to the `SharedWorker` instance.
 
-When a remote client connects to the [`SharedWorkerServer`](#sharedworkerserver), so that a new `SharedworkerAcceptor` instance being created, you can determine whether to accept the client's connection or not, reading the [`SharedWorkerAcceptor.header`](/api/classes/SharedWorkerAcceptor-1.html#header-1) property. If you've decided to accept the connection, call the [`SharedWorkerAcceptor.accept()`](/api/classes/SharedWorkerAcceptor-1.html#accept) method with Provider instance. Otherwise, reject it thorugh the [`SharedWorkerAcceptor.reject()`](/api/classes/SharedWorkerAcceptor-1.html#reject) method.
+When a remote client connects to the [`SharedWorkerServer`](#sharedworkerserver), so that a new `SharedWorkerAcceptor` instance being created, you can determine whether to accept the client's connection or not, reading the [`SharedWorkerAcceptor.header`](/api/classes/SharedWorkerAcceptor-1.html#header-1) property. If you've decided to accept the connection, call the [`SharedWorkerAcceptor.accept()`](/api/classes/SharedWorkerAcceptor-1.html#accept) method with Provider instance. Otherwise, reject it thorugh the [`SharedWorkerAcceptor.reject()`](/api/classes/SharedWorkerAcceptor-1.html#reject) method.
 
 After [accepting](/api/classes/SharedWorkerAcceptor-1.html#accept) the connection, don't forget to [closing](/api/classes/SharedWorkerAcceptor-1.html#close) the connection after your business has been completed to clean up the resources. Otherwise the closing must be performed by the remote client, you can wait the remote client's closing signal by the [`SharedWorkerAcceptor.join()`](/api/classes/SharedWorkerAcceptor-1.html#accept) method.
 
-Also, when declaring this `SharedworkerAcceptor` type, you have to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the [`SharedWorkerServer`](#sharedworkerserver) class.
+Also, when declaring this `SharedWorkerAcceptor` type, you have to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the [`SharedWorkerServer`](#sharedworkerserver) class.
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from server to client, and the other `Remote` means a provider from the remote client to server.
 
 ### `SharedWorkerConnector`
 <Tabs items={["Main Program", "Interfaces"]}>
@@ -695,7 +695,7 @@ After the connection, don't forget to [closing](/api/classes/SharedWorkerConnect
 
 Also, when declaring this `SharedWorkerConnector` type, you've to define three generic arguments; `Header`, `Provider` and `Remote`. Those generic arguments must be same with the ones defined in the target [`SharedWorkerServer`](#sharedworkerserver) and [`SharedWorkerAcceptor`](#sharedworkeracceptor) classes (Provider and `Remote` must be reversed).
 
-For reference, the first `Header` type repersents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
+For reference, the first `Header` type represents an initial data from the remote client after the connection. I recommend utilize it as an activation tool for security enhancement. The second generic argument `Provider` represents a provider from client to server, and the other `Remote` means a provider from the remote server to client.
 
   - Above example case:
     - `Header`: `ICalcConfig` type

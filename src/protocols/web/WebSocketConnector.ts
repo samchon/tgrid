@@ -31,7 +31,7 @@ import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
  * be same with the ones defined in the target {@link WebSocketServer} and
  * {@link WebSocketAcceptor} classes (`Provider` and `Remote` must be reversed).
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from client to server, and the other `Remote` means a provider from the
@@ -97,7 +97,7 @@ export class WebSocketConnector<
     this.state_ = WebSocketConnector.State.CONNECTING;
 
     try {
-      // DO CONNNECT
+      // DO CONNECT
       const factory = is_node()
         ? ((await WebSocketPolyfill()) as any)
         : self.WebSocket;
@@ -204,7 +204,7 @@ export class WebSocketConnector<
           }
         });
 
-      // EVENT LISTENRES
+      // EVENT LISTENERS
       this.socket_!.onmessage = once((evt) => {
         if (expired === false) {
           completed = true;

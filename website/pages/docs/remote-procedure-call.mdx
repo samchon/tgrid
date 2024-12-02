@@ -542,18 +542,18 @@ export interface IStatisticsCalculator {
   </Tab>
 </Tabs>
 
-Looking at the above `ICompositeCalculator` type from the "Interfaces" tab, none of the functions are actually asynchrounous. However, the "Client Program" is attaching `await` symbols. It's because every return types of `ICompositeCalculator` have changed to `Promise<R>` types through the `Driver<T>` type.
+Looking at the above `ICompositeCalculator` type from the "Interfaces" tab, none of the functions are actually asynchronous. However, the "Client Program" is attaching `await` symbols. It's because every return types of `ICompositeCalculator` have changed to `Promise<R>` types through the `Driver<T>` type.
 
 As the `Driver<ICompositeCalculator>` typed instance is not a "Client Program"'s own, but the "Server Program"'s own (`CompositeCalculator`), the function call must be passed through the asynchronous network communication. In such reason, the remote function calling cannot be synchronous, but asynchronous, and `Driver<T>` type is casting them.
 
 <Callout type="warning" emoji="💡">
 **Tip**
 
-Description of `Driver` type in the [Features > Components](./features/components) chatper.
+Description of `Driver` type in the [Features > Components](./features/components) chapter.
 
 `Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument `Remote` which means the type of remote system's [Provider](./features/components/#provider), and you can remotely call the functions of the [Provider](#provider) asynchronously through the `Drive<Remote>` instance.
 
-When you call some function of remote [Provider](./features/components/#provider) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments (parameter values) to the remote system through the [Communicator](./features/components/#communicator). If the remote system suceeded to reply the result of the function call, [Communicator](./features/components/#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Remote>` working.
+When you call some function of remote [Provider](./features/components/#provider) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments (parameter values) to the remote system through the [Communicator](./features/components/#communicator). If the remote system succeeded to reply the result of the function call, [Communicator](./features/components/#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Remote>` working.
 
 Otherwise exception is thrown in the remote [Provider](./features/components/#provider) function, [Communicator](./features/components/#communicator) deliveries the exception instance instead to the remote system, so that actual exception being thrown from the `Driver<Remote>` instance.
 

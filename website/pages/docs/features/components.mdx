@@ -3,9 +3,9 @@ import { Callout, Tabs, Tab } from 'nextra-theme-docs'
 ## Outline
 This chapter describes key components of the `TGrid` only in the conceptual level.
 
-If you're not familar with theoretical stories, it's okay to skip to the next chapter [Features > WebSocket Protocol](./websocket).
+If you're not familiar with theoretical stories, it's okay to skip to the next chapter [Features > WebSocket Protocol](./websocket).
 
-Even you want to see the example codes, step to the [Learn from Examples > Remote Funtion Call](../examples/remote-function-call) chapter. 
+Even you want to see the example codes, step to the [Learn from Examples > Remote Function Call](../examples/remote-function-call) chapter.
 
 Otherwise, let's study about the key components of the `TGrid`.
 
@@ -305,7 +305,7 @@ Driver of RPC (Remote Procedure Call).
 
 `Driver` is a proxy instance designed to call functions of the remote system. It has a generic argument `Remote` which means the type of remote system's [Provider](#provider), and you can remotely call the functions of the [Provider](#provider) asynchronously through the `Drive<Remote>` instance.
 
-When you call some function of remote [Provider](#provider) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments (parameter values) to the remote system through the [Communicator](#communicator). If the remote system suceeded to reply the result of the function call, [Communicator](#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Remote>` working.
+When you call some function of remote [Provider](#provider) by the `Driver<Listener>` instance, it hooks the function call expression, and delivers the function name and arguments (parameter values) to the remote system through the [Communicator](#communicator). If the remote system succeeded to reply the result of the function call, [Communicator](#communicator) resolves the promise of the function call expression with the result, so that makes `Driver<Remote>` working.
 
 Otherwise exception is thrown in the remote [Provider](#provider) function, [Communicator](#communicator) deliveries the exception instance instead to the remote system, so that actual exception being thrown from the `Driver<Remote>` instance.
 
