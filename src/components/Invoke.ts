@@ -16,7 +16,7 @@ export namespace Invoke {
     readonly uid: number;
 
     /**
-     * Target function (sometimes calsuled in objects) to call.
+     * Target function (sometimes capsuled in objects) to call.
      */
     readonly listener: string;
 

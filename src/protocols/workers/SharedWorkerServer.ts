@@ -12,7 +12,7 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
  *
  * The `SharedWorkerServer` is a class representing a server in `SharedWorker`
  * environment. Clients connecting to the `SharedWorkerServer` would communicate
- * with this server through {@link SharedWorkerAcceptor} instaces using RPC
+ * with this server through {@link SharedWorkerAcceptor} instances using RPC
  * (Remote Procedure Call) concept.
  *
  * To open the server, call the {@link open} method with your callback function
@@ -24,7 +24,7 @@ import { SharedWorkerAcceptor } from "./SharedWorkerAcceptor";
  * would be propagated to the {@link SharedWorkerAcceptor}, so that
  * {@link SharedWorkerAcceptor} would have the same generic arguments, too.
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from server to client, and the other `Remote` means a provider from the
@@ -72,7 +72,7 @@ export class SharedWorkerServer<
    *
    * When implementing the *handler* function with the {@link SharedWorkerServer}
    * instance, calls the {@link SharedWorkerAcceptor.accept} method if you want to
-   * accept the new client's connection. Otherwise you dont't want to accept the
+   * accept the new client's connection. Otherwise you don't want to accept the
    * client and reject its connection, just calls the
    * {@link SharedWorkerAcceptor.reject} instead.
    *
@@ -115,9 +115,9 @@ export class SharedWorkerServer<
    *
    * Close all connections between its remote clients ({@link SharedWorkerConnector}s).
    *
-   * It destories all RFCs (remote function calls) between this server and remote clients
+   * It destroys all RFCs (remote function calls) between this server and remote clients
    * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
-   * causes all incompleted RFCs to throw exceptions.
+   * causes all incomplete RFCs to throw exceptions.
    */
   public async close(): Promise<void> {
     // TEST VALIDATION

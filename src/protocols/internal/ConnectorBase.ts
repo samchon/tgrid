@@ -3,11 +3,11 @@ import { Communicator } from "../../components/Communicator";
 /**
  * Basic Connector.
  *
- * The `ConnectorBase` is an abtract communicator class, who can connect to remote server who
+ * The `ConnectorBase` is an abstract communicator class, who can connect to remote server who
  * interacts with clients using the RFC (Remote Function Call).
  *
  * Also, when declaring this {@link ConnectorBase} type, you've to define two template arguments,
- * *Header* and *Provider*. The *Header* type repersents an initial data gotten from the remote
+ * *Header* and *Provider*. The *Header* type represents an initial data gotten from the remote
  * client after the connection. I hope you and client not to omit it and utilize it as an
  * activation tool to enhance security.
  *
@@ -104,7 +104,7 @@ export abstract class ConnectorBase<
       return new Error(
         `Error on ${this.constructor.name}.${method}(): the connection has been closed.`,
       );
-    // UNKNOWN ERROR, IT MAY NOT OCCURED
+    // UNKNOWN ERROR, IT MAY NOT OCCURRED
     else
       return new Error(
         `Error on ${this.constructor.name}.${method}(): unknown error, but not connected.`,

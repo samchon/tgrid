@@ -49,7 +49,7 @@ async function main(): Promise<void> {
     await _Paginate(browser, "worker.html");
     await _Paginate(browser, "shared-worker.html");
   } catch (exp) {
-    console.log("An error has occured");
+    console.log("An error has occurred");
     console.log(exp);
     process.exit(-1);
   }

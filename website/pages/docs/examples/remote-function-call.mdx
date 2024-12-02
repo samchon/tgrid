@@ -3,7 +3,7 @@ import { Callout, Tabs, Tab } from 'nextra-theme-docs'
 ## Outline
 With `TGrid`, you can call remote system's functions as if they are local functions. 
 
-Such remote procedure calling concept is called as [RPC (Remote Procedure Call)](../remote-procedure-call) in the development world, but it contains not only remote funtion call, but also contains [Remote Object Call](./remote-object-call) and [Object Oriented Network](./object-oriented-network). However, in here chapter, we will focus only on the remote function calls.
+Such remote procedure calling concept is called as [RPC (Remote Procedure Call)](../remote-procedure-call) in the development world, but it contains not only remote function call, but also contains [Remote Object Call](./remote-object-call) and [Object Oriented Network](./object-oriented-network). However, in here chapter, we will focus only on the remote function calls.
 
 Let's learn how to call remote functions with `TGrid`.
 
@@ -142,7 +142,7 @@ Here is the websocket server program providing `Calculator` class to the client.
 
 Above ["Client Program"](#client-program) is calling remote functions to the calculator through the `remote` instance of `Driver<ICalculator>` typed. To make the client program works properly, "Server Program" must provide the actual instance implemented the `ICalculator` type. This "Server Program" is serving it providing the `Calculator` class instance in such reason.
 
-By the way, the provided `Calculator` does not have any asynchronous method, but "Client Program" is calling the remote functions with `await` symbol. It's because remote function calls are actually asynchrounous operations perform by the network communication, and `Driver` is a type changing every function's return type to be asynchronous (`Promise<R>`) in such reason.
+By the way, the provided `Calculator` does not have any asynchronous method, but "Client Program" is calling the remote functions with `await` symbol. It's because remote function calls are actually asynchronous operations perform by the network communication, and `Driver` is a type changing every function's return type to be asynchronous (`Promise<R>`) in such reason.
 
 This is the [RPC (Remote Procedure Call)](../remote-procedure-call) of `TGrid`.
 

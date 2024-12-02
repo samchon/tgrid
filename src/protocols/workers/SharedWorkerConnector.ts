@@ -33,7 +33,7 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  * be same with the ones defined in the target {@link WebSocketServer} and
  * {@link SharedWorkerAcceptor} classes (`Provider` and `Remote` must be reversed).
  *
- * For reference, the first `Header` type repersents an initial data from the
+ * For reference, the first `Header` type represents an initial data from the
  * remote client after the connection. I recommend utilize it as an activation tool
  * for security enhancement. The second generic argument `Provider` represents a
  * provider from client to server, and the other `Remote` means a provider from the
@@ -109,7 +109,7 @@ export class SharedWorkerConnector<
     this.state_ = SharedWorkerConnector.State.CONNECTING;
 
     try {
-      // EXECUET THE WORKER
+      // EXECUTE THE WORKER
       const worker: SharedWorker = new SharedWorker(jsFile);
       this.port_ = worker.port as MessagePort;
 
@@ -125,7 +125,7 @@ export class SharedWorkerConnector<
       // SEND HEADERS
       this.port_.postMessage(JSON.stringify(IHeaderWrapper.wrap(this.header)));
 
-      // WAIT ACCEPTION OR REJECTION
+      // WAIT ACCESSION OR REJECTION
       const last: string | SharedWorkerConnector.State.OPEN =
         await this._Handshake(options.timeout, at);
       if (last === SharedWorkerConnector.State.OPEN) {

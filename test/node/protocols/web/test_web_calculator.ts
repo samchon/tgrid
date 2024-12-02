@@ -14,7 +14,7 @@ export async function test_web_calculator(): Promise<void> {
   const server: WebSocketServer<object, Calculator | Vector<number>, null> =
     new WebSocketServer();
   await server.open(PORT, async (acceptor) => {
-    // SPEICFY PROVIDER
+    // SPECIFY PROVIDER
     const provider = /calculator/.test(acceptor.path)
       ? new Calculator()
       : new Vector<number>();

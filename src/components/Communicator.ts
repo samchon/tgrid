@@ -128,9 +128,9 @@ export abstract class Communicator<
   }
 
   /**
-   * Destory the communicator.
+   * Destroy the communicator.
    *
-   * A destory function must be called when the network communication has been closed.
+   * A destroy function must be called when the network communication has been closed.
    * It would destroy all function calls in the remote system (by `Driver<Controller>`),
    * which are not returned yet.
    *
@@ -269,7 +269,7 @@ export abstract class Communicator<
    *   - `Driver`: Remote Function Call
    *
    * @template Controller An interface for provided features (functions & objects) from the remote system (`Provider`).
-   * @template UseParametric Whether to convert type of function parameters to be compatible with their pritimive.
+   * @template UseParametric Whether to convert type of function parameters to be compatible with their primitive.
    * @return A Driver for the RFC.
    */
   public getDriver<
@@ -289,7 +289,7 @@ export abstract class Communicator<
   /**
    * Join connection or timeout.
    *
-   * Wait until the connection to be clsoed until timeout.
+   * Wait until the connection to be closed until timeout.
    *
    * @param ms The maximum milliseconds for joining.
    * @return Whether awaken by disconnection or timeout.
