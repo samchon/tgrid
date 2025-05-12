@@ -1,6 +1,6 @@
 import type http from "http";
 import { sleep_for } from "tstl";
-import type WebSocket from "ws";
+import WebSocket from "ws";
 
 import { Invoke } from "../../components/Invoke";
 import { AcceptorBase } from "../internal/AcceptorBase";
@@ -303,5 +303,5 @@ export namespace WebSocketAcceptor {
   /**
    * Current state of the {@link WebSocketAcceptor}.
    */
-  export import State = AcceptorBase.State;
+  export type State = AcceptorBase.State;
 }

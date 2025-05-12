@@ -330,7 +330,7 @@ export namespace WorkerConnector {
   /**
    * Current state of the {@link WorkerConnector}.
    */
-  export import State = ConnectorBase.State;
+  export type State = ConnectorBase.State;
 
   /**
    * Connection options for the {@link WorkerConnector.connect}.
