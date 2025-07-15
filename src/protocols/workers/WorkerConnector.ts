@@ -99,7 +99,7 @@ export class WorkerConnector<
    * memory leak.
    *
    * @param content JS Source code to compile.
-   * @param timeout Detailed options like timeout.
+   * @param options Detailed options like timeout.
    */
   public async compile(
     content: string,
@@ -146,8 +146,7 @@ export class WorkerConnector<
    * memory leak.
    *
    * @param jsFile JS File to be {@link WorkerServer}.
-   * @param args Headers containing initialization data like activation.
-   * @param timeout Detailed options like timeout.
+   * @param options Detailed options like timeout.
    */
   public async connect(
     jsFile: string,
@@ -352,5 +351,15 @@ export namespace WorkerConnector {
      * Available only in the NodeJS + Process environments.
      */
     stdio: "overlapped" | "pipe" | "ignore" | "inherit";
+
+    /**
+     * Current working directory of the worker server.
+     */
+    cwd: string;
+
+    /**
+     * Environment variables to be passed to the worker server.
+     */
+    env: Record<string, string>;
   }
 }
