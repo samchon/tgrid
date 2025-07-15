@@ -21,7 +21,7 @@ export async function ProcessWorker(): Promise<IWorkerCompiler.Creator> {
         execArgv: options?.execArgv,
         stdio: options?.stdio,
         cwd: options?.cwd,
-        env: options?.env,
+        env: { ...process.env, ...options?.env },
       });
     }
 
