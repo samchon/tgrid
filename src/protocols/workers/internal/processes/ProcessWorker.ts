@@ -20,6 +20,8 @@ export async function ProcessWorker(): Promise<IWorkerCompiler.Creator> {
       this.process_ = fork(jsFile, {
         execArgv: options?.execArgv,
         stdio: options?.stdio,
+        cwd: options?.cwd,
+        env: options?.env,
       });
     }
 
