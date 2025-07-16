@@ -252,7 +252,7 @@ export namespace SharedWorkerConnector {
   /**
    * Current state of the {@link SharedWorkerConnector}.
    */
-  export import State = ConnectorBase.State;
+  export type State = ConnectorBase.State;
 
   /**
    * Connection options for the {@link SharedWorkerConnector.connect}.

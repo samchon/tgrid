@@ -299,7 +299,7 @@ export namespace WebSocketConnector {
   /**
    * Current state of the {@link WebSocketConnector}.
    */
-  export import State = ConnectorBase.State;
+  export type State = ConnectorBase.State;
 
   /**
    * Connection options for the {@link WebSocketConnector.connect}.

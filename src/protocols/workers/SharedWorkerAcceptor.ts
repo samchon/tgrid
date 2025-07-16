@@ -201,5 +201,5 @@ export namespace SharedWorkerAcceptor {
   /**
    * Current state of the {@link SharedWorkerAcceptor}.
    */
-  export import State = AcceptorBase.State;
+  export type State = AcceptorBase.State;
 }

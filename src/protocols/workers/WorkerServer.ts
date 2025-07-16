@@ -269,7 +269,7 @@ export namespace WorkerServer {
   /**
    * Current state of the {@link WorkerServer}.
    */
-  export import State = IServer.State;
+  export type State = IServer.State;
 }
 
 //----

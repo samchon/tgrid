@@ -264,5 +264,5 @@ export namespace WebSocketServer {
   /**
    * Current state of the {@link WebSocketServer}.
    */
-  export import State = IServer.State;
+  export type State = IServer.State;
 }
