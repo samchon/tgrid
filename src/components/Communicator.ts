@@ -186,7 +186,7 @@ export abstract class Communicator<
    * @hidden
    */
   private _Call_function(name: string, ...params: any[]): Promise<any> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // READY TO SEND ?
       const error: Error | null = this.inspectReady(
         "Communicator._Call_fuction",
@@ -227,7 +227,11 @@ export abstract class Communicator<
         resolve,
         reject,
       });
-      await this.sendData(invoke);
+
+      Promise.resolve(this.sendData(invoke)).catch((error) => {
+        this.promises_.erase(invoke.uid);
+        reject(error);
+      });
     });
   }
 
@@ -509,7 +513,9 @@ export abstract class Communicator<
       props.return.value = serializeError(props.return.value);
 
     // RETURNS
-    await this.sendData(props.return);
+    try {
+      await this.sendData(props.return);
+    } catch {}
   }
 }
 
