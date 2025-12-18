@@ -94,5 +94,6 @@
     "README.md",
     "lib",
     "src"
-  ]
+  ],
+  "packageManager": "pnpm@10.5.2"
 }
