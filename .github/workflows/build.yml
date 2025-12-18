@@ -1,16 +1,10 @@
 name: build
 on: 
-  push:
-    paths:
-      - 'src/**'
-      - 'test/**'
-      - 'package.json'
   pull_request:
     paths:
       - 'src/**'
       - 'test/**'
       - 'package.json'
-
 jobs:
   NodeJS:
     runs-on: ubuntu-latest
