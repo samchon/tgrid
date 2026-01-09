@@ -183,7 +183,7 @@ export namespace SharedWorkerServer {
   /**
    * Current state of the {@link SharedWorkerServer}.
    */
-  export import State = IServer.State;
+  export type State = IServer.State;
 }
 
 /**
