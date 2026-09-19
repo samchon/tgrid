@@ -17,4 +17,5 @@
     "./shared-worker-server.ts",
     "../../src",
   ],
+  "exclude": ["../../src/platform/node"],
 }
