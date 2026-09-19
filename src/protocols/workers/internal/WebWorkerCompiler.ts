@@ -3,7 +3,7 @@ import { IWorkerCompiler } from "./IWorkerCompiler";
 /**
  * @internal
  */
-export const WebWorkerCompiler = async (): Promise<IWorkerCompiler> => ({
+export const WebWorkerCompiler = (): IWorkerCompiler => ({
   compile: async (content) => {
     const blob: Blob = new Blob([content], {
       type: "application/javascript",

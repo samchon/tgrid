@@ -5,10 +5,8 @@
     "paths": {
       "tgrid": ["../src"],
       "tgrid/lib/*": ["../src/*"],
+      "#platform": ["../src/platform/node"],
     },
-    "plugins": [
-      { "transform": "typescript-transform-paths" },
-    ],
   },
   "include": [
     "./", 

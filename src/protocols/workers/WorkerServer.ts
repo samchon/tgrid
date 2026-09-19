@@ -1,13 +1,13 @@
-import { Singleton, is_node, sleep_until } from "tstl";
+import { Platform } from "#platform";
+import { Singleton, sleep_until } from "tstl";
 
 import { Communicator } from "../../components/Communicator";
 import { Invoke } from "../../components/Invoke";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IServer } from "../internal/IServer";
 import { once } from "../internal/once";
+import { IWorkerChannel } from "./internal/IWorkerChannel";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { ProcessChannel } from "./internal/processes/ProcessChannel";
-import { ThreadPort } from "./internal/threads/ThreadPort";
 
 /**
  * Worker Server.
@@ -43,17 +43,17 @@ import { ThreadPort } from "./internal/threads/ThreadPort";
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WorkerServer<
-    Header,
-    Provider extends object | null,
-    Remote extends object | null,
-  >
+  Header,
+  Provider extends object | null,
+  Remote extends object | null,
+>
   extends Communicator<Provider | undefined, Remote>
   implements IWorkerSystem, IServer<WorkerServer.State>
 {
   /**
    * @hidden
    */
-  private channel_: Singleton<Promise<IFeature>>;
+  private channel_: Singleton<IWorkerChannel>;
 
   /**
    * @hidden
@@ -75,17 +75,10 @@ export class WorkerServer<
    */
   public constructor() {
     super(undefined);
-    this.channel_ = new Singleton(async () => {
-      // BROWSER CASE
-      if (is_node() === false) return (<any>self) as IFeature;
-
-      return (await ThreadPort.isWorkerThread())
-        ? ((await ThreadPort()) as IFeature)
-        : (ProcessChannel as IFeature);
-    });
+    this.channel_ = new Singleton(() => Platform.worker.channel());
     this.state_ = WorkerServer.State.NONE;
     this.header_ = new Singleton(async () => {
-      (await this.channel_.get()).postMessage(WorkerServer.State.OPENING);
+      this.channel_.get().postMessage(WorkerServer.State.OPENING);
 
       const data: string = await this._Handshake("getHeader");
       const wrapper: IHeaderWrapper<Header> = JSON.parse(data);
@@ -107,10 +100,7 @@ export class WorkerServer<
    */
   public async open(provider: Provider): Promise<void> {
     // TEST CONDITION
-    if (is_node() === false) {
-      if (self.document !== undefined)
-        throw new Error("Error on WorkerServer.open(): this is not Worker.");
-    } else if ((await this.channel_.get()).is_worker_server() === false)
+    if (this.channel_.get().is_worker_server() === false)
       throw new Error("Error on WorkerServer.open(): this is not Worker.");
     else if (this.state_ !== WorkerServer.State.NONE)
       throw new Error(
@@ -125,7 +115,7 @@ export class WorkerServer<
     await this.header_.get();
 
     // SUCCESS
-    const channel = await this.channel_.get();
+    const channel = this.channel_.get();
     channel.onmessage = (evt) => this._Handle_message(evt);
     channel.postMessage(WorkerServer.State.OPEN);
 
@@ -149,8 +139,8 @@ export class WorkerServer<
       await this.destructor();
 
       // DO CLOSE
-      setTimeout(async () => {
-        const channel = await this.channel_.get();
+      setTimeout(() => {
+        const channel = this.channel_.get();
         channel.postMessage(WorkerServer.State.CLOSING);
         channel.close();
       });
@@ -204,7 +194,7 @@ export class WorkerServer<
           })
           .catch(() => {});
 
-      (await this.channel_.get()).onmessage = once((evt) => {
+      this.channel_.get().onmessage = once((evt) => {
         if (expired === false) {
           completed = true;
           resolve(evt.data);
@@ -220,7 +210,7 @@ export class WorkerServer<
    * @hidden
    */
   protected async sendData(invoke: Invoke): Promise<void> {
-    (await this.channel_.get()).postMessage(JSON.stringify(invoke));
+    this.channel_.get().postMessage(JSON.stringify(invoke));
   }
 
   /**
@@ -270,17 +260,4 @@ export namespace WorkerServer {
    * Current state of the {@link WorkerServer}.
    */
   export import State = IServer.State;
-}
-
-//----
-// POLYFILL
-//----
-/**
- * @hidden
- */
-interface IFeature {
-  close(): void;
-  postMessage(message: any): void;
-  onmessage(event: MessageEvent): void;
-  is_worker_server(): boolean;
 }

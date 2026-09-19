@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./lib/browser",
+    "declaration": false,
+    "paths": {
+      "#platform": ["./src/platform/browser"]
+    }
+  },
+  "exclude": ["src/platform/node"]
+}

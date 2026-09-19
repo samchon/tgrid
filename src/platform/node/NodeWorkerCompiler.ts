@@ -1,22 +1,21 @@
-import { NodeModule } from "../../../utils/internal/NodeModule";
+import os from "os";
+
+import { IWorkerCompiler } from "../../protocols/workers/internal/IWorkerCompiler";
 import { FileSystem } from "./FileSystem";
-import { IWorkerCompiler } from "./IWorkerCompiler";
-import { ProcessWorker } from "./processes/ProcessWorker";
-import { ThreadWorker } from "./threads/ThreadWorker";
+import { ProcessWorker } from "./ProcessWorker";
+import { ThreadWorker } from "./ThreadWorker";
 
 /**
  * @internal
  */
-export const NodeWorkerCompiler = async (
+export const NodeWorkerCompiler = (
   type: "process" | "thread",
-): Promise<IWorkerCompiler> => ({
+): IWorkerCompiler => ({
   execute: async (jsFile, options) => {
-    const factory =
-      type === "process" ? await ProcessWorker() : await ThreadWorker();
+    const factory = type === "process" ? ProcessWorker : ThreadWorker;
     return (<any>new factory(jsFile, options)) as Worker;
   },
   compile: async (content) => {
-    const os = await NodeModule.os.get();
     let path: string = `${os.tmpdir().split("\\").join("/")}/tgrid`;
     if ((await FileSystem.exists(path)) === false) await FileSystem.mkdir(path);
 
@@ -35,10 +34,6 @@ export const NodeWorkerCompiler = async (
       await FileSystem.unlink(url);
     } catch {}
   },
-  // public execute(jsFile: string, execArgv: string[] | undefined): Worker
-  // {
-  //     return new this.factory_(jsFile, execArgv) as any;
-  // }
 });
 
 /**

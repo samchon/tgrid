@@ -1,4 +1,5 @@
-import { Singleton, is_node, sleep_until } from "tstl";
+import { Platform } from "#platform";
+import { Singleton, sleep_until } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
@@ -6,8 +7,6 @@ import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 import { IWorkerCompiler } from "./internal/IWorkerCompiler";
 import { IWorkerSystem } from "./internal/IWorkerSystem";
-import { NodeWorkerCompiler } from "./internal/NodeWorkerCompiler";
-import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
 
 /**
  * Worker Connector.
@@ -43,17 +42,17 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WorkerConnector<
-    Header,
-    Provider extends object | null,
-    Remote extends object | null,
-  >
+  Header,
+  Provider extends object | null,
+  Remote extends object | null,
+>
   extends ConnectorBase<Header, Provider, Remote>
   implements IWorkerSystem
 {
   /**
    * @hidden
    */
-  private readonly compiler_: Singleton<Promise<IWorkerCompiler>>;
+  private readonly compiler_: Singleton<IWorkerCompiler>;
 
   /**
    * @hidden
@@ -77,9 +76,7 @@ export class WorkerConnector<
     type?: "thread" | "process",
   ) {
     super(header, provider);
-    this.compiler_ = new Singleton(() =>
-      is_node() ? NodeWorkerCompiler(type ?? "process") : WebWorkerCompiler(),
-    );
+    this.compiler_ = new Singleton(() => Platform.worker.compiler(type));
   }
 
   /* ----------------------------------------------------------------
@@ -194,10 +191,7 @@ export class WorkerConnector<
     try {
       // EXECUTE THE WORKER
       const compiler: IWorkerCompiler = await this.compiler_.get();
-      this.worker_ = await compiler.execute(
-        jsFile,
-        is_node() === true ? options : undefined,
-      );
+      this.worker_ = await compiler.execute(jsFile, options);
 
       // WAIT THE WORKER TO BE READY
       if (

@@ -5,7 +5,7 @@ import { TestBundler } from "../../../browser/TestBundler";
 import { ICalculator } from "../../../controllers/ICalculator";
 
 export async function test_worker_compiler(): Promise<void> {
-  const PATH = __dirname + "/../../../../../bundle/worker-server.js";
+  const PATH = __dirname + "/../../../../../bundle/worker-server.node.js";
   if (fs.existsSync(PATH) === false) await TestBundler.execute();
 
   await _Test_worker(

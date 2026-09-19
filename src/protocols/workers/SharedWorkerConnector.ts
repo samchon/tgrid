@@ -44,10 +44,10 @@ import { WebWorkerCompiler } from "./internal/WebWorkerCompiler";
  * @template Remote Type of features supported by remote server.
  */
 export class SharedWorkerConnector<
-    Header,
-    Provider extends object | null,
-    Remote extends object | null,
-  >
+  Header,
+  Provider extends object | null,
+  Remote extends object | null,
+>
   extends ConnectorBase<Header, Provider, Remote>
   implements IWorkerSystem
 {
@@ -271,8 +271,7 @@ export namespace SharedWorkerConnector {
    * @return Temporary URL.
    */
   export async function compile(content: string): Promise<string> {
-    const { compile } = await WebWorkerCompiler();
-    return compile(content);
+    return WebWorkerCompiler().compile(content);
   }
 
   /**
@@ -281,7 +280,6 @@ export namespace SharedWorkerConnector {
    * @param url Temporary URL.
    */
   export async function remove(url: string): Promise<void> {
-    const { remove } = await WebWorkerCompiler();
-    await remove(url);
+    await WebWorkerCompiler().remove(url);
   }
 }

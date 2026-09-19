@@ -11,15 +11,3 @@ export interface IWorkerCompiler {
     options?: Partial<WorkerConnector.IConnectOptions>,
   ): Promise<Worker>;
 }
-
-/**
- * @internal
- */
-export namespace IWorkerCompiler {
-  export type Creator = {
-    new (
-      jsFile: string,
-      options?: Partial<WorkerConnector.IConnectOptions>,
-    ): IWorkerCompiler;
-  };
-}

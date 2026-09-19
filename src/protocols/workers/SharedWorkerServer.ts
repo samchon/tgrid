@@ -1,4 +1,5 @@
-import { HashSet, is_node } from "tstl";
+import { Platform } from "#platform";
+import { HashSet } from "tstl";
 
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { IServer } from "../internal/IServer";
@@ -39,8 +40,7 @@ export class SharedWorkerServer<
   Header,
   Provider extends object | null,
   Remote extends object | null,
-> implements IServer<SharedWorkerServer.State>
-{
+> implements IServer<SharedWorkerServer.State> {
   /**
    * @hidden
    */
@@ -84,7 +84,7 @@ export class SharedWorkerServer<
     ) => Promise<void>,
   ): Promise<void> {
     // TEST CONDITION
-    if (is_node() === true)
+    if (Platform.name !== "browser")
       throw new Error(
         "Error on SharedWorkerServer.open(): SharedWorker is not supported in the NodeJS.",
       );

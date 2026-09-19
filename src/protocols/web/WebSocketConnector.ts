@@ -1,4 +1,5 @@
-import { is_node, sleep_for } from "tstl";
+import { Platform } from "#platform";
+import { sleep_for } from "tstl";
 
 import { Invoke } from "../../components/Invoke";
 import { ConnectorBase } from "../internal/ConnectorBase";
@@ -6,7 +7,6 @@ import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 import { WebSocketError } from "./WebSocketError";
 import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
-import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
 
 /**
  * Web Socket Connector.
@@ -43,10 +43,10 @@ import { WebSocketPolyfill } from "./internal/WebSocketPolyfill";
  * @author Jeongho Nam - https://github.com/samchon
  */
 export class WebSocketConnector<
-    Header,
-    Provider extends object | null,
-    Remote extends object | null,
-  >
+  Header,
+  Provider extends object | null,
+  Remote extends object | null,
+>
   extends ConnectorBase<Header, Provider, Remote>
   implements IWebSocketCommunicator
 {
@@ -98,10 +98,7 @@ export class WebSocketConnector<
 
     try {
       // DO CONNECT
-      const factory = is_node()
-        ? ((await WebSocketPolyfill()) as any)
-        : self.WebSocket;
-      this.socket_ = new factory(url);
+      this.socket_ = Platform.web.createSocket(url);
       await this._Wait_connection();
 
       // SEND HEADERS

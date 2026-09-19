@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../bin/browser",
+    "paths": {
+      "tgrid": ["../../src"],
+      "tgrid/lib/*": ["../../src/*"],
+      "#platform": ["../../src/platform/browser"],
+    },
+  },
+  "include": [
+    "./internal.ts",
+    "./web-client.ts",
+    "./worker-client.ts",
+    "./worker-server.ts",
+    "./shared-worker-client.ts",
+    "./shared-worker-server.ts",
+    "../../src",
+  ],
+}
