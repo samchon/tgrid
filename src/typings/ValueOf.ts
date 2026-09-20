@@ -1,3 +1,6 @@
+// wrapper objects (`Boolean`, `Number`, `String`) are intended here: they are
+// what `ValueOf` unwraps into their primitive counterparts
+/* eslint-disable @typescript-eslint/ban-types */
 /**
  * Get origin value type.
  *
@@ -12,12 +15,13 @@ export type ValueOf<Instance> =
       : is_value_of<Instance, String> extends true
         ? string
         : Instance;
+/* eslint-enable @typescript-eslint/ban-types */
 
 type is_value_of<
   Instance,
-  Object extends IValueOf<any>,
-> = Instance extends Object
-  ? Object extends IValueOf<infer Primitive>
+  Wrapper extends IValueOf<any>,
+> = Instance extends Wrapper
+  ? Wrapper extends IValueOf<infer Primitive>
     ? Instance extends Primitive
       ? false
       : true // not Primitive, but Object

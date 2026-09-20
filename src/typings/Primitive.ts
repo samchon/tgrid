@@ -43,7 +43,8 @@ type PrimitiveMain<Instance> = Instance extends [never]
     ? never
     : ValueOf<Instance> extends boolean | number | string
       ? ValueOf<Instance>
-      : Instance extends Function
+      : // eslint-disable-next-line @typescript-eslint/ban-types
+        Instance extends Function
         ? never
         : ValueOf<Instance> extends object
           ? Instance extends object
@@ -80,6 +81,9 @@ type PrimitiveTuple<T extends readonly any[]> = T extends []
           ? [PrimitiveMain<F>?, ...PrimitiveTuple<Rest>]
           : [];
 
+// wrapper objects (`Boolean`, `Number`, `String`) are intended here: they are
+// what `ValueOf` unwraps into their primitive counterparts
+/* eslint-disable @typescript-eslint/ban-types */
 type ValueOf<Instance> =
   IsValueOf<Instance, Boolean> extends true
     ? boolean
@@ -88,6 +92,7 @@ type ValueOf<Instance> =
       : IsValueOf<Instance, String> extends true
         ? string
         : Instance;
+/* eslint-enable @typescript-eslint/ban-types */
 
 type NativeClass =
   | Set<any>
@@ -119,8 +124,11 @@ type IsTuple<T extends readonly any[] | { length: number }> = [T] extends [
       : true
     : false;
 
-type IsValueOf<Instance, Object extends IValueOf<any>> = Instance extends Object
-  ? Object extends IValueOf<infer U>
+type IsValueOf<
+  Instance,
+  Wrapper extends IValueOf<any>,
+> = Instance extends Wrapper
+  ? Wrapper extends IValueOf<infer U>
     ? Instance extends U
       ? false
       : true // not Primitive, but Object

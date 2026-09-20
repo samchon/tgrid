@@ -21,6 +21,7 @@ export type Promisive<
 > = RemoveNever<
   OmitEdgeUnderscored<
     {
+      // eslint-disable-next-line @typescript-eslint/ban-types
       [P in keyof Instance]: Instance[P] extends Function
         ? Functional<Instance[P], UseParametric> // function, its return type would be capsuled in the Promise
         : ValueOf<Instance[P]> extends object
