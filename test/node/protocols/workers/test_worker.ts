@@ -1,16 +1,13 @@
 import { WorkerConnector } from "tgrid";
 
 import { IScientific } from "../../../controllers/ICalculator";
-import { resolve_runtime_path } from "../../runtime";
 
 export async function test_worker(): Promise<void> {
   const worker: WorkerConnector<null, null, IScientific> = new WorkerConnector(
     null,
     null,
   );
-  await worker.connect(
-    resolve_runtime_path(__dirname + "/internal/scientific.ts"),
-  );
+  await worker.connect(__dirname + "/internal/scientific.ts");
 
   if ((await worker.getDriver().pow(2, 4)) !== Math.pow(2, 4))
     throw new Error("Unknown error on worker");

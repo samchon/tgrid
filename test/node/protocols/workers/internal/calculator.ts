@@ -2,7 +2,6 @@ import { Driver, WorkerConnector, WorkerServer } from "tgrid";
 
 import { IScientific, IStatistics } from "../../../../controllers/ICalculator";
 import { Simple } from "../../../../providers/Calculator";
-import { resolve_runtime_path } from "../../../runtime";
 
 class HierarchicalCalculator extends Simple {
   // REMOTE CALCULATOR
@@ -25,12 +24,8 @@ async function get<Controller extends object>(
 async function main(): Promise<void> {
   // PREPARE REMOTE CALCULATOR
   const calc = new HierarchicalCalculator();
-  calc.scientific = await get<IScientific>(
-    resolve_runtime_path(__dirname + "/scientific.ts"),
-  );
-  calc.statistics = await get<IStatistics>(
-    resolve_runtime_path(__dirname + "/statistics.ts"),
-  );
+  calc.scientific = await get<IScientific>(__dirname + "/scientific.ts");
+  calc.statistics = await get<IStatistics>(__dirname + "/statistics.ts");
 
   // OPEN SERVER
   const server = new WorkerServer();

@@ -21,22 +21,6 @@
       },
       "require": "./lib/node/index.js",
       "import": "./lib/node/index.mjs"
-    },
-    "./node": {
-      "types": "./lib/node/index.d.ts",
-      "require": "./lib/node/index.js",
-      "import": "./lib/node/index.mjs"
-    },
-    "./browser": {
-      "types": "./lib/node/index.d.ts",
-      "require": "./lib/browser/index.js",
-      "import": "./lib/browser/index.mjs"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "node": ["lib/node/index.d.ts"],
-      "browser": ["lib/node/index.d.ts"]
     }
   },
   "description": "Grid Computing Framework for TypeScript",
@@ -52,7 +36,7 @@
     "dev": "rimraf bin && ttsc --project test/tsconfig.json --watch",
     "prettier": "prettier src --write && prettier test --write",
     "test": "npm run test:node && npm run test:browser",
-    "test:browser": "node bin/test/browser",
+    "test:browser": "ttsx --project test/tsconfig.json test/browser/index.ts",
     "test:node": "ttsx test/node/index.ts"
   },
   "dependencies": {
@@ -80,7 +64,6 @@
     "rimraf": "^5.0.5",
     "rollup": "^4.13.1",
     "rollup-plugin-esbuild": "^6.2.1",
-    "source-map-support": "^0.5.21",
     "tslib": "^2.6.2",
     "ttsc": "0.30.4",
     "typescript": "7.0.2",

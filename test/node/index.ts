@@ -1,26 +1,19 @@
 ﻿import fs from "fs";
-
-const EXTENSION = __filename.endsWith(".ts") ? ".ts" : ".js";
-if (EXTENSION === ".js") require("source-map-support").install();
+import path from "path";
 
 interface IModule {
   [key: string]: () => Promise<void>;
 }
 
-async function iterate(path: string): Promise<void> {
-  for (const file of await fs.promises.readdir(path)) {
-    const location: string = path + "/" + file;
+async function iterate(directory: string): Promise<void> {
+  for (const file of await fs.promises.readdir(directory)) {
+    const location: string = path.join(directory, file);
     const stat: fs.Stats = await fs.promises.lstat(location);
-
-    if (file === "utils") console.log(location, stat.isDirectory());
 
     if (stat.isDirectory() === true && file !== "internal") {
       await iterate(location);
       continue;
-    } else if (
-      file.endsWith(EXTENSION) === false ||
-      location === __dirname + "/index" + EXTENSION
-    )
+    } else if (file.endsWith(".ts") === false || location === __filename)
       continue;
 
     const external: IModule = await import(location);

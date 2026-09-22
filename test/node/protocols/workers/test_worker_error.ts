@@ -1,11 +1,10 @@
 import { WorkerConnector } from "tgrid";
 
 import { ErrorService } from "../../../providers/ErrorService";
-import { resolve_runtime_path } from "../../runtime";
 
 export async function test_worker_error(): Promise<void> {
   const worker = new WorkerConnector(null, null, "process");
-  await worker.connect(resolve_runtime_path(`${__dirname}/internal/error.ts`));
+  await worker.connect(`${__dirname}/internal/error.ts`);
 
   const service = worker.getDriver<ErrorService>();
   try {

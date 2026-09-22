@@ -23,13 +23,7 @@ export namespace TestBundler {
   }
 
   export async function execute(): Promise<void> {
-    const browserRoot: string = __filename.endsWith(".ts")
-      ? path.resolve(process.cwd(), "bin/browser/test/browser")
-      : path.resolve(__dirname, "../../browser/test/browser");
-    const nodeRoot: string = __filename.endsWith(".ts")
-      ? path.resolve(process.cwd(), "bin/test/browser")
-      : __dirname;
-    const bundleRoot: string = path.resolve(process.cwd(), "bundle");
+    const root: string = path.resolve(__dirname, "../..");
 
     // BROWSER SIDE SCRIPTS
     //
@@ -44,8 +38,8 @@ export namespace TestBundler {
     ];
     for (const instance of INSTANCES)
       await bundle(
-        `${browserRoot}/${instance}.js`,
-        `${bundleRoot}/${instance}.js`,
+        `${root}/bin/browser/test/browser/${instance}.js`,
+        `${root}/bundle/${instance}.js`,
       );
 
     // NODE SIDE WORKER SCRIPT
@@ -53,8 +47,8 @@ export namespace TestBundler {
     // compiled by the `test/tsconfig.json` with the node platform, and
     // bundled into a single file to be compiled by `WorkerConnector.compile()`
     await bundle(
-      `${nodeRoot}/worker-server.js`,
-      `${bundleRoot}/worker-server.node.js`,
+      `${root}/bin/test/browser/worker-server.js`,
+      `${root}/bundle/worker-server.node.js`,
       { node: true, ignoreMissing: true },
     );
   }
