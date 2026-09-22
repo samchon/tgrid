@@ -34,4 +34,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build:test
+      - run: pnpm exec puppeteer browsers install chrome
       - run: pnpm run test:browser
