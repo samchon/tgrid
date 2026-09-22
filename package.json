@@ -21,22 +21,6 @@
       },
       "require": "./lib/node/index.js",
       "import": "./lib/node/index.mjs"
-    },
-    "./node": {
-      "types": "./lib/node/index.d.ts",
-      "require": "./lib/node/index.js",
-      "import": "./lib/node/index.mjs"
-    },
-    "./browser": {
-      "types": "./lib/node/index.d.ts",
-      "require": "./lib/browser/index.js",
-      "import": "./lib/browser/index.mjs"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "node": ["lib/node/index.d.ts"],
-      "browser": ["lib/node/index.d.ts"]
     }
   },
   "description": "Grid Computing Framework for TypeScript",
