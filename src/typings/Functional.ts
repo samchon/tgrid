@@ -14,6 +14,7 @@ import { Primitive } from "./Primitive";
  * @author Jeongho Nam - https://github.com/samchon
  */
 export type Functional<
+  // eslint-disable-next-line @typescript-eslint/ban-types
   Method extends Function,
   UseParametric extends boolean = false,
 > = (Method extends (...args: infer Params) => infer Ret
@@ -42,5 +43,6 @@ type IRemoteFunction = {
   /**
    * Remote Function does not allow it.
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   [P in keyof Function | "Symbol"]: never;
 };

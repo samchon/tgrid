@@ -1,10 +1,9 @@
+import { Platform } from "#platform";
 import type http from "http";
 import type https from "https";
 import type net from "net";
-import { is_node } from "tstl";
 import type WebSocket from "ws";
 
-import { NodeModule } from "../../utils/internal/NodeModule";
 import { IServer } from "../internal/IServer";
 import { WebSocketAcceptor } from "./WebSocketAcceptor";
 
@@ -42,8 +41,7 @@ export class WebSocketServer<
   Header,
   Provider extends object | null,
   Remote extends object | null,
-> implements IServer<WebSocketServer.State>
-{
+> implements IServer<WebSocketServer.State> {
   /**
    * @hidden
    */
@@ -85,7 +83,7 @@ export class WebSocketServer<
   public constructor(key: string, cert: string);
 
   public constructor(key?: string, cert?: string) {
-    if (is_node() === false)
+    if (Platform.name !== "node")
       throw new Error(
         "Error on WebSocketServer.constructor(): only available in NodeJS.",
       );
@@ -140,13 +138,8 @@ export class WebSocketServer<
       this.server_ === null ||
       this.state_ === WebSocketServer.State.CLOSED
     )
-      this.server_ =
-        this.options_ !== null
-          ? (await NodeModule.https.get()).createServer(this.options_!)
-          : (await NodeModule.http.get()).createServer();
-    this.protocol_ = new (await NodeModule.ws.get()).default.Server({
-      noServer: true,
-    });
+      this.server_ = Platform.web.createServer(this.options_);
+    this.protocol_ = Platform.web.createProtocol();
 
     // SET STATE
     this.state_ = WebSocketServer.State.OPENING;

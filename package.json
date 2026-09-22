@@ -1,13 +1,42 @@
 {
   "name": "tgrid",
   "version": "1.2.1",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "lib/node/index.js",
+  "typings": "lib/node/index.d.ts",
+  "browser": "lib/browser/index.js",
   "exports": {
     ".": {
-      "types": "./lib/index.d.ts",
-      "require": "./lib/index.js",
-      "import": "./lib/index.mjs"
+      "types": "./lib/node/index.d.ts",
+      "browser": {
+        "require": "./lib/browser/index.js",
+        "import": "./lib/browser/index.mjs"
+      },
+      "react-native": {
+        "require": "./lib/browser/index.js",
+        "import": "./lib/browser/index.mjs"
+      },
+      "node": {
+        "require": "./lib/node/index.js",
+        "import": "./lib/node/index.mjs"
+      },
+      "require": "./lib/node/index.js",
+      "import": "./lib/node/index.mjs"
+    },
+    "./node": {
+      "types": "./lib/node/index.d.ts",
+      "require": "./lib/node/index.js",
+      "import": "./lib/node/index.mjs"
+    },
+    "./browser": {
+      "types": "./lib/node/index.d.ts",
+      "require": "./lib/browser/index.js",
+      "import": "./lib/browser/index.mjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "node": ["lib/node/index.d.ts"],
+      "browser": ["lib/node/index.d.ts"]
     }
   },
   "description": "Grid Computing Framework for TypeScript",
@@ -18,9 +47,9 @@
   },
   "scripts": {
     "build": "npm run build:main && npm run build:test",
-    "build:main": "rimraf lib && tsc && rollup -c",
-    "build:test": "rimraf bin && tsc --project test/tsconfig.json",
-    "dev": "npm run build:test -- --watch",
+    "build:main": "rimraf lib && tsc --project tsconfig.node.json && tsc --project tsconfig.browser.json && rollup -c",
+    "build:test": "rimraf bin && tsc --project test/tsconfig.json && tsc --project test/browser/tsconfig.json",
+    "dev": "rimraf bin && tsc --build test/tsconfig.json test/browser/tsconfig.json --watch",
     "prepare": "ts-patch install",
     "prettier": "prettier src --write && prettier test --write",
     "test": "npm run test:node && npm run test:browser",
@@ -31,7 +60,6 @@
     "@types/node": "^20.11.30",
     "@types/websocket": "^1.0.10",
     "@types/ws": "^7.4.7",
-    "import2": "^1.0.3",
     "tstl": "3.0.0",
     "ws": "^7.5.3"
   },
@@ -89,6 +117,7 @@
     "thread",
     "process"
   ],
+  "sideEffects": false,
   "files": [
     "LICENSE",
     "README.md",
