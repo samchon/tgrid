@@ -17,6 +17,10 @@ export interface IWebSocketCommunicator {
    * `1000` means the disconnection is abnormal and causes special exceptions (`WebSocketError`)
    * to be thrown to incomplete RFCs.
    *
+   * Note that web browsers only allow `1000` or a code in the `3000`-`4999` range to be
+   * sent from the client side; any other value makes the browser's `WebSocket.close()`
+   * throw an `InvalidAccessError`.
+   *
    * @param code Closing code.
    * @param reason Reason why.
    */
