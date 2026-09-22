@@ -1,7 +1,5 @@
 import { WebSocketServer, WorkerConnector } from "tgrid";
 
-import { resolve_runtime_path } from "../../runtime";
-
 export async function test_web_stress(): Promise<void> {
   const server: WebSocketServer<null, Calculator, null> = new WebSocketServer();
   await server.open(12_345, async (acceptor) => {
@@ -11,11 +9,7 @@ export async function test_web_stress(): Promise<void> {
   const counts: number[] = await Promise.all(
     new Array(VOLUME).fill(0).map(async () => {
       const worker = new WorkerConnector(null, null, "process");
-      await worker.connect(
-        resolve_runtime_path(
-          `${__dirname}/internal/_test_web_stress_client.ts`,
-        ),
-      );
+      await worker.connect(`${__dirname}/internal/_test_web_stress_client.ts`);
       const success: number = await worker.getDriver<IServant>().execute();
       await worker.close();
       return success;

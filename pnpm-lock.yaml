@@ -75,9 +75,6 @@ importers:
       rollup-plugin-esbuild:
         specifier: ^6.2.1
         version: 6.2.1(esbuild@0.28.2)(rollup@4.63.4)
-      source-map-support:
-        specifier: ^0.5.21
-        version: 0.5.21
       tslib:
         specifier: ^2.6.2
         version: 2.8.1

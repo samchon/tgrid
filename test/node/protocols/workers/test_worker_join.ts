@@ -2,9 +2,7 @@ import fs from "fs";
 import { WorkerConnector } from "tgrid";
 import { sleep_for } from "tstl";
 
-import { resolve_runtime_path } from "../../runtime";
-
-const FILE_PATH = resolve_runtime_path(__dirname + "/log.dat");
+const FILE_PATH = __dirname + "/log.dat";
 
 export async function test_worker_join(): Promise<void> {
   await fs.promises.writeFile(FILE_PATH, "NOT YET", "utf8");
@@ -13,9 +11,7 @@ export async function test_worker_join(): Promise<void> {
     null,
     null,
   );
-  await connector.connect(
-    resolve_runtime_path(__dirname + "/internal/join.ts"),
-  );
+  await connector.connect(__dirname + "/internal/join.ts");
 
   sleep_for(1_000)
     .then(() => connector.close())
