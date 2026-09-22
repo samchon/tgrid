@@ -7,6 +7,7 @@ import { AcceptorBase } from "../internal/AcceptorBase";
 import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { WebSocketError } from "./WebSocketError";
 import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
+import { NORMAL_CLOSURE } from "./internal/WebSocketCloseCode";
 
 /**
  * Web Socket Acceptor.
@@ -139,8 +140,7 @@ export class WebSocketAcceptor<
 
     // DO CLOSE
     this.state_ = WebSocketAcceptor.State.CLOSING;
-    if (code === 1000) this.socket_!.close();
-    else this.socket_!.close(code!, reason!);
+    this.socket_!.close(code ?? NORMAL_CLOSURE, reason);
 
     // state would be closed in destructor() via _Handle_close()
     await ret;
@@ -232,7 +232,7 @@ export class WebSocketAcceptor<
 
     // SEND CLOSING FRAME
     this.state_ = WebSocketAcceptor.State.REJECTING;
-    this.socket_.close(status, reason);
+    this.socket_.close(status ?? NORMAL_CLOSURE, reason);
 
     // FINALIZATION
     await this.destructor();
@@ -290,7 +290,7 @@ export class WebSocketAcceptor<
    */
   private async _Handle_close(code: number, reason: string): Promise<void> {
     const error: WebSocketError | undefined =
-      code !== 100 ? new WebSocketError(code, reason) : undefined;
+      code !== NORMAL_CLOSURE ? new WebSocketError(code, reason) : undefined;
 
     await this.destructor(error);
   }

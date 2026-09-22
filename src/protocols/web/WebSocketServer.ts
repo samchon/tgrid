@@ -6,6 +6,7 @@ import type WebSocket from "ws";
 
 import { IServer } from "../internal/IServer";
 import { WebSocketAcceptor } from "./WebSocketAcceptor";
+import { GOING_AWAY } from "./internal/WebSocketCloseCode";
 
 /**
  * Web Socket Server.
@@ -220,13 +221,30 @@ export class WebSocketServer<
    * @hidden
    */
   private _Close(): Promise<void> {
-    return new Promise((resolve) => {
-      this.protocol_!.close(() => {
-        this.server_!.close(() => {
-          resolve();
-        });
-      });
-    });
+    const clients: WebSocket[] = Array.from(this.protocol_!.clients);
+    return Promise.all(
+      clients.map(
+        (client) =>
+          new Promise<void>((resolve) => {
+            if (client.readyState === 3) {
+              resolve();
+              return;
+            }
+
+            client.once("close", resolve);
+            client.close(GOING_AWAY, "WebSocketServer is going away.");
+          }),
+      ),
+    ).then(
+      () =>
+        new Promise<void>((resolve) => {
+          this.protocol_!.close(() => {
+            this.server_!.close(() => {
+              resolve();
+            });
+          });
+        }),
+    );
   }
 
   /* ----------------------------------------------------------------

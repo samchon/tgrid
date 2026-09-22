@@ -13,8 +13,9 @@ export interface IWebSocketCommunicator {
    * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
    * causes all incomplete RFCs to throw exceptions.
    *
-   * If parametric *code* and *reason* are specified, it means the disconnection is
-   * abnormal and it would throw special exceptions (`WebSocketError`) to the incomplete RFCs.
+   * If *code* is omitted, the normal closure code (`1000`) is used. A close code other than
+   * `1000` means the disconnection is abnormal and causes special exceptions (`WebSocketError`)
+   * to be thrown to incomplete RFCs.
    *
    * @param code Closing code.
    * @param reason Reason why.
