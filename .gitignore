@@ -6,4 +6,3 @@ node_modules/
 
 bundle/*.js
 package-lock.json
-pnpm-lock.yaml

@@ -47,14 +47,13 @@
   },
   "scripts": {
     "build": "npm run build:main && npm run build:test",
-    "build:main": "rimraf lib && tsc --project tsconfig.node.json && tsc --project tsconfig.browser.json && rollup -c",
-    "build:test": "rimraf bin && tsc --project test/tsconfig.json && tsc --project test/browser/tsconfig.json",
-    "dev": "rimraf bin && tsc --build test/tsconfig.json test/browser/tsconfig.json --watch",
-    "prepare": "ts-patch install",
+    "build:main": "rimraf lib && ttsc --project tsconfig.node.json && ttsc --project tsconfig.browser.json && rollup -c",
+    "build:test": "rimraf bin && ttsc --project test/tsconfig.json && ttsc --project test/browser/tsconfig.json",
+    "dev": "rimraf bin && ttsc --project test/tsconfig.json --watch",
     "prettier": "prettier src --write && prettier test --write",
     "test": "npm run test:node && npm run test:browser",
     "test:browser": "node bin/test/browser",
-    "test:node": "node bin/test/node"
+    "test:node": "ttsx test/node/index.ts"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
@@ -65,7 +64,8 @@
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@ttsc/unplugin": "0.30.4",
+    "@ttsc/paths": "0.30.4",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/browserify": "^12.0.40",
     "@types/puppeteer": "^7.0.4",
@@ -79,12 +79,11 @@
     "puppeteer": "^22.4.1",
     "rimraf": "^5.0.5",
     "rollup": "^4.13.1",
+    "rollup-plugin-esbuild": "^6.2.1",
     "source-map-support": "^0.5.21",
-    "ts-node": "^10.9.2",
-    "ts-patch": "^3.1.2",
     "tslib": "^2.6.2",
-    "typescript": "5.4.5",
-    "typescript-transform-paths": "^3.4.7",
+    "ttsc": "0.30.4",
+    "typescript": "7.0.2",
     "whatwg-fetch": "^3.6.2"
   },
   "homepage": "https://tgrid.com",

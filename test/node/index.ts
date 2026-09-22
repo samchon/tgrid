@@ -1,7 +1,7 @@
 ﻿import fs from "fs";
 
-const EXTENSION = __filename.substr(-2);
-if (EXTENSION === "js") require("source-map-support").install();
+const EXTENSION = __filename.endsWith(".ts") ? ".ts" : ".js";
+if (EXTENSION === ".js") require("source-map-support").install();
 
 interface IModule {
   [key: string]: () => Promise<void>;
@@ -18,14 +18,12 @@ async function iterate(path: string): Promise<void> {
       await iterate(location);
       continue;
     } else if (
-      file.substr(-3) !== ".js" ||
-      location === __dirname + "/index.js"
+      file.endsWith(EXTENSION) === false ||
+      location === __dirname + "/index" + EXTENSION
     )
       continue;
 
-    const external: IModule = await import(
-      location.substr(0, location.length - 3)
-    );
+    const external: IModule = await import(location);
     for (const key in external)
       if (key.substr(0, 5) === "test_") {
         // WHEN SPECIALIZED

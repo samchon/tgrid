@@ -6,6 +6,7 @@ import type WebSocket from "ws";
 
 import { IServer } from "../internal/IServer";
 import { WebSocketAcceptor } from "./WebSocketAcceptor";
+import { GOING_AWAY } from "./internal/WebSocketCloseCode";
 
 /**
  * Web Socket Server.
@@ -174,6 +175,11 @@ export class WebSocketServer<
    *
    * Close all connections between its remote clients ({@link WebSocketConnector}s).
    *
+   * Every connected client receives the going-away close code (`1001`) and the server
+   * waits for each closing handshake to complete before shutting down. Note that the
+   * underlying `ws` library gives a peer up to 30 seconds to answer the close frame,
+   * so an unresponsive client can delay this method by that long.
+   *
    * It destroys all RFCs (remote function calls) between this server and remote clients
    * (through `Driver<Controller>`) that are not returned (completed) yet. The destruction
    * causes all incomplete RFCs to throw exceptions.
@@ -220,13 +226,30 @@ export class WebSocketServer<
    * @hidden
    */
   private _Close(): Promise<void> {
-    return new Promise((resolve) => {
-      this.protocol_!.close(() => {
-        this.server_!.close(() => {
-          resolve();
-        });
-      });
-    });
+    const clients: WebSocket[] = Array.from(this.protocol_!.clients);
+    return Promise.all(
+      clients.map(
+        (client) =>
+          new Promise<void>((resolve) => {
+            if (client.readyState === client.CLOSED) {
+              resolve();
+              return;
+            }
+
+            client.once("close", resolve);
+            client.close(GOING_AWAY, "WebSocketServer is going away.");
+          }),
+      ),
+    ).then(
+      () =>
+        new Promise<void>((resolve) => {
+          this.protocol_!.close(() => {
+            this.server_!.close(() => {
+              resolve();
+            });
+          });
+        }),
+    );
   }
 
   /* ----------------------------------------------------------------

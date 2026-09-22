@@ -7,6 +7,7 @@ import { IHeaderWrapper } from "../internal/IHeaderWrapper";
 import { once } from "../internal/once";
 import { WebSocketError } from "./WebSocketError";
 import { IWebSocketCommunicator } from "./internal/IWebSocketCommunicator";
+import { NORMAL_CLOSURE } from "./internal/WebSocketCloseCode";
 
 /**
  * Web Socket Connector.
@@ -170,7 +171,7 @@ export class WebSocketConnector<
 
     // DO CLOSE
     this.state_ = WebSocketConnector.State.CLOSING;
-    this.socket_!.close(code, reason);
+    this.socket_!.close(code ?? NORMAL_CLOSURE, reason);
 
     // LAZY RETURN
     await ret;
@@ -280,7 +281,7 @@ export class WebSocketConnector<
    */
   private async _Handle_close(event: CloseEvent): Promise<void> {
     const error: WebSocketError | undefined =
-      !event.code || event.code !== 1000
+      event.code !== NORMAL_CLOSURE
         ? new WebSocketError(event.code, event.reason)
         : undefined;
 

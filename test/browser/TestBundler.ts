@@ -1,5 +1,6 @@
 import browserify, { BrowserifyObject, Options } from "browserify";
 import fs from "fs";
+import path from "path";
 
 export namespace TestBundler {
   function bundle(
@@ -22,6 +23,14 @@ export namespace TestBundler {
   }
 
   export async function execute(): Promise<void> {
+    const browserRoot: string = __filename.endsWith(".ts")
+      ? path.resolve(process.cwd(), "bin/browser/test/browser")
+      : path.resolve(__dirname, "../../browser/test/browser");
+    const nodeRoot: string = __filename.endsWith(".ts")
+      ? path.resolve(process.cwd(), "bin/test/browser")
+      : __dirname;
+    const bundleRoot: string = path.resolve(process.cwd(), "bundle");
+
     // BROWSER SIDE SCRIPTS
     //
     // compiled by the `test/browser/tsconfig.json`, which resolves the
@@ -35,8 +44,8 @@ export namespace TestBundler {
     ];
     for (const instance of INSTANCES)
       await bundle(
-        `${__dirname}/../../browser/test/browser/${instance}.js`,
-        `${__dirname}/../../../bundle/${instance}.js`,
+        `${browserRoot}/${instance}.js`,
+        `${bundleRoot}/${instance}.js`,
       );
 
     // NODE SIDE WORKER SCRIPT
@@ -44,8 +53,8 @@ export namespace TestBundler {
     // compiled by the `test/tsconfig.json` with the node platform, and
     // bundled into a single file to be compiled by `WorkerConnector.compile()`
     await bundle(
-      `${__dirname}/worker-server.js`,
-      `${__dirname}/../../../bundle/worker-server.node.js`,
+      `${nodeRoot}/worker-server.js`,
+      `${bundleRoot}/worker-server.node.js`,
       { node: true, ignoreMissing: true },
     );
   }
