@@ -5,24 +5,33 @@ on:
       - 'src/**'
       - 'test/**'
       - 'package.json'
+      - 'pnpm-lock.yaml'
 jobs:
   NodeJS:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.5.2
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
-      - run: npm install
-      - run: npm run build
-      - run: npm run test:node
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: pnpm run test:node
   Browser:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.5.2
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
-      - run: npm install
-      - run: npm run build:test
-      - run: npm run test:browser
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:test
+      - run: pnpm run test:browser
