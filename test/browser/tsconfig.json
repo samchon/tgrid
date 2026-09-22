@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "rootDir": "../../",
     "outDir": "../../bin/browser",
     "paths": {
       "tgrid": ["../../src"],

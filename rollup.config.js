@@ -1,5 +1,6 @@
 const path = require("path");
-const typescript = require("@rollup/plugin-typescript");
+const ttsc = require("@ttsc/unplugin/rollup").default;
+const esbuild = require("rollup-plugin-esbuild").default;
 const terser = require("@rollup/plugin-terser");
 
 /**
@@ -19,13 +20,11 @@ const build = (platform) => ({
     sourcemap: true,
   },
   // bare specifiers (tstl, ws, node builtins) are left to the runtime
-  external: (id) => id.startsWith(".") === false && path.isAbsolute(id) === false,
+  external: (id) =>
+    id.startsWith(".") === false && path.isAbsolute(id) === false,
   plugins: [
-    typescript({
-      tsconfig: `tsconfig.${platform}.json`,
-      module: "ES2020",
-      target: "ES2020",
-    }),
+    ttsc({ project: `tsconfig.${platform}.json` }),
+    esbuild({ target: "es2020" }),
     terser({
       format: {
         comments: "some",
