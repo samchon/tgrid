@@ -6,18 +6,28 @@ on:
 permissions:
   id-token: write
   contents: write
+env:
+  TTSC_CACHE_DIR: ${{ github.workspace }}/.ttsc-cache/ttsc
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.x
           registry-url: https://registry.npmjs.org/
-      - uses: pnpm/action-setup@v4
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v5
+        with:
+          path: .ttsc-cache/ttsc/plugins
+          key: ${{ runner.os }}-${{ runner.arch }}-ttsc-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-ttsc-
+      - run: pnpm exec ttsc prepare
       - name: Build
         run: pnpm run build
       - name: Publish to npm

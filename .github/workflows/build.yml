@@ -6,33 +6,48 @@ on:
       - 'test/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
+      - 'tsconfig*.json'
+      - 'rollup.config.js'
+      - '.github/workflows/build.yml'
+env:
+  TTSC_CACHE_DIR: ${{ github.workspace }}/.ttsc-cache/ttsc
 jobs:
   NodeJS:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.5.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v5
+        with:
+          path: .ttsc-cache/ttsc/plugins
+          key: ${{ runner.os }}-${{ runner.arch }}-ttsc-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-ttsc-
+      - run: pnpm exec ttsc prepare
       - run: pnpm run build
       - run: pnpm run test:node
   Browser:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.5.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v5
+        with:
+          path: .ttsc-cache/ttsc/plugins
+          key: ${{ runner.os }}-${{ runner.arch }}-ttsc-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-ttsc-
+      - run: pnpm exec ttsc prepare
       - run: pnpm run build:test
       - run: pnpm exec puppeteer browsers install chrome
       - run: pnpm run test:browser
